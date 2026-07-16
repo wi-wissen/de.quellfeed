@@ -85,6 +85,20 @@
   select:focus, input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   .field-hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
 
+  /* The reveal eye inside the key field — same corner as in the app's SecretInput. */
+  .key-wrap { position: relative; }
+  .key-wrap input { padding-right: 44px; }
+  .key-toggle {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; margin: 0; padding: 8px;
+    display: inline-flex; align-items: center; color: var(--muted); cursor: pointer;
+  }
+  .key-toggle[aria-pressed="true"] { color: var(--accent); }
+  .key-toggle svg {
+    width: 20px; height: 20px; fill: none; stroke: currentColor;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+
   .qr-card { text-align: center; position: sticky; top: 24px; }
   /* The attribute must win over the display rules below — without this, clearing the
      key hid the canvas logically but kept the old QR code visibly on screen. */
@@ -129,12 +143,20 @@
   </header>
 
   <h1>Set up AI on your phone</h1>
-  <p class="sub">
-    API keys are long, and phones are terrible at typing them. Fill in the fields here on
-    a big screen, then point your phone's <strong>camera app</strong> at the QR code and
-    tap the link it offers — Quell Feed opens, shows you what it received, and asks
-    before saving anything. <strong>Nothing you type here leaves this browser tab</strong>;
-    the page has no server and sends no requests.
+  <p class="sub" style="max-width:none">
+    Quell Feed can summarize long articles, translate them, and filter your feeds by
+    your own wishes — if you switch that on. There is no account and no subscription
+    behind it: you bring your own <strong>API key</strong> from an AI provider (think
+    of it as a prepaid phone card — <a href="#get-key">how to get one</a> is explained
+    below), and the app talks to that provider directly. Without a key the AI features
+    simply stay off; everything else in the app works without them.
+  </p>
+
+  <h2 style="font-size:22px;letter-spacing:-.01em;margin:8px 0 6px">Type the key here, scan it with your phone</h2>
+  <p class="sub" style="max-width:none;margin-bottom:24px">
+    Phones are terrible at typing long keys. Fill in the fields on this big screen,
+    scan the QR code with your phone's camera — and Quell Feed asks before saving
+    anything. <strong>Nothing you type here leaves this browser tab.</strong>
   </p>
 
   <div class="grid">
@@ -157,7 +179,13 @@
       </div>
 
       <label for="apiKey">API key</label>
-      <input id="apiKey" type="password" placeholder="sk-…" spellcheck="false">
+      <div class="key-wrap">
+        <input id="apiKey" type="password" placeholder="sk-…" spellcheck="false">
+        <button type="button" class="key-toggle" id="key-toggle" aria-pressed="false" aria-label="Show key">
+          <svg id="key-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg id="key-eye-off" viewBox="0 0 24 24" hidden><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </button>
+      </div>
       <p class="field-hint">
         Created in your provider's dashboard — for OpenRouter under
         <em>Keys</em>, for OpenAI under <em>API keys</em>.
@@ -177,7 +205,7 @@
     </div>
   </div>
 
-  <h2 style="font-size:22px;letter-spacing:-.01em;margin:8px 0 6px">Where do I get a key?</h2>
+  <h2 id="get-key" style="font-size:22px;letter-spacing:-.01em;margin:8px 0 6px">Where do I get a key?</h2>
   <p class="sub" style="margin-bottom:20px">
     A key is like a prepaid phone card for AI: you create it once in the provider's
     dashboard, put a few euros on the account, and the app uses it only when you tap
@@ -285,6 +313,17 @@
     el.addEventListener('input', render)
     el.addEventListener('change', render)
   }
+
+  // The reveal eye, masked by default — same behaviour as the key fields in the app.
+  const toggle = document.getElementById('key-toggle')
+  toggle.addEventListener('click', () => {
+    const show = els.apiKey.type === 'password'
+    els.apiKey.type = show ? 'text' : 'password'
+    toggle.setAttribute('aria-pressed', String(show))
+    toggle.setAttribute('aria-label', show ? 'Hide key' : 'Show key')
+    document.getElementById('key-eye').hidden = show
+    document.getElementById('key-eye-off').hidden = !show
+  })
 
   render()
 })()
