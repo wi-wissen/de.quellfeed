@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>Quell Feed</title>
+    <!-- The SVG switches itself with prefers-color-scheme; the PNG is the fallback. -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Painted before the bundle loads: the WebView must never flash white in front
+         of a dark-themed app. The system scheme is the guess, the last applied theme
+         (written by applyTheme into localStorage) is the truth. -->
+    <style>
+      /* Only html: the body keeps its transparent default, so this one value is the
+         canvas colour no matter how tall the body is at any point during startup. */
+      html { background: #ffffff; }
+      @media (prefers-color-scheme: dark) {
+        html { background: #000000; }
+      }
+    </style>
+    <script>
+      try {
+        var quellLastBg = localStorage.getItem('quell:lastBg')
+        if (quellLastBg) document.documentElement.style.background = quellLastBg
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

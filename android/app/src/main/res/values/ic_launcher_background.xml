@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The icon is a royal-blue Q on white paper. The launcher background is that paper. -->
+    <color name="ic_launcher_background">#FFFFFF</color>
+    <color name="quell_royal">#1D3D8F</color>
+</resources>

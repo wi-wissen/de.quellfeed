@@ -1,0 +1,27 @@
+node_modules/
+dist/
+.env.local
+*.local
+
+# Die nativen Projekte gehören ins Repo: android/ enthält handgeschriebene Konfiguration
+# (Share-Intent-Filter im Manifest, App-Icons, Splash, App-Name), die `npx cap add` NICHT
+# wiederherstellt. Ignoriert werden nur die Build-Ausgaben.
+android/app/build/
+android/build/
+android/.gradle/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/capacitor-cordova-android-plugins/
+android/local.properties
+ios/App/Pods/
+ios/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App/config.xml
+ios/App/Podfile.lock
+
+# Signing keys never enter the repo — CI gets them as base64 secrets, local builds read
+# android/keystore.properties (README, "Releases"). Neither may ever be committed.
+*.keystore
+*.jks
+android/keystore.properties

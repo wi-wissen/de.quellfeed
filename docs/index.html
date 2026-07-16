@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quell Feed — Quell the noise.</title>
+<meta name="description" content="A calm, offline-first RSS reader and bookmark keeper for Android. No account, no ads, no tracking — your reading stays yours.">
+
+<meta property="og:title" content="Quell Feed">
+<meta property="og:description" content="A calm, offline-first RSS reader and bookmark keeper. Quell the noise.">
+<meta property="og:url" content="https://quellfeed.de">
+<meta property="og:image" content="https://quellfeed.de/assets/icon-royal-512.png">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/quell-favicon-auto.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-royal-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/icon-royal-512.png">
+
+<style>
+  /* Lora — the typeface of the Q in the logo — self-hosted (SIL OFL, see
+     assets/fonts/LICENSE-Lora.txt), and used deliberately sparingly: the wordmark and
+     the headings carry the brand, everything meant for reading stays the system font. */
+  @font-face {
+    font-family: 'Lora';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/lora-latin-400-normal.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Lora';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('assets/fonts/lora-latin-600-normal.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Lora';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('assets/fonts/lora-latin-700-normal.woff2') format('woff2');
+  }
+
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f5f6f9;
+    --card: #ffffff;
+    --text: #14161d;
+    --muted: #59606f;
+    --border: #e2e5ec;
+    --brand: #1d3d8f;
+    --brand-ink: #ffffff;
+    --accent: #1d3d8f;
+    --shadow: 0 1px 2px rgba(16,20,32,.06), 0 8px 24px rgba(16,20,32,.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1116;
+      --bg-soft: #15181f;
+      --card: #171a22;
+      --text: #e8eaf0;
+      --muted: #99a0b0;
+      --border: #262b37;
+      --brand: #8fadf5;
+      --brand-ink: #0d1120;
+      --accent: #a9bff2;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.35);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- header ---------- */
+  header { padding: 28px 0; }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'Lora', Georgia, serif;
+    font-weight: 700; font-size: 19px; letter-spacing: -.01em; text-decoration: none;
+  }
+  .brand img { width: 34px; height: 34px; border-radius: 9px; display: block; }
+  .bar nav { display: flex; gap: 22px; font-size: 15px; color: var(--muted); }
+  .bar nav a { text-decoration: none; }
+  .bar nav a:hover { color: var(--text); }
+  @media (max-width: 620px) { .bar nav { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero {
+    padding: 56px 0 40px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center;
+  }
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; gap: 40px; padding-top: 32px; }
+  }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 12px; border: 1px solid var(--border); border-radius: 999px;
+    background: var(--bg-soft); font-size: 13px; color: var(--muted); margin-bottom: 22px;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; }
+
+  h1 {
+    margin: 0 0 18px;
+    font-family: 'Lora', Georgia, serif;
+    font-size: clamp(36px, 5.2vw, 54px); line-height: 1.12;
+    letter-spacing: -.02em; font-weight: 700;
+  }
+  h1 .glow { color: var(--brand); }
+
+  .lede { margin: 0 0 32px; font-size: 19px; color: var(--muted); max-width: 34ch; }
+
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 13px 22px; border-radius: 12px; text-decoration: none;
+    font-weight: 600; font-size: 15px; border: 1px solid transparent;
+    transition: transform .12s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn svg { width: 18px; height: 18px; }
+  .btn-primary { background: var(--brand); color: var(--brand-ink); box-shadow: var(--shadow); }
+  .btn-ghost { background: var(--card); color: var(--text); border-color: var(--border); }
+
+  /* Phone mock-up, drawn in CSS so the asset stays a plain screenshot.
+     Modelled on a current Android flagship: thin uniform bezel, fairly square
+     corners, and a punch-hole camera rather than a notch or an earpiece slit. */
+  .shot {
+    margin: 0; justify-self: center; position: relative;
+    width: 278px; padding: 6px;
+    background: linear-gradient(150deg, #55565c, #1d1e22 22%, #17181b 78%, #45464b);
+    border-radius: 26px;
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,.6),
+      0 26px 64px rgba(16,20,32,.3),
+      inset 0 1px 1px rgba(255,255,255,.18);
+  }
+  .shot img {
+    display: block; width: 100%; height: auto;
+    border-radius: 21px; background: #0d0d0d;
+  }
+  /* punch-hole camera */
+  .shot::before {
+    content: ""; position: absolute; z-index: 2;
+    top: 16px; left: 50%; transform: translateX(-50%);
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #08090b;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.09);
+  }
+  /* power + volume keys on the right edge */
+  .shot::after {
+    content: ""; position: absolute; z-index: -1;
+    right: -2px; top: 96px;
+    width: 2px; height: 96px; border-radius: 2px;
+    background: linear-gradient(180deg, #4a4b50 0 34%, transparent 34% 44%, #4a4b50 44% 100%);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .shot { transition: transform .3s ease; }
+    .shot:hover { transform: translateY(-4px); }
+  }
+
+  /* slideshow dots under the mock-up */
+  .shot-wrap { justify-self: center; display: grid; gap: 16px; justify-items: center; }
+  .shot-dots { display: flex; gap: 10px; }
+  .shot-dots button {
+    width: 10px; height: 10px; padding: 0; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--card);
+    cursor: pointer; transition: background .15s ease, transform .15s ease;
+  }
+  .shot-dots button:hover { transform: scale(1.25); }
+  .shot-dots button[aria-selected="true"] { background: var(--brand); border-color: var(--brand); }
+
+  /* ---------- sections ---------- */
+  section { padding: 64px 0; }
+  h2 {
+    margin: 0 0 8px;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 30px; letter-spacing: -.01em; font-weight: 600;
+  }
+  .sub { margin: 0 0 36px; color: var(--muted); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
+  .feat { padding: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
+  .feat h3 { margin: 14px 0 6px; font-size: 17px; font-weight: 650; }
+  .feat p { margin: 0; color: var(--muted); font-size: 15px; }
+  .ico {
+    width: 38px; height: 38px; display: grid; place-items: center;
+    border-radius: 10px; background: var(--bg-soft); border: 1px solid var(--border);
+  }
+  .ico svg { width: 20px; height: 20px; stroke: var(--accent); fill: none; stroke-width: 1.8; }
+
+  /* ---------- download ---------- */
+  .downloads { background: var(--bg-soft); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .dl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-bottom: 22px; }
+  .dl {
+    display: block; padding: 22px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 14px; text-decoration: none;
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  .dl:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .dl strong { display: block; font-size: 17px; margin-bottom: 3px; }
+  .dl span { color: var(--muted); font-size: 14px; }
+  .note { font-size: 14px; color: var(--muted); margin: 0; }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: .9em; background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 5px; padding: 1px 6px;
+  }
+
+  /* ---------- footer ---------- */
+  footer { padding: 44px 0; color: var(--muted); font-size: 14px; border-top: 1px solid var(--border); }
+  footer a { color: var(--muted); }
+  .foot-row {
+    display: flex; flex-wrap: wrap; gap: 18px;
+    justify-content: space-between; align-items: center; margin-bottom: 18px;
+  }
+  .fine { max-width: 65ch; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="bar">
+      <a class="brand" href="/">
+        <img src="assets/icon-royal-512.png" alt="">
+        Quell Feed
+      </a>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="setup-ai.html">AI setup</a>
+        <a href="#download">Download</a>
+        <!-- TODO: confirm the repository URL before release -->
+        <a href="https://github.com/wi-wissen/de.quellfeed">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <div class="pill"><span class="dot"></span> Bookmarks · RSS-Feeds · offline first</div>
+      <h1>Your sources.<br>Your reading.<br><span class="glow">Your quiet.</span></h1>
+      <p class="lede">
+        Quell Feed is a calm reader for RSS and bookmarks. It quells the noise:
+        no account, no ads, no algorithm — just the sites you chose, readable
+        anywhere, even offline.
+      </p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download
+        </a>
+        <!-- TODO: confirm the repository URL before release -->
+        <a class="btn btn-ghost" href="https://github.com/wi-wissen/de.quellfeed">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.26 5.69.41.36.78 1.07.78 2.16v3.2c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>
+          Source
+        </a>
+      </div>
+    </div>
+
+    <div class="shot-wrap">
+      <figure class="shot" id="shot">
+        <img id="shot-img" src="assets/screenshots/feed.webp" width="853" height="1844"
+             alt="Quell Feed's feed: the latest articles from your sources in one quiet list.">
+      </figure>
+      <div class="shot-dots" role="tablist" aria-label="Screenshots"></div>
+    </div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <h2>What it does</h2>
+    <p class="sub">A reader in the old sense: it brings you the words, then gets out of the way.</p>
+
+    <div class="grid">
+      <div class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+        <h3>Offline first</h3>
+        <p>Every saved article lives on your device, readable with no signal at all. Flight mode is just another reading room.</p>
+      </div>
+
+      <div class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Nothing watches you</h3>
+        <p>No account, no ads, no analytics, no server of ours. Your reading list exists in exactly one place: your pocket.</p>
+      </div>
+
+      <div class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></div>
+        <h3>Reads to you</h3>
+        <p>Your phone's own voice reads any article aloud, paragraph by paragraph, highlighting as it goes. Pause, skip, or tap a paragraph to continue there.</p>
+      </div>
+
+      <div class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div>
+        <h3>Your subscriptions, honoured</h3>
+        <p>Sign in to your newspaper inside the app and read the full articles you already pay for. Your credentials never leave the device.</p>
+      </div>
+
+      <div class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
+        <h3>AI on your terms</h3>
+        <p>Bring your own API key and long reads fold into summaries, translate themselves, or filter your feeds by your own wishes. No key, no requests.</p>
+      </div>
+
+      <div class="feat">
+        <div class="ico"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+        <h3>In sync, your way</h3>
+        <p>Sync through your own Nextcloud or any WebDAV server, or pair it with a KaraKeep or Linkwarden instance you run yourself. Device to server, no one in between.</p>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top:22px">
+      And you are free to leave: feeds come and go as OPML, saved articles as ordinary
+      browser bookmarks. Everything you bring in, you can take out again.
+    </p>
+  </div>
+</section>
+
+<section class="downloads" id="download">
+  <div class="wrap">
+    <h2>Download</h2>
+    <p class="sub" id="release-sub">Grab the latest build from the releases page.</p>
+
+    <div class="dl-grid">
+      <!-- TODO: confirm the repository URL before release -->
+      <a class="dl" id="download-android" href="https://github.com/wi-wissen/de.quellfeed/releases/latest">
+        <strong>Android</strong>
+        <span id="android-meta">Signed APK — install and go</span>
+      </a>
+      <a class="dl" id="download-ios" href="https://github.com/wi-wissen/de.quellfeed/releases/latest">
+        <strong>iOS</strong>
+        <span>Unsigned IPA — sideload it with AltStore or SideStore, signed by your own Apple ID</span>
+      </a>
+    </div>
+
+    <p class="note">
+      Free, no strings — the Play Store listing will follow. Or build it yourself:
+      <code>npx cap sync android && cd android && ./gradlew assembleDebug</code>; the
+      instructions are in the <a href="https://github.com/wi-wissen/de.quellfeed#readme">readme</a>.
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <a class="brand" href="/">
+        <img src="assets/icon-royal-512.png" alt="">
+        Quell Feed
+      </a>
+      <div>
+        <!-- TODO: confirm the repository URL before release -->
+        <a href="https://github.com/wi-wissen/de.quellfeed">GitHub</a> ·
+        <a href="https://github.com/wi-wissen/de.quellfeed/releases">Releases</a> ·
+        <a href="setup-ai.html">AI setup</a> ·
+        <a href="https://wi-wissen.de/impressum.html">Legal notice</a> ·
+        <a href="https://wi-wissen.de/datenschutz.html">Privacy</a>
+      </div>
+    </div>
+    <p class="fine">
+      Quell Feed runs entirely on your device: no server of ours, no account, no analytics.
+      The app talks to the sites you subscribe to — and to nobody else. This page sets no
+      cookies and loads nothing from third parties; its only network request asks GitHub
+      for the newest release, and the page works without the answer.
+    </p>
+  </div>
+</footer>
+
+<script>
+// The screenshot slideshow: three real screens, switched by the dots under the phone.
+// Buttons are built here rather than written in the HTML so the list of shots lives in
+// exactly one place.
+(() => {
+  const SHOTS = [
+    { src: 'assets/screenshots/feed.webp',
+      alt: "Quell Feed's feed: the latest articles from your sources in one quiet list." },
+    { src: 'assets/screenshots/article.webp',
+      alt: "Quell Feed's reading view: a clean article page in your own font, size and theme." },
+    { src: 'assets/screenshots/settings.webp',
+      alt: "Quell Feed's settings: sync, AI and reading options, all optional." },
+  ]
+
+  const img = document.getElementById('shot-img')
+  const dots = document.querySelector('.shot-dots')
+
+  SHOTS.forEach((shot, i) => {
+    const dot = document.createElement('button')
+    dot.type = 'button'
+    dot.setAttribute('role', 'tab')
+    dot.setAttribute('aria-label', shot.alt)
+    dot.setAttribute('aria-selected', i === 0 ? 'true' : 'false')
+    dot.addEventListener('click', () => {
+      img.src = shot.src
+      img.alt = shot.alt
+      dots.querySelectorAll('button').forEach((b) => b.setAttribute('aria-selected', 'false'))
+      dot.setAttribute('aria-selected', 'true')
+    })
+    dots.appendChild(dot)
+  })
+
+  // Fetch the other two once the page is settled, so the first tap doesn't flash
+  // an empty phone frame while the network catches up.
+  addEventListener('load', () => {
+    SHOTS.slice(1).forEach((shot) => { new Image().src = shot.src })
+  })
+})()
+
+// Point the download cards straight at the newest assets and name the version. If the
+// API is unreachable or rate-limited — which happens, and silently — the cards keep
+// their /releases/latest hrefs, which GitHub redirects to the current release anyway.
+// So this only ever adds detail; it can never take the download away.
+(async () => {
+  const REPO = 'wi-wissen/de.quellfeed' // TODO: confirm before release
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`)
+    if (!res.ok) return
+    const rel = await res.json()
+
+    const apk = (rel.assets || []).find((a) => a.name.endsWith('.apk'))
+    if (apk) {
+      const mb = (apk.size / 1048576).toFixed(1)
+      document.getElementById('download-android').href = apk.browser_download_url
+      document.getElementById('android-meta').textContent = `Signed APK · ${mb} MB`
+    }
+
+    const ipa = (rel.assets || []).find((a) => a.name.endsWith('.ipa'))
+    if (ipa) document.getElementById('download-ios').href = ipa.browser_download_url
+
+    const date = new Date(rel.published_at).toLocaleDateString('en-GB',
+      { year: 'numeric', month: 'long', day: 'numeric' })
+    document.getElementById('release-sub').textContent =
+      `Latest release: ${rel.tag_name} — ${date}.`
+  } catch {
+    /* keep the static fallback */
+  }
+})()
+</script>
+
+</body>
+</html>

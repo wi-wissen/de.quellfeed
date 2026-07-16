@@ -1,0 +1,91 @@
+apply plugin: 'com.android.application'
+
+// Release signing, the same four values from one of two sources:
+//   1. `android/keystore.properties` next to `android/app/quellfeed-release.jks` — the
+//      local way, following the pattern from the official Android docs ("Remove signing
+//      information from your build files"); see README, "Releases".
+//   2. QUELL_* environment variables — how CI hands its GitHub secrets over
+//      (.github/workflows/release.yml).
+// With neither present the signing config is simply not applied, and assembleRelease
+// produces an UNSIGNED apk: local builds never break, they just cannot be installed as-is.
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+def releaseKeystore = keystoreProperties.getProperty('storeFile') ?: System.getenv('QUELL_KEYSTORE_FILE')
+
+android {
+    namespace "de.quellfeed"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "de.quellfeed"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        // CI derives both from the git tag and the run number; the fallbacks are for
+        // local builds only and are deliberately obvious about it.
+        versionCode (project.hasProperty('quellVersionCode') ? quellVersionCode.toInteger() : 1)
+        versionName (project.hasProperty('quellVersionName') ? quellVersionName : '0.0.0-dev')
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        if (releaseKeystore) {
+            release {
+                // A relative `storeFile` in keystore.properties (`quellfeed-release.jks`)
+                // resolves against this module — i.e. android/app/, where the README
+                // puts the keystore. CI passes an absolute path instead.
+                storeFile file(releaseKeystore)
+                storePassword keystoreProperties.getProperty('storePassword') ?: System.getenv('QUELL_KEYSTORE_PASSWORD')
+                keyAlias keystoreProperties.getProperty('keyAlias') ?: System.getenv('QUELL_KEY_ALIAS')
+                keyPassword keystoreProperties.getProperty('keyPassword') ?: System.getenv('QUELL_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (releaseKeystore) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    // MediaSessionCompat + MediaStyle for the read-aloud media notification
+    // (MediaControlPlugin). 1.7.x is the current androidx.media line and fine
+    // with compileSdk 35.
+    implementation "androidx.media:media:1.7.0"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

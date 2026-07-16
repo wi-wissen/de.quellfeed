@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Replaces Capacitor's default splash PNG (its own logo, 480x320). A layer-list, not a
+  bitmap: the whole thing is a colour plus a vector, so it is resolution-independent and
+  needs none of the ten splash.png variants per density and orientation that Capacitor
+  ships.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/ic_launcher_background"/>
+    <!-- Sized, because a vector without bounds stretches to fill the window — the Q would
+         cover the entire screen. -->
+    <item
+        android:drawable="@drawable/ic_launcher_foreground"
+        android:width="192dp"
+        android:height="192dp"
+        android:gravity="center"/>
+</layer-list>

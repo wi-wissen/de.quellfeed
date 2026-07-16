@@ -1,0 +1,947 @@
+/* ── Quell brand tokens ─────────────────────────────────────── */
+/* The light palette, written out once so the app has colours before theme.js runs. From
+   then on applyTheme() sets every one of these inline on <html>, so this list and
+   THEME_PALETTES in src/utils/theme.js must stay in step — a token defined here but
+   missing from a palette keeps the *previous* theme's value when the theme changes.
+   tests/theme.test.js enforces the parity. */
+:root {
+  --q-accent: #1d3d8f;
+  --q-accent-rgb: 29, 61, 143;
+  --q-text: #172033;
+  --q-text-muted: #617089;
+  --q-bg: #ffffff;
+  --q-surface: #ffffff;
+  --q-surface-elevated: #ffffff;
+  --q-border: #dde3ec;
+  --q-bar-bg: #ffffff;
+  --q-bar-border: rgba(137, 154, 179, 0.22);
+  --q-input-bg: #ffffff;
+  --q-shadow: 0 18px 40px rgba(23, 32, 51, 0.05);
+  --q-danger: #b42318;
+  --q-warning: #d97706;
+  --q-success: #11795a;
+  --q-saved-bar: var(--q-accent);
+  --q-navbar-title-size: clamp(1rem, 0.94rem + 0.45vw, 1.18rem);
+  --q-toolbar-label-size: clamp(0.76rem, 0.72rem + 0.25vw, 0.92rem);
+
+  --f7-theme-color: var(--q-accent);
+  /* Framework7 mixes every partially transparent theme tint (ripples, highlights) from
+     this triplet. It used to be a hardcoded blue, so those tints stayed blue in the
+     sepia, dark and slate themes. */
+  --f7-theme-color-rgb: var(--q-accent-rgb);
+  --f7-page-bg-color: var(--q-bg);
+  --f7-bars-bg-color: var(--q-bar-bg);
+  --f7-bars-text-color: var(--q-text);
+  --f7-bars-link-color: var(--q-text);
+  --f7-navbar-bg-color: var(--q-bar-bg);
+  --f7-navbar-text-color: var(--q-text);
+  --f7-navbar-link-color: var(--q-text);
+  --f7-navbar-title-font-size: var(--q-navbar-title-size);
+  --f7-toolbar-bg-color: var(--q-bar-bg);
+  --f7-toolbar-text-color: var(--q-text);
+  --f7-tabbar-link-inactive-color: var(--q-text-muted);
+  --f7-tabbar-link-active-color: var(--q-accent);
+  --f7-list-bg-color: var(--q-surface-elevated);
+  /* F7 paints `.list-strong ul` and the floating label of outline inputs inside a
+     strong list from this one variable (bundle: 3552-3555, 10636-10642). Its default
+     is a hardcoded #fff / #1c1c1d, which showed up as a white label patch in the
+     dark/sepia/slate themes. */
+  --f7-list-strong-bg-color: var(--q-surface-elevated);
+  --f7-list-item-title-text-color: var(--q-text);
+  --f7-list-item-after-text-color: var(--q-text-muted);
+  --f7-list-item-text-text-color: var(--q-text-muted);
+  --f7-list-item-subtitle-text-color: var(--q-text-muted);
+  /* The settings index and the sync index carry their one-line explanations in the item
+     footer. F7 leaves that colour at a hardcoded rgba (bundle:3473) — ours follows the
+     theme like every other muted text. */
+  --f7-list-item-footer-text-color: var(--q-text-muted);
+  --f7-block-strong-bg-color: var(--q-surface-elevated);
+  --f7-block-title-text-color: var(--q-text-muted);
+  /* The native list footnote: `.block-footer` under a list, `.block-header` above one —
+     the same component both iOS and Material use for the small grey explanatory line of
+     a settings section. Framework7 gives them a hardcoded rgba(0,0,0,.45) (bundle:2980)
+     and a px font size; ours follow the theme and the system font size instead. */
+  --f7-block-header-text-color: var(--q-text-muted);
+  --f7-block-footer-text-color: var(--q-text-muted);
+  --f7-block-header-font-size: 0.875rem;
+  --f7-block-footer-font-size: 0.875rem;
+  --f7-input-text-color: var(--q-text);
+  --f7-input-bg-color: var(--q-input-bg);
+  --f7-text-editor-border-color: var(--q-border);
+  --f7-dialog-bg-color: var(--q-surface-elevated);
+  --f7-popup-bg-color: var(--q-bg);
+  --f7-sheet-bg-color: var(--q-surface-elevated);
+  --f7-card-bg-color: var(--q-surface-elevated);
+  --f7-card-outline-border-color: var(--q-border);
+  --f7-safe-area-left: env(safe-area-inset-left);
+  --f7-safe-area-right: env(safe-area-inset-right);
+}
+
+html,
+body,
+#app,
+.framework7-root,
+.views,
+.view,
+.page,
+.page-content {
+  background: var(--q-bg);
+  color: var(--q-text);
+}
+
+body {
+  font-family: Inter, 'Segoe UI', sans-serif;
+}
+
+.safe-areas {
+  background: var(--q-bg);
+}
+
+.navbar,
+.toolbar,
+.tabbar {
+  background: var(--q-bar-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.navbar::after,
+.toolbar::before,
+.toolbar::after {
+  background: var(--q-bar-border);
+}
+
+.navbar .title {
+  color: var(--q-text);
+  font-size: var(--q-navbar-title-size);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.nav-icon-link,
+.toolbar .link,
+.navbar .link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  color: var(--q-text);
+}
+
+.navbar .right {
+  gap: 0.125rem;
+}
+
+.navbar .right .link,
+.navbar .left .link,
+.navbar .nav-icon-link {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0;
+}
+
+.tabbar .tab-link {
+  color: var(--q-text-muted);
+}
+
+.tabbar .tab-link-active {
+  color: var(--q-accent);
+}
+
+.tabbar-label {
+  font-size: var(--q-toolbar-label-size);
+}
+
+.tab-icon-stack {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.tab-icon {
+  position: absolute;
+  inset: 0;
+}
+
+.tab-icon--filled {
+  opacity: 0;
+}
+
+/* Tabs whose icon has an outline/filled pair (saved, archive): the filled twin
+   fades in when the tab is active, matching how the feed icon gains color. */
+.tab-link-stacked.tab-link-active .tab-icon--filled {
+  opacity: 1;
+}
+
+.tab-link-stacked.tab-link-active .tab-icon--outline {
+  opacity: 0;
+}
+
+.app-icon {
+  display: inline-flex;
+  width: 1em;
+  height: 1em;
+  font-size: 1.3rem;
+  color: currentColor;
+  vertical-align: middle;
+  pointer-events: none;
+}
+
+/* Lifted from ion-icon's shadow DOM. We render the SVGs inline (see src/utils/icons.js),
+   so they live in the light DOM and these rules have to be here — without them the outline
+   icons lose their stroke and the filled ones come out black. */
+.app-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.app-icon .ionicon-fill-none {
+  fill: none;
+}
+
+.app-icon .ionicon-stroke-width {
+  stroke-width: var(--ionicon-stroke-width, 32px);
+}
+
+.app-icon--xl {
+  font-size: 3rem;
+}
+
+.app-icon--inline {
+  font-size: 1em;
+}
+
+/* The eye inside key/password fields (SecretInput). Anchored to the right edge of
+   .item-input-wrap — the same corner and vertical line F7 uses for its clear button
+   (which these fields therefore do not have). */
+.secret-input .item-input-wrap input {
+  /* Long keys must not run under the eye. */
+  padding-right: 44px;
+}
+
+.secret-input__toggle {
+  position: absolute;
+  right: 0;
+  top: calc(var(--f7-input-height) / 2);
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 10px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--q-text-muted);
+  cursor: pointer;
+}
+
+.secret-input__toggle[aria-pressed='true'] {
+  color: var(--q-accent);
+}
+
+/* Framework7 never sizes the MD preloader's SVG (<svg viewBox="0 0 36 36"> without
+   width/height) — how big it renders is left to the engine. The Android WebView picks
+   the SVG default size, so the circle ends up larger than the preloader box and spins
+   around a point outside its own centre. Pinning it to the box fixes the rotation. */
+.preloader svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.article-card__link-icon {
+  margin-right: 0.15em;
+  transform: translateY(-0.05em);
+}
+
+.color-accent {
+  color: var(--q-accent);
+}
+
+/* All four follow the palette. Warning and danger used to be hardcoded hexes while
+   success already read its token, so a trash icon stayed the same red on the OLED-black
+   theme as on white — the palettes even carried a `q-danger` nobody consumed. */
+.color-warning {
+  color: var(--q-warning);
+}
+
+.color-success {
+  color: var(--q-success);
+}
+
+.color-danger {
+  color: var(--q-danger);
+}
+
+.list,
+.list ul,
+.item-content,
+.item-inner,
+.block,
+.block-title,
+.item-title,
+.item-after,
+.item-subtitle,
+.item-text,
+.item-input-wrap,
+.item-input-wrap input,
+.item-input-wrap textarea,
+.item-input-wrap select {
+  color: var(--q-text);
+}
+
+.list ul {
+  background: var(--q-surface-elevated);
+}
+
+/* Full-bleed lists need the edge hairlines; inset lists already have a rounded
+   border of their own and would end up with two. */
+.list:not(.inset):not(.list-strong) ul {
+  border-top: 1px solid var(--q-border);
+  border-bottom: 1px solid var(--q-border);
+}
+
+/* Framework7 derives every rounded corner of an inset list from ONE variable
+   (bundle: 4095-4130): the `ul`, `li.swipeout:first/last-child` and `li:first-child > a`
+   all get `--f7-list-inset-border-radius`. Its default differs per theme
+   (.ios: 8px, bundle:3439 — .md: 16px, bundle:3497). Rounding only the `ul` by hand
+   left the items at the theme default, so their square/8px corners poked out of the
+   16px ul — that was the "bleeding" corner. Set the variable, let F7 round everything. */
+:root.ios,
+:root.md {
+  --f7-list-inset-border-radius: 16px;
+}
+
+/* The hairline of an inset list is drawn as a ring, not a border: a box-shadow follows
+   F7's border-radius exactly, sits outside the border box (no 1px layout shift that the
+   item dividers would then overshoot) and needs no `overflow: hidden` that would clip
+   F7's swipeout. Needed because --q-surface-elevated equals --q-bg in the light theme. */
+.list-strong.inset ul,
+.list-strong-ios.inset ul,
+.list-strong-md.inset ul {
+  box-shadow: 0 0 0 1px var(--q-border);
+}
+
+/* `.item-content` deliberately has NO background: F7 keeps list items transparent and
+   lets the (rounded) `ul` supply the surface. An opaque item-content paints square
+   corners over the ul's rounded ones — the second half of the corner bleed. Swipeout
+   still works: F7 parks the actions outside the item (`translateX(100% + 1px)`,
+   bundle:7782-7785) inside an `overflow: hidden` li (bundle:7709). */
+.block-strong,
+.card {
+  background: var(--q-surface-elevated);
+}
+
+.item-after,
+.item-subtitle,
+.item-text,
+.block-title,
+.feed-item-url,
+.empty-state,
+.article-card__meta,
+.article-card__excerpt,
+.settings-note {
+  color: var(--q-text-muted);
+}
+
+.item-inner::after,
+.list .item-inner::after {
+  background: var(--q-border);
+}
+
+.block-strong,
+.card {
+  border: 1px solid var(--q-border);
+  border-radius: 18px;
+  box-shadow: var(--q-shadow);
+}
+
+/* Inputs use Framework7's `outline` variant, which draws the box itself. We only
+   feed it our tokens — hand-rolling a second border here is what produced the
+   double frames and the double dropdown arrow. */
+:root {
+  /* F7 hardcodes #000/#fff here (bundle: 4536-4539) and only swaps them on its `.dark`
+     class. theme.js sets that class now, but sepia is a *light* theme with a warm
+     background — a generic grey would sit in it like a stain. So: our tokens. */
+  --f7-segmented-strong-bg-color: color-mix(in srgb, var(--q-text) 8%, transparent);
+  --f7-segmented-strong-button-text-color: var(--q-text-muted);
+  --f7-segmented-strong-button-active-text-color: var(--q-text);
+  --f7-segmented-strong-button-active-bg-color: var(--q-surface-elevated);
+  --f7-button-text-color: var(--q-accent);
+
+  --f7-input-outline-border-color: var(--q-border);
+  --f7-input-outline-focused-border-color: var(--q-accent);
+  --f7-input-outline-border-radius: 12px;
+  --f7-input-placeholder-color: var(--q-text-muted);
+  --f7-label-text-color: var(--q-text-muted);
+  --f7-input-focused-label-text-color: var(--q-accent);
+}
+
+.item-input-wrap input,
+.item-input-wrap select,
+.item-input-wrap textarea {
+  background: transparent;
+  color: var(--q-text);
+}
+
+.item-input-wrap input::placeholder,
+.item-input-wrap textarea::placeholder {
+  color: var(--q-text-muted);
+}
+
+.item-input-wrap textarea {
+  min-height: 8rem;
+}
+
+/* One chevron — F7's. `<f7-list-input type="select">` renders the wrap with the class
+   `input-dropdown` (framework7-vue/components/list-input.js:394-396) and F7 draws its own
+   triangle on it plus the matching padding-right (bundle:10558-10583). It does NOT reset
+   the native control, so the browser arrow has to go — that is all `appearance: none` is
+   for here. Drawing a second chevron on top of F7's was the doubling. */
+.item-input-wrap select {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* F7 hardcodes the triangle colour (`border-top: 5px solid #727272`, bundle:10573) —
+   there is no --f7-* variable for it, so the colour is the one thing we override. */
+.input-dropdown-wrap::before,
+.input-dropdown::before {
+  border-top-color: var(--q-text-muted);
+}
+
+.item-input-wrap select option {
+  color: var(--q-text);
+  background: var(--q-surface-elevated);
+}
+
+.item-input-focused .item-floating-label,
+.item-input-focused .item-label,
+.item-input-focused .input-label {
+  color: var(--q-accent);
+}
+
+.button {
+  border-radius: 14px;
+}
+
+.button-fill,
+.button.button-fill {
+  background: var(--q-accent);
+  color: #fff;
+}
+
+/* ── Settings notes ─────────────────────────────────────────────
+   Every explanatory line in the settings is one of four things, and each has exactly one
+   look. The neutral two are Framework7's own list header/footer — the native grouped-list
+   footnote of both iOS and Material — so they align with the inset lists by construction
+   and need no styling beyond a readable line height:
+
+     <f7-block-header>            lead-in above the list/section it introduces
+     <f7-block-footer>            footnote below the list it explains  ← the default
+     <f7-block-footer|-header
+       class="settings-warning">  a caution: costs you something if you skip it
+     <f7-block strong inset
+       class="settings-empty">    "there is nothing here yet" placeholder
+
+   `.settings-note` is the hand-rolled predecessor. The settings pages no longer use it;
+   AddFeedPage and AddLinkPage still do, so it stays — matched to the native footnote so
+   the two are indistinguishable. */
+.block-header,
+.block-footer,
+.settings-note {
+  line-height: 1.45;
+}
+
+.settings-note {
+  margin-top: 0;
+  font-size: var(--f7-block-footer-font-size);
+}
+
+/* A note with two thoughts in it is two paragraphs, not two stacked blocks — that is what
+   made the same kind of hint sit at a different distance from its list on every page. */
+.block-header p,
+.block-footer p {
+  margin: 0 0 0.5em;
+}
+
+.block-header p:last-child,
+.block-footer p:last-child {
+  margin-bottom: 0;
+}
+
+/* A warning must not read as a footnote: full text colour instead of muted, and a rule
+   in the theme's warning colour down the gutter. The margins put that rule exactly where
+   an inset list's left edge is, so it lines up with the list it warns about. */
+.settings-warning {
+  color: var(--q-text);
+  margin-left: calc(var(--f7-block-padding-horizontal, 16px) + var(--f7-safe-area-left));
+  margin-right: calc(var(--f7-block-padding-horizontal, 16px) + var(--f7-safe-area-right));
+  padding-left: 0.75rem;
+  padding-right: 0;
+  border-left: 3px solid var(--q-warning);
+}
+
+/* An empty list is not a footnote either — it stands in for the list, so it takes the
+   list's surface and inset. */
+.settings-empty {
+  color: var(--q-text-muted);
+  text-align: center;
+}
+
+.settings-action-item {
+  cursor: pointer;
+}
+
+.settings-action-item .item-after {
+  display: none;
+}
+
+/* Size steps as growing A's — a reader convention, and it needs no unit label.
+   The inset margin matches Framework7's own inset lists so it lines up with them. */
+.reading-segmented {
+  margin: 0 var(--f7-list-inset-side-margin, 16px);
+}
+
+.reading-segmented .button {
+  align-items: baseline;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.color-muted {
+  color: var(--q-text-muted);
+}
+
+/* The app's own footnote at the very bottom of the settings index. */
+.settings-about {
+  margin-top: 1.5rem;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.sync-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.sync-actions .button {
+  flex: 1;
+}
+
+/* The three sync targets are not interchangeable, so each row's footer is a full sentence
+   about what it can and cannot carry. Framework7's footer line-height (1.2) is meant for
+   a label; a sentence needs air. */
+.sync-targets .item-footer {
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+/* ── AI summary card (above the article) ────────────────────── */
+.summary-card {
+  margin: 12px var(--f7-list-inset-side-margin, 16px) 0;
+  padding: 12px 14px;
+  border: 1px solid var(--q-border);
+  border-radius: 14px;
+  background: var(--q-surface-elevated);
+}
+
+.summary-card--note {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  color: var(--q-text-muted);
+  text-align: center;
+}
+
+.summary-card__label {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--q-text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.summary-card__text {
+  margin: 0;
+  color: var(--q-text);
+  line-height: 1.55;
+}
+
+.summary-card__body--loading {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  color: var(--q-text-muted);
+}
+
+.summary-card__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  color: var(--q-accent);
+}
+
+/* Family and size come inline from the store — a preview that does not render in
+   the real reading font is not a preview. */
+.reading-preview {
+  color: var(--q-text);
+  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Article card ───────────────────────────────────────────── */
+.article-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--q-border);
+  position: relative;
+  background: var(--q-surface-elevated);
+}
+
+/* The whole card is the click target (it opens the reading view), so it has to look like
+   one. Only background-color is animated — never transform — because the card lives in an
+   F7 swipeout that owns the transform of `.swipeout-content` (bundle:7716-7725). */
+.article-card {
+  transition: background-color 150ms ease;
+}
+
+/* Pointer-only: on touch a :hover state would stick after the tap and would light up while
+   swiping. `(hover: hover) and (pointer: fine)` keeps it to real mice/trackpads. */
+@media (hover: hover) and (pointer: fine) {
+  .article-card {
+    cursor: pointer;
+  }
+
+  .article-card:hover {
+    /* Tinted with --q-text so it works in every theme: a fixed grey would be invisible on
+       the OLED-black theme and muddy in sepia. */
+    background: color-mix(in srgb, var(--q-text) 6%, var(--q-surface-elevated));
+  }
+
+  .article-card:active {
+    background: color-mix(in srgb, var(--q-text) 11%, var(--q-surface-elevated));
+    transition-duration: 0ms;
+  }
+}
+
+/* Keyboard affordance. Inert until the card gets `tabindex="0"` in ArticleCard.vue —
+   see report; the style is ready for it. */
+.article-card:focus-visible {
+  outline: 2px solid var(--q-accent);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--q-text) 6%, var(--q-surface-elevated));
+}
+
+/* A click on the card's chrome (padding, thumbnail, the gap between the lines) must not
+   start a text selection — that is the drag that smears a blue selection across a control
+   you meant to press, and on touch it fights the swipeout. The text itself stays
+   selectable on pointer devices, where selecting is a real feature; on touch we keep it
+   off so long-press/swipe belong to the swipeout. */
+.article-card {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .article-card__meta,
+  .article-card__title,
+  .article-card__excerpt {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
+.article-card.is-saved::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--q-saved-bar);
+  border-radius: 0 2px 2px 0;
+}
+
+.article-card__meta {
+  font-size: 12px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.article-card__title {
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--q-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0 0 4px;
+}
+
+.article-card__title.unread {
+  font-weight: 700;
+}
+
+.article-card__excerpt {
+  font-size: 13px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.article-card__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.article-card__thumb {
+  flex-shrink: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--q-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--q-border) 72%, transparent);
+}
+
+.article-card__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.article-card__thumb--favicon img {
+  width: 56%;
+  height: 56%;
+  object-fit: contain;
+}
+
+/* ── Reading view iframe ────────────────────────────────────── */
+.reading-iframe {
+  width: 100%;
+  border: none;
+  flex: 1;
+  display: block;
+  background: var(--q-bg);
+}
+
+/* ── Empty state ────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 32px;
+  text-align: center;
+  gap: 12px;
+}
+
+.empty-state__icon {
+  opacity: 0.4;
+}
+
+.empty-state__text {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.empty-state__text--subtle {
+  max-width: 36ch;
+  font-size: 13px;
+  color: var(--q-text-muted);
+}
+
+/* ── Feed list ──────────────────────────────────────────────── */
+.feed-item-url {
+  font-size: 12px;
+}
+
+/* Both article lists (Feed and Saved) are full-bleed card stacks. Only the Feed page
+   used to carry this class, so the Saved list still picked up the generic list rules
+   and drew an edge hairline the Feed list never had — the stray line at the end. */
+.article-list .list {
+  margin: 0;
+}
+
+.article-list .list ul {
+  border-top: none;
+  border-bottom: none;
+}
+
+.article-list .article-card-item .item-content,
+.article-list .article-card-item .item-inner {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.article-list .article-card-item .item-inner {
+  margin-left: 0;
+}
+
+/* The card draws its own rule between items — Framework7's item divider would be a
+   second one on top of it. */
+.article-list .article-card-item .item-inner::after {
+  display: none;
+}
+
+/* The bar answers each list's question. In the feed: "which of these did I save?"
+   In the reading list and the archive every article is saved, so there it answers
+   the question that matters there instead: "which of these are still unread?" —
+   the bold title alone was too quiet a signal on a device. Same bar, same accent;
+   read cards show nothing. */
+.saved-list .article-card.is-saved:not(.is-unread)::before,
+.archive-list .article-card.is-saved:not(.is-unread)::before {
+  display: none;
+}
+
+/* ── Long-press auf Artikelkarten (Listen) ──────────────────────────────────────
+   Neuer Block ans Dateiende — siehe src/components/ArticleCard.vue.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+/* Holding a card down opens its action menu, so while the finger is down the card must
+   not also be a text-selection or image-save target: Android would otherwise put its
+   native "select / copy / share image" popup on top of our sheet, and iOS would show the
+   link callout. The article text itself is selectable where it belongs — in the reading
+   view — so nothing is lost here. */
+.article-card {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* The thumbnail is the one part of the card that a browser treats as an object in its own
+   right — a long press on an <img> raises "save image", and a right click raises the image
+   context menu before ours. It is decoration, so it does not need to be a target at all. */
+.article-card__thumb img {
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+
+/* ── Read-aloud player (ReadingView) ──────────────────────────────────────────
+   A transport bar, not a status line: the reader is listening, so the controls
+   have to be reachable with a thumb and readable at a glance. The highlight of the
+   paragraph being spoken lives INSIDE the article iframe and is injected there by
+   ReadingView — it cannot be styled from here. */
+.speech-player .toolbar-inner {
+  gap: 0.15rem;
+  padding: 0 0.35rem;
+}
+
+/* 40px, not the 44px of a nav icon: five controls plus the position have to fit into
+   F7's toolbar height (44px on iOS), and growing the bar would desynchronise the
+   bottom padding F7 gives the page content from `--f7-toolbar-height`.
+
+   TWO classes on purpose. The global `.toolbar .link` rule near the top of this file
+   pins min-width/min-height to 2.75rem (44px), and Framework7 itself stretches toolbar
+   links to bar height — both beat any single-class 40px rule on specificity, which is
+   exactly how this button shipped as a 44x48 ellipse twice. This selector ties the
+   global rule and wins by source order; the max-* caps make inherited stretching
+   irrelevant no matter who sets it. */
+.speech-player .speech-player__button {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  align-self: center;
+  padding: 0;
+  justify-content: center;
+  color: var(--q-text);
+}
+
+/* The one circle in the bar. */
+.speech-player .speech-player__button--main {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--q-accent);
+}
+
+.speech-player__button--main .app-icon {
+  color: #fff;
+  font-size: 1.15rem;
+}
+
+.speech-player__button.disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.speech-player__status {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0 0.45rem;
+}
+
+.speech-player__position {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--q-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.speech-player__track {
+  display: block;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--q-border);
+  overflow: hidden;
+}
+
+.speech-player__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--q-accent);
+  transition: width 240ms ease;
+}
+
+/* ── Quell filter (AI feed filter) ────────────────────────────
+   Quelled articles are stored, never deleted. When the user opts
+   to see them ("Show quelled items"), they render dimmed and
+   tagged so the list still reads as filtered. */
+
+.article-card.is-quelled {
+  opacity: 0.5;
+}
+
+.article-card__quelled-tag {
+  font-style: italic;
+}
+
+/* The feed detail page shows the full feed URL — long and unbreakable
+   by nature, so it must wrap instead of pushing the layout. */
+.feed-detail-url .item-title {
+  white-space: normal;
+  word-break: break-all;
+  font-size: 0.85rem;
+}

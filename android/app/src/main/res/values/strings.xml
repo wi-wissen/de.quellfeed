@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Quell Feed</string>
+    <string name="title_activity_main">Quell Feed</string>
+    <string name="package_name">de.quellfeed</string>
+    <string name="custom_url_scheme">de.quellfeed</string>
+    <!-- ShareActivity's toasts — native, because the WebView never starts for a share. -->
+    <string name="share_saved">Article saved.</string>
+    <string name="share_no_link">No link found.</string>
+</resources>

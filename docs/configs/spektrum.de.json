@@ -1,0 +1,32 @@
+{
+  "presentation": {
+    "showFeedImage": false,
+    "showArticleTitle": false
+  },
+  "selectors": {
+    "container": [
+      ".article__body",
+      ".article-body",
+      "[class*='articleBody']",
+      ".entry-content",
+      "article"
+    ],
+    "remove": [
+      ".article__recommendation",
+      ".article__newsletter",
+      ".article__teaser-image-caption",
+      ".content__copyright",
+      ".breadcrumbs",
+      ".social-share",
+      ".newsletter-module",
+      ".paywall-teaser",
+      "[aria-label='Sie befinden sich hier:']",
+      "[class*='recommendation']",
+      "[class*='newsletter']",
+      "[class*='social']",
+      "aside",
+      ".ad",
+      "[id*='ad-']"
+    ]
+  }
+}

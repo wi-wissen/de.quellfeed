@@ -1,0 +1,122 @@
+name: Release
+
+# Pushing a tag like v0.2.0 builds and publishes both apps to a GitHub Release:
+#   quell-feed-<tag>.apk           signed, installable directly (the website links it)
+#   quell-feed-<tag>-unsigned.ipa  for sideloading — AltStore/SideStore re-sign it with
+#                                  the user's own Apple ID, so OUR signature is not needed
+#
+# The Android signature needs four repository secrets — see README, section "Releases".
+# Without them the workflow fails early with a clear message instead of shipping an
+# unsigned APK that Android would refuse to install.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run
+
+  android:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Check signing secrets
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set — see README, section 'Releases'."
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync android
+
+      - name: Decode keystore
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/release.keystore"
+
+      - name: Build signed APK
+        env:
+          QUELL_KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
+          QUELL_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          QUELL_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          QUELL_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        working-directory: android
+        # versionName from the tag (v0.2.0 -> 0.2.0); versionCode from the run number,
+        # which only ever grows — exactly what Android's update check needs.
+        run: |
+          ./gradlew assembleRelease \
+            -PquellVersionName="${GITHUB_REF_NAME#v}" \
+            -PquellVersionCode="${GITHUB_RUN_NUMBER}"
+
+      - name: Name the artifact
+        run: cp android/app/build/outputs/apk/release/app-release.apk "quell-feed-${GITHUB_REF_NAME}.apk"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: quell-feed-*.apk
+          generate_release_notes: true
+
+  ios:
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync ios
+
+      # No certificate, no provisioning profile — the archive is built without any
+      # signing. Sideloading tools re-sign the IPA with the user's own Apple ID.
+      - name: Build unsigned archive
+        working-directory: ios/App
+        run: |
+          xcodebuild archive \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -R "$RUNNER_TEMP/App.xcarchive/Products/Applications/App.app" Payload/
+          zip -qry "quell-feed-${GITHUB_REF_NAME}-unsigned.ipa" Payload
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: quell-feed-*-unsigned.ipa
+          generate_release_notes: true

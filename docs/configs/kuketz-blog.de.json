@@ -1,0 +1,24 @@
+{
+  "presentation": {
+    "showFeedImage": false,
+    "showArticleTitle": true
+  },
+  "selectors": {
+    "container": [
+      ".post .content",
+      ".content-wrapper .content",
+      ".content"
+    ],
+    "remove": [
+      ".support-box",
+      ".author",
+      ".teaser",
+      ".teaser-arrow",
+      ".button-wrapper-follow",
+      ".yarpp",
+      ".comment-container",
+      ".coffee",
+      "hr"
+    ]
+  }
+}

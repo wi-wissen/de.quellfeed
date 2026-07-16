@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quell Feed — AI setup</title>
+<meta name="description" content="Configure Quell Feed's AI features on a big screen and hand the settings to your phone as a QR code. Everything stays in your browser.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/quell-favicon-auto.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-royal-32.png" sizes="32x32">
+
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f5f6f9;
+    --card: #ffffff;
+    --text: #14161d;
+    --muted: #59606f;
+    --border: #e2e5ec;
+    --brand: #1d3d8f;
+    --brand-ink: #ffffff;
+    --accent: #1d3d8f;
+    --warn-bg: #fdf6e7;
+    --warn-border: #ecd9ab;
+    --shadow: 0 1px 2px rgba(16,20,32,.06), 0 8px 24px rgba(16,20,32,.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1116;
+      --bg-soft: #15181f;
+      --card: #171a22;
+      --text: #e8eaf0;
+      --muted: #99a0b0;
+      --border: #262b37;
+      --brand: #8fadf5;
+      --brand-ink: #0d1120;
+      --accent: #a9bff2;
+      --warn-bg: #262013;
+      --warn-border: #4d3f1f;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.35);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+  header { padding: 28px 0; }
+  .brand {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: Georgia, serif;
+    font-weight: 700; font-size: 19px; letter-spacing: -.01em; text-decoration: none;
+  }
+  .brand img { width: 34px; height: 34px; border-radius: 9px; display: block; }
+
+  h1 { margin: 24px 0 8px; font-size: 30px; letter-spacing: -.02em; font-weight: 750; }
+  .sub { margin: 0 0 32px; color: var(--muted); max-width: 58ch; }
+
+  .grid { display: grid; grid-template-columns: 1fr 300px; gap: 28px; align-items: start; padding-bottom: 64px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px;
+  }
+
+  label { display: block; font-size: 14px; font-weight: 600; margin: 18px 0 6px; }
+  label:first-child { margin-top: 0; }
+  select, input {
+    width: 100%; padding: 11px 12px;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--bg); color: var(--text);
+    font: inherit; font-size: 15px;
+  }
+  select:focus, input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .field-hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+
+  .qr-card { text-align: center; position: sticky; top: 24px; }
+  /* The attribute must win over the display rules below — without this, clearing the
+     key hid the canvas logically but kept the old QR code visibly on screen. */
+  [hidden] { display: none !important; }
+
+  .qr-card canvas, .qr-card .qr-empty {
+    width: 232px; height: 232px; margin: 0 auto; display: block;
+    border-radius: 10px;
+  }
+  .qr-empty {
+    display: grid; place-items: center;
+    background: var(--bg-soft); border: 1px dashed var(--border);
+    color: var(--muted); font-size: 14px; padding: 20px;
+  }
+  .qr-hint { font-size: 14px; color: var(--muted); margin: 16px 0 0; }
+
+  .warn {
+    margin-top: 16px; padding: 12px 14px;
+    background: var(--warn-bg); border: 1px solid var(--warn-border);
+    border-radius: 10px; font-size: 13px; color: var(--text); text-align: left;
+  }
+
+  .btn {
+    display: inline-block; margin-top: 16px; padding: 12px 20px;
+    border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 15px;
+    background: var(--brand); color: var(--brand-ink); box-shadow: var(--shadow);
+  }
+  .btn[hidden] { display: none; }
+
+  footer { padding: 24px 0 44px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--border); }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <a class="brand" href="index.html">
+      <img src="assets/icon-royal-512.png" alt="">
+      Quell Feed
+    </a>
+  </header>
+
+  <h1>Set up AI on your phone</h1>
+  <p class="sub">
+    API keys are long, and phones are terrible at typing them. Fill in the fields here on
+    a big screen, then point your phone's <strong>camera app</strong> at the QR code and
+    tap the link it offers — Quell Feed opens, shows you what it received, and asks
+    before saving anything. <strong>Nothing you type here leaves this browser tab</strong>;
+    the page has no server and sends no requests.
+  </p>
+
+  <div class="grid">
+    <form class="card" autocomplete="off">
+      <label for="preset">Provider</label>
+      <select id="preset">
+        <option value="openrouter-deepseek">OpenRouter — DeepSeek V4 Flash (fast, cheap)</option>
+        <option value="openrouter-free">OpenRouter — free models</option>
+        <option value="openai-nano">OpenAI — GPT-5.4 nano</option>
+        <option value="custom">Custom (any OpenAI-compatible endpoint)</option>
+      </select>
+
+      <div id="custom-fields" hidden>
+        <label for="baseUrl">Base URL</label>
+        <input id="baseUrl" type="url" placeholder="https://my-server.example/v1" spellcheck="false">
+
+        <label for="model">Model</label>
+        <input id="model" type="text" placeholder="e.g. llama-3.3-70b" spellcheck="false">
+        <p class="field-hint">Whatever your endpoint expects in the <code>model</code> field.</p>
+      </div>
+
+      <label for="apiKey">API key</label>
+      <input id="apiKey" type="password" placeholder="sk-…" spellcheck="false">
+      <p class="field-hint">
+        Created in your provider's dashboard — for OpenRouter under
+        <em>Keys</em>, for OpenAI under <em>API keys</em>.
+      </p>
+    </form>
+
+    <div class="card qr-card">
+      <div class="qr-empty" id="qr-empty">The QR code appears once the key is filled in.</div>
+      <canvas id="qr" hidden></canvas>
+      <p class="qr-hint" id="qr-hint" hidden>
+        Scan with your phone's camera and tap “Open with Quell Feed”.
+      </p>
+      <div class="warn">
+        This QR code contains your real API key. Treat it like a password — don't share
+        screenshots of it, and close this tab when you're done.
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-size:22px;letter-spacing:-.01em;margin:8px 0 6px">Where do I get a key?</h2>
+  <p class="sub" style="margin-bottom:20px">
+    A key is like a prepaid phone card for AI: you create it once in the provider's
+    dashboard, put a few euros on the account, and the app uses it only when you tap
+    Summarize, Translate, or when a feed filter runs.
+  </p>
+
+  <div class="card" style="margin-bottom:16px">
+    <details open>
+      <summary style="font-weight:600;cursor:pointer">OpenRouter (recommended — one key, many models)</summary>
+      <ol style="margin:12px 0 4px;padding-left:20px;color:var(--muted)">
+        <li>Go to <strong>openrouter.ai</strong> and sign in (Google/GitHub works).</li>
+        <li>Top-right menu → <strong>Credits</strong> → add a small amount (5&nbsp;€ lasts a long time — a summary costs fractions of a cent).</li>
+        <li>Top-right menu → <strong>Keys</strong> → <strong>Create key</strong>, give it a name like “Quell Feed”.</li>
+        <li>Copy the key (starts with <code>sk-or-</code>) into the field above. Done.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="card" style="margin-bottom:64px">
+    <details>
+      <summary style="font-weight:600;cursor:pointer">OpenAI</summary>
+      <ol style="margin:12px 0 4px;padding-left:20px;color:var(--muted)">
+        <li>Go to <strong>platform.openai.com</strong> and sign in (this is the developer site — a ChatGPT subscription is a different product and not needed).</li>
+        <li><strong>Settings → Billing</strong> → add a payment method or prepaid credit.</li>
+        <li><strong>API keys</strong> → <strong>Create new secret key</strong>.</li>
+        <li>Copy the key (starts with <code>sk-</code>) into the field above — it is shown only once.</li>
+      </ol>
+    </details>
+  </div>
+
+  <footer>
+    <a href="index.html">Quell Feed</a> ·
+    <a href="https://wi-wissen.de/impressum.html">Legal notice</a> ·
+    <a href="https://wi-wissen.de/datenschutz.html">Privacy</a>
+  </footer>
+</div>
+
+<script src="assets/qrcode.min.js"></script>
+<script>
+// Everything below runs locally. The settings are serialized as base64url JSON into a
+// URL FRAGMENT — the part after # that a browser never sends to any server — first as
+// an https link (because every camera app opens those), whose page (this one) then
+// hands the fragment to the app scheme on a tap.
+(() => {
+  const els = {
+    preset: document.getElementById('preset'),
+    customFields: document.getElementById('custom-fields'),
+    baseUrl: document.getElementById('baseUrl'),
+    model: document.getElementById('model'),
+    apiKey: document.getElementById('apiKey'),
+    qr: document.getElementById('qr'),
+    qrEmpty: document.getElementById('qr-empty'),
+    qrHint: document.getElementById('qr-hint'),
+  }
+
+  // Mirrors AI_PRESETS in the app (src/utils/ai.js) — keep in step.
+  const PRESETS = {
+    'openrouter-deepseek': { provider: 'openrouter', model: 'deepseek/deepseek-v4-flash' },
+    'openrouter-free': { provider: 'openrouter', model: 'openrouter/free' },
+    'openai-nano': { provider: 'openai', model: 'gpt-5.4-nano' },
+    custom: { provider: 'custom', model: '' },
+  }
+
+  function encodePayload(payload) {
+    const bytes = new TextEncoder().encode(JSON.stringify(payload))
+    let binary = ''
+    for (const byte of bytes) binary += String.fromCharCode(byte)
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  }
+
+  function currentConfig() {
+    const preset = PRESETS[els.preset.value]
+    const custom = els.preset.value === 'custom'
+    const apiKey = els.apiKey.value.trim()
+    if (!apiKey) return null
+
+    const ai = {
+      provider: preset.provider,
+      baseUrl: custom ? els.baseUrl.value.trim() : '',
+      apiKey,
+      model: custom ? els.model.value.trim() : preset.model,
+    }
+    if (custom && (!/^https?:\/\/\S+$/i.test(ai.baseUrl) || !ai.model)) return null
+    return ai
+  }
+
+  function render() {
+    els.customFields.hidden = els.preset.value !== 'custom'
+
+    const ai = currentConfig()
+    const ready = Boolean(ai)
+    els.qr.hidden = !ready
+    els.qrHint.hidden = !ready
+    els.qrEmpty.style.display = ready ? 'none' : 'grid'
+    if (!ai) return
+
+    const fragment = encodePayload({ v: 1, ai })
+    // The QR carries the app scheme DIRECTLY. The https detour (camera -> browser ->
+    // tap-through) was tried first and failed in the field: the browser does not
+    // reliably forward to the app. Camera apps do offer custom-scheme links.
+    QRCode.toCanvas(els.qr, `de.quellfeed://setup#${fragment}`, { width: 232, margin: 1 }, () => {})
+  }
+
+  for (const el of [els.preset, els.baseUrl, els.model, els.apiKey]) {
+    el.addEventListener('input', render)
+    el.addEventListener('change', render)
+  }
+
+  render()
+})()
+</script>
+
+</body>
+</html>
