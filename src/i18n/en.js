@@ -133,7 +133,7 @@ export default {
     syncIndex: {
       hint: 'Everything runs straight between your device and your server. We run none of it and see none of it.',
       on: 'On',
-      difference: 'WebDAV syncs feeds and articles in both directions, deletions included. KaraKeep and Linkwarden are bookmark services: the server holds the truth there, only saved articles are synced — and feeds not at all.',
+      difference: 'WebDAV syncs feeds and articles in both directions, deletions included. KaraKeep, Linkwarden and Instapaper are bookmark services: the server holds the truth there, only saved articles are synced — and feeds not at all.',
       webdav: {
         title: 'WebDAV',
         subtitle: 'Nextcloud, ownCloud, Synology … — one file in our own JSON format on your server: feeds, articles and read state all travel with it, both ways.',
@@ -145,6 +145,10 @@ export default {
       linkwarden: {
         title: 'Linkwarden',
         subtitle: 'Your own Linkwarden server — saved articles only; the archive is mirrored as a second collection, and it can store neither the publication date nor the read state.',
+      },
+      instapaper: {
+        title: 'Instapaper',
+        subtitle: 'Your Instapaper account via its API v2 — saved articles only; archive and publication date have a home there, read state does not. Needs a personal access token from your own Instapaper application.',
       },
     },
     karakeep: {
@@ -213,6 +217,35 @@ export default {
         invalidPayload: 'Linkwarden answered, but the app cannot make sense of the answer.',
         requestFailed: 'Request to Linkwarden failed.',
         notConfigured: 'Enter the server URL and access token first.',
+      },
+    },
+    instapaper: {
+      title: 'Instapaper',
+      hint: 'Syncs your saved articles with your Instapaper account (API v2). Everything in Home and Archive comes across, and Quell\'s archive is Instapaper\'s archive; an article deleted here is deleted there too — permanently, not just archived.',
+      noReadState: 'Read state is not synced with Instapaper and stays on the device (WebDAV still carries it). Bookmarks you filed into your own Instapaper folders are left alone.',
+      ownApp: 'Instapaper only lets an application serve other people after a review, so Quell Feed uses your own: register one at instapaper.com/developers, and the token works for your account.',
+      accessToken: 'Access token',
+      accessTokenHint: 'Create it on the Applications page of the Instapaper developer site (Personal Access Token). It does not expire; revoke it there to cut access. It is stored unencrypted on the device.',
+      enabled: 'Sync automatically',
+      lastSync: 'Last synced',
+      never: 'Never',
+      test: 'Test connection',
+      testOk: 'Instapaper connection works.',
+      syncNow: 'Sync now',
+      done: 'Synced with Instapaper: {pushed} up, {pulled} down.',
+      notConfigured: 'No Instapaper account set up yet — the access token is missing.',
+      errors: {
+        unauthorized: 'Instapaper rejected the access token — missing or revoked.',
+        forbidden: 'Instapaper denied access. A token from an application that is not yet approved only works for the account that owns the application.',
+        notFound: 'Instapaper could not find that.',
+        conflict: 'Another device wrote at the same time. Try again.',
+        rateLimited: 'Too many requests to Instapaper — please wait a moment.',
+        aborted: 'Cancelled.',
+        serverError: 'Instapaper reported an error.',
+        networkError: 'Could not reach Instapaper.',
+        invalidPayload: 'Instapaper answered, but the app cannot make sense of the answer.',
+        requestFailed: 'Request to Instapaper failed.',
+        notConfigured: 'Enter the access token first.',
       },
     },
     sync: {

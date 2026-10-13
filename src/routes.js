@@ -12,6 +12,7 @@ import SyncSettings from './pages/settings/SyncSettings.vue'
 import WebdavSettings from './pages/settings/WebdavSettings.vue'
 import KarakeepSettings from './pages/settings/KarakeepSettings.vue'
 import LinkwardenSettings from './pages/settings/LinkwardenSettings.vue'
+import InstapaperSettings from './pages/settings/InstapaperSettings.vue'
 import PaywallSettings from './pages/settings/PaywallSettings.vue'
 import AiSettings from './pages/settings/AiSettings.vue'
 import DataSettings from './pages/settings/DataSettings.vue'
@@ -33,6 +34,7 @@ export default [
   { path: '/settings/sync/webdav/', component: WebdavSettings },
   { path: '/settings/sync/karakeep/', component: KarakeepSettings },
   { path: '/settings/sync/linkwarden/', component: LinkwardenSettings },
+  { path: '/settings/sync/instapaper/', component: InstapaperSettings },
   { path: '/settings/paywall/', component: PaywallSettings },
   { path: '/settings/ai/', component: AiSettings },
   { path: '/settings/data/', component: DataSettings },

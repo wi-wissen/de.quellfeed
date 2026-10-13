@@ -185,7 +185,7 @@ Identity is the **URL**, never the local `id` (a `crypto.randomUUID()`, differen
 device). Deletions leave tombstones. `cachedHtml` is never synced — it is a cache, can be
 megabytes, and is locally rebuildable.
 
-**KaraKeep** and **Linkwarden** are bookmark services: the server holds the truth, and only
+**KaraKeep**, **Linkwarden** and **Instapaper** are bookmark services: the server holds the truth, and only
 saved articles travel. Both were tested against live servers, which corrected several
 assumptions that would have destroyed data — the details are in the code comments, because
 that is where the next person will need them. Two things worth knowing up front:
@@ -197,6 +197,12 @@ that is where the next person will need them. Two things worth knowing up front:
   twenty syncs would leave twenty identical collections. And it can store **no publication
   date** and has **no read state** at all; the settings page says so up front rather than
   letting you discover it after 300 articles.
+- Instapaper (API v2) authenticates with a **personal access token**, not an OAuth flow: the
+  code exchange needs the application's client secret, and an app without a backend has
+  nowhere safe to keep one. Each user registers their own Owner Only application and
+  pastes the token — the same bring-your-own model as the other two. Saved = exists
+  (Home + Archive), archive ↔ `archived`, date ← `pubtime`; read state stays local. Built
+  from the published OpenAPI spec; **not yet run against a live account**.
 
 ## Logged-in sites (paywalls)
 
@@ -233,7 +239,7 @@ articles[]  id, feedId, source?, url, title, description, image,
             isRead, isSaved, publishedAt, updatedAt, cachedHtml?
 tombstones  deletions, so a sync cannot resurrect what you removed
 settings    language, theme, reading{font,size,width},
-            ai, webdav, karakeep, linkwarden, paywall
+            ai, webdav, karakeep, linkwarden, instapaper, paywall
 ```
 
 `source` is only set on link articles; for feed articles the feed title is the source name.
@@ -274,7 +280,7 @@ src/
   pages/             Feed · Saved · ReadingView · AddFeed · AddLink · settings/
   components/        ArticleCard (swipe + hold actions), AppIcon
   utils/             http · feedParser · articleParser · articleText · speech ·
-                     mediaSession · sync · webdav · karakeep · linkwarden · ai ·
+                     mediaSession · sync · webdav · karakeep · linkwarden · instapaper · ai ·
                      shareTarget · icons · fonts · theme · favicon · opml · bookmarks
   i18n/              de · en
   css/app.css        brand tokens + Framework7 overrides
