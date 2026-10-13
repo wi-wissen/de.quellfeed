@@ -133,7 +133,7 @@ export default {
     syncIndex: {
       hint: 'Alles läuft direkt zwischen deinem Gerät und deinem Server. Wir betreiben nichts davon und sehen nichts davon.',
       on: 'An',
-      difference: 'WebDAV gleicht Feeds und Artikel in beide Richtungen ab, inklusive Löschungen. KaraKeep und Linkwarden sind Lesezeichen-Dienste: dort liegt die Wahrheit auf dem Server, es werden nur die gespeicherten Artikel abgeglichen — und Feeds gar nicht.',
+      difference: 'WebDAV gleicht Feeds und Artikel in beide Richtungen ab, inklusive Löschungen. KaraKeep, Linkwarden und Instapaper sind Lesezeichen-Dienste: dort liegt die Wahrheit auf dem Server, es werden nur die gespeicherten Artikel abgeglichen — und Feeds gar nicht.',
       webdav: {
         title: 'WebDAV',
         subtitle: 'Nextcloud, ownCloud, Synology … — eine Datei in unserem eigenen JSON-Format auf deinem Server: Feeds, Artikel und Gelesen-Status wandern mit, in beide Richtungen.',
@@ -145,6 +145,10 @@ export default {
       linkwarden: {
         title: 'Linkwarden',
         subtitle: 'Dein eigener Linkwarden-Server — nur die gespeicherten Artikel; das Archiv wird als zweite Collection abgebildet, Erscheinungsdatum und Gelesen-Status kann er nicht speichern.',
+      },
+      instapaper: {
+        title: 'Instapaper',
+        subtitle: 'Dein Instapaper-Konto über die API v2 — nur die gespeicherten Artikel; Archiv und Erscheinungsdatum haben dort einen Platz, der Gelesen-Status nicht. Braucht einen persönlichen Access-Token aus deiner eigenen Instapaper-Anwendung.',
       },
     },
     karakeep: {
@@ -213,6 +217,35 @@ export default {
         invalidPayload: 'Linkwarden hat geantwortet, aber die App kann mit der Antwort nichts anfangen.',
         requestFailed: 'Anfrage an Linkwarden fehlgeschlagen.',
         notConfigured: 'Bitte zuerst Server-URL und Access Token eintragen.',
+      },
+    },
+    instapaper: {
+      title: 'Instapaper',
+      hint: 'Gleicht deine gespeicherten Artikel mit deinem Instapaper-Konto ab (API v2). Alles aus Home und Archiv kommt herüber, Quells Archiv ist Instapapers Archiv; ein hier gelöschter Artikel wird dort ebenfalls gelöscht — endgültig, nicht nur archiviert.',
+      noReadState: 'Der Gelesen-Status wird mit Instapaper nicht abgeglichen und bleibt auf dem Gerät (WebDAV transportiert ihn weiterhin). Lesezeichen in deinen eigenen Instapaper-Ordnern bleiben unangetastet.',
+      ownApp: 'Instapaper lässt eine Anwendung erst nach einer Prüfung für andere Leute zu, deshalb nutzt Quell Feed deine eigene: Registriere unter instapaper.com/developers eine, dann funktioniert der Token für dein Konto.',
+      accessToken: 'Access-Token',
+      accessTokenHint: 'Du erzeugst ihn auf der Applications-Seite der Instapaper-Entwicklerseite (Personal Access Token). Er läuft nicht ab; zum Sperren widerrufst du ihn dort. Er wird unverschlüsselt auf dem Gerät gespeichert.',
+      enabled: 'Automatisch abgleichen',
+      lastSync: 'Zuletzt abgeglichen',
+      never: 'Noch nie',
+      test: 'Verbindung testen',
+      testOk: 'Verbindung zu Instapaper steht.',
+      syncNow: 'Jetzt abgleichen',
+      done: 'Mit Instapaper abgeglichen: {pushed} hoch, {pulled} runter.',
+      notConfigured: 'Noch kein Instapaper-Konto eingerichtet — der Access-Token fehlt.',
+      errors: {
+        unauthorized: 'Instapaper hat den Access-Token abgelehnt — fehlt oder wurde widerrufen.',
+        forbidden: 'Instapaper verweigert den Zugriff. Ein Token aus einer noch nicht freigegebenen Anwendung funktioniert nur für das Konto, dem die Anwendung gehört.',
+        notFound: 'Instapaper hat das nicht gefunden.',
+        conflict: 'Ein anderes Gerät hat gleichzeitig geschrieben. Versuch es nochmal.',
+        rateLimited: 'Zu viele Anfragen an Instapaper — bitte kurz warten.',
+        aborted: 'Abgebrochen.',
+        serverError: 'Instapaper hat einen Fehler gemeldet.',
+        networkError: 'Instapaper ist nicht erreichbar.',
+        invalidPayload: 'Instapaper hat geantwortet, aber die App kann mit der Antwort nichts anfangen.',
+        requestFailed: 'Anfrage an Instapaper fehlgeschlagen.',
+        notConfigured: 'Bitte zuerst den Access-Token eintragen.',
       },
     },
     sync: {

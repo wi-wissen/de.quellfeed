@@ -21,6 +21,7 @@ import {
 import { DEFAULT_PAYWALL_SETTINGS } from '../utils/paywall.js'
 import { DEFAULT_KARAKEEP_SETTINGS, syncWithKarakeep, deleteFromKarakeep } from '../utils/karakeep.js'
 import { DEFAULT_LINKWARDEN_SETTINGS, syncWithLinkwarden, deleteFromLinkwarden } from '../utils/linkwarden.js'
+import { DEFAULT_INSTAPAPER_SETTINGS, syncWithInstapaper, deleteFromInstapaper } from '../utils/instapaper.js'
 import { clearDomainConfigCache, getDefaultConfigBaseUrl, normalizeConfigBaseUrl } from '../utils/domainConfig.js'
 import { getFaviconUrl } from '../utils/favicon.js'
 import { applyTheme, resolveThemeChoice } from '../utils/theme.js'
@@ -61,6 +62,7 @@ export const store = reactive({
     webdav: { ...DEFAULT_WEBDAV_SETTINGS },
     karakeep: { ...DEFAULT_KARAKEEP_SETTINGS },
     linkwarden: { ...DEFAULT_LINKWARDEN_SETTINGS },
+    instapaper: { ...DEFAULT_INSTAPAPER_SETTINGS },
     paywall: { ...DEFAULT_PAYWALL_SETTINGS },
   },
   loading: false,
@@ -104,12 +106,13 @@ export const store = reactive({
 
     // `ai` and `webdav` are nested, so a plain assign would replace the whole object —
     // a settings blob written by an older version would arrive missing keys.
-    const { ai, webdav, karakeep, linkwarden, paywall, ...flat } = saved
+    const { ai, webdav, karakeep, linkwarden, instapaper, paywall, ...flat } = saved
     Object.assign(this.settings, flat)
     this.settings.ai = { ...DEFAULT_AI_SETTINGS, ...(ai || {}) }
     this.settings.webdav = { ...DEFAULT_WEBDAV_SETTINGS, ...(webdav || {}) }
     this.settings.karakeep = { ...DEFAULT_KARAKEEP_SETTINGS, ...(karakeep || {}) }
     this.settings.linkwarden = { ...DEFAULT_LINKWARDEN_SETTINGS, ...(linkwarden || {}) }
+    this.settings.instapaper = { ...DEFAULT_INSTAPAPER_SETTINGS, ...(instapaper || {}) }
     this.settings.paywall = { ...DEFAULT_PAYWALL_SETTINGS, ...(paywall || {}) }
   },
   async loadTombstones() {
@@ -132,6 +135,10 @@ export const store = reactive({
   },
   async setLinkwardenSettings(patch) {
     this.settings.linkwarden = { ...this.settings.linkwarden, ...patch }
+    await this.saveSettings()
+  },
+  async setInstapaperSettings(patch) {
+    this.settings.instapaper = { ...this.settings.instapaper, ...patch }
     await this.saveSettings()
   },
   async setPaywallSites(sites) {
@@ -197,6 +204,20 @@ export const store = reactive({
       this.articles = articles
       await this.saveArticles()
       await this.setLinkwardenSettings({ lastSync: new Date().toISOString() })
+      return { pushed, pulled }
+    } finally {
+      this.syncing = false
+    }
+  },
+  async syncWithInstapaper() {
+    if (this.syncing) return { pushed: 0, pulled: 0 }
+    this.syncing = true
+
+    try {
+      const { articles, pushed, pulled } = await syncWithInstapaper(this.articles, this.settings.instapaper)
+      this.articles = articles
+      await this.saveArticles()
+      await this.setInstapaperSettings({ lastSync: new Date().toISOString() })
       return { pushed, pulled }
     } finally {
       this.syncing = false
@@ -515,7 +536,7 @@ export const store = reactive({
   },
 
   /**
-   * KaraKeep and Linkwarden have no tombstones — the server holds the truth. Unless the
+   * KaraKeep, Linkwarden and Instapaper have no tombstones — the server holds the truth. Unless the
    * deletion is pushed through, the article simply comes back on the next pull.
    *
    * Best-effort on purpose: a server that is down must never block a local deletion. The
@@ -534,6 +555,13 @@ export const store = reactive({
         await deleteFromLinkwarden(url, this.settings.linkwarden)
       } catch (e) {
         console.warn('[store] Linkwarden delete failed:', e.message)
+      }
+    }
+    if (this.settings.instapaper.enabled) {
+      try {
+        await deleteFromInstapaper(url, this.settings.instapaper)
+      } catch (e) {
+        console.warn('[store] Instapaper delete failed:', e.message)
       }
     }
   },

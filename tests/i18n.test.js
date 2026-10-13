@@ -67,6 +67,7 @@ describe('the sync pages use their own i18n namespace', () => {
     'WebdavSettings.vue': 'sync',
     'KarakeepSettings.vue': 'karakeep',
     'LinkwardenSettings.vue': 'linkwarden',
+    'InstapaperSettings.vue': 'instapaper',
   }
   const SYNC_NAMESPACES = Object.values(PAGES)
 
@@ -86,9 +87,9 @@ describe('the sync pages use their own i18n namespace', () => {
     })
   }
 
-  // Same shape everywhere: whatever one page says in a situation, the other two say too —
+  // Same shape everywhere: whatever one page says in a situation, the others say too —
   // in their own words. A missing key here is a page that would render a raw key path.
-  it('gives all three targets the same set of texts', () => {
+  it('gives all four targets the same set of texts', () => {
     const shared = [
       'title', 'hint', 'enabled', 'lastSync', 'never',
       'test', 'testOk', 'syncNow', 'done', 'notConfigured',
@@ -99,7 +100,7 @@ describe('the sync pages use their own i18n namespace', () => {
     ]
 
     for (const locale of [de, en]) {
-      for (const namespace of ['sync', 'karakeep', 'linkwarden']) {
+      for (const namespace of ['sync', 'karakeep', 'linkwarden', 'instapaper']) {
         const section = locale.settings[namespace]
         for (const key of shared) {
           expect(section[key], `settings.${namespace}.${key}`).toBeTruthy()
@@ -117,7 +118,7 @@ describe('the sync pages use their own i18n namespace', () => {
     const { SYNC_ERROR_KEYS } = await import('../src/utils/syncErrors.js')
 
     for (const locale of [de, en]) {
-      for (const namespace of ['sync', 'karakeep', 'linkwarden']) {
+      for (const namespace of ['sync', 'karakeep', 'linkwarden', 'instapaper']) {
         for (const key of Object.values(SYNC_ERROR_KEYS)) {
           expect(
             locale.settings[namespace].errors[key],

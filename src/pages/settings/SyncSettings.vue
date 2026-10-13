@@ -64,6 +64,12 @@ export default {
           icon: 'link-outline',
           enabled: this.$store.settings.linkwarden.enabled,
         },
+        {
+          id: 'instapaper',
+          route: '/settings/sync/instapaper/',
+          icon: 'newspaper-outline',
+          enabled: this.$store.settings.instapaper.enabled,
+        },
       ]
     },
   },
