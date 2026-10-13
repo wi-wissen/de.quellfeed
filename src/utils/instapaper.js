@@ -46,7 +46,8 @@
 // ── Transport ───────────────────────────────────────────────────────────────
 // Native: CapacitorHttp. Browser dev build: the /__dav middleware in vite.config.js, which
 // forwards the method, Authorization and Content-Type (the article proxy is GET-only).
-// Whether instapaper.com answers CORS preflights is unverified — the proxy sidesteps it.
+// Measured live: the OPTIONS preflight is answered 401 with no Access-Control-Allow-*
+// headers, so a browser could not call the API directly — the proxy is not optional there.
 
 import { Capacitor, CapacitorHttp } from '@capacitor/core'
 
@@ -406,11 +407,12 @@ function moveBookmark(config, id, archived) {
 /**
  * Saves the bookmark, or brings the one that is already there in line.
  *
- * POST /bookmarks dedupes server-side, but the documented behaviour for a known URL is
- * "updated with whatever you sent and moved back to the top" — that would reshuffle the
- * user's list on every sync, which is why a bookmark found in the index is never POSTed.
- * Whether `archived` in the body is honoured for an EXISTING bookmark is not documented,
- * so after a POST the answer is checked and a move is sent if it came back wrong.
+ * POST /bookmarks dedupes server-side and, measured live, treats a known URL as a full
+ * overwrite: `archived` IS honoured (a re-POST with false un-archived it), but an omitted
+ * title/description is WIPED (title came back empty, description null) and the bookmark is
+ * moved to the top. That is why a bookmark found in the index is never POSTed again — only
+ * moved. For a NEW bookmark `archived: true` is honoured too; the follow-up move below is
+ * a safety net, not the normal path.
  *
  * @returns {'created'|'updated'|'skipped'}
  */
