@@ -289,7 +289,7 @@ always DOMPurify, rendered in a sandboxed iframe with no JavaScript.
 src/
   main.js            app bootstrap
   routes.js          Framework7 routes
-  store/index.js     the one reactive store, global as $store
+  store/index.js     the one Pinia store (options style), global as $store
   pages/             Feed · Saved · ReadingView · AddFeed · AddLink · settings/
   components/        ArticleCard (swipe + hold actions), AppIcon
   utils/             http · feedParser · articleParser · articleText · speech ·

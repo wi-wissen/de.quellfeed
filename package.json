@@ -33,6 +33,7 @@
     "framework7": "^9.3.0",
     "framework7-vue": "^9.3.0",
     "ionicons": "^8.1.0",
+    "pinia": "^3.0.4",
     "qrcode": "^1.5.4",
     "vue": "^3.5.45",
     "vue-i18n": "^11.4.18"

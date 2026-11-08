@@ -7,7 +7,7 @@ import App from './App.vue'
 import AppIcon from './components/AppIcon.vue'
 import SecretInput from './components/SecretInput.vue'
 import { i18n } from './i18n/index.js'
-import { store } from './store/index.js'
+import { pinia, store } from './store/index.js'
 import routes from './routes.js'
 import './css/app.css'
 
@@ -16,7 +16,10 @@ Framework7.use(Framework7Vue)
 const app = createApp(App)
 
 app.use(i18n)
+app.use(pinia)
 
+// Pinia's own way would be mapState/mapActions per component; `$store` keeps every
+// template and method unchanged and is the same store instance Pinia DevTools shows.
 app.config.globalProperties.$store = store
 app.component('AppIcon', AppIcon)
 app.component('SecretInput', SecretInput)
