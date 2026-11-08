@@ -176,7 +176,11 @@ export default {
       return CapacitorApp.addListener('backButton', () => {
         // An open sheet, dialog or popover swallows the back press first — anything else
         // would feel broken.
-        if (document.querySelector('.actions-modal.modal-in, .dialog.modal-in, .popover.modal-in, .sheet-modal.modal-in')) {
+        if (
+          document.querySelector(
+            '.actions-modal.modal-in, .dialog.modal-in, .popover.modal-in, .sheet-modal.modal-in',
+          )
+        ) {
           f7.actions.close()
           f7.dialog.close()
           f7.popover.close()
@@ -294,7 +298,7 @@ export default {
         async () => {
           await this.$store.setAiSettings(patch.ai)
           f7.toast.show({ text: this.$t('setupLink.applied'), closeTimeout: 2500 })
-        }
+        },
       )
     },
   },

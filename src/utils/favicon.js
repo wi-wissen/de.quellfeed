@@ -29,7 +29,7 @@ export function rememberDeclaredIcon(pageUrl, doc) {
   try {
     const { hostname } = new URL(pageUrl)
     const links = [...doc.querySelectorAll('link[rel]')].filter(link =>
-      ICON_REL.test(link.getAttribute('rel') || '')
+      ICON_REL.test(link.getAttribute('rel') || ''),
     )
     if (links.length === 0) return
 

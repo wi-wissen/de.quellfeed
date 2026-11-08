@@ -25,11 +25,11 @@
           :placeholder="$t('settings.paywall.loginUrlPlaceholder')"
           :value="loginUrl"
           clear-button
-          @input="loginUrl = $event.target.value"
-          @keyup.enter="addSite"
           inputmode="url"
           autocapitalize="off"
           autocorrect="off"
+          @input="loginUrl = $event.target.value"
+          @keyup.enter="addSite"
         ></f7-list-input>
       </f7-list>
 
@@ -157,9 +157,7 @@ export default {
     },
 
     async markSignedIn(site) {
-      const sites = this.sites.map(s =>
-        s.domain === site.domain ? { ...s, lastLoginAt: Date.now() } : s,
-      )
+      const sites = this.sites.map(s => (s.domain === site.domain ? { ...s, lastLoginAt: Date.now() } : s))
       await this.$store.setPaywallSites(sites)
     },
 

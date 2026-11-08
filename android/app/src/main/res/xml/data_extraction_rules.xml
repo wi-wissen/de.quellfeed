@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ cloud backup and device-to-device transfer.
+
+     Excluded:
+     - WSSecureStorageSharedPreferences: the passwords and API keys, encrypted with a
+       Keystore key that never leaves the device. A restored copy could not be decrypted,
+       and secrets have no business in a cloud backup in the first place
+       (src/utils/secretStorage.js).
+     - files/quell/html/: the offline copies of saved articles. Re-fetchable, and large —
+       Android skips an app's whole backup once it exceeds 25 MB
+       (src/utils/articleStorage.js).
+
+     Feeds, the article list and the settings (without secrets) are still backed up.
+     Keep this file in step with backup_rules.xml (Android 11 and older). -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="WSSecureStorageSharedPreferences.xml" />
+        <exclude domain="file" path="quell/html/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="WSSecureStorageSharedPreferences.xml" />
+    </device-transfer>
+</data-extraction-rules>

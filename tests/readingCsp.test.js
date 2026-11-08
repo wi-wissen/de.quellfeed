@@ -20,14 +20,14 @@ function cspOf(html) {
  * font switch works, and it does not.
  */
 describe('the reading view CSP lets our own fonts through', () => {
-  it('names the origin instead of relying on \'self\'', () => {
+  it("names the origin instead of relying on 'self'", () => {
     const csp = cspOf(docFor('inter'))
 
     expect(csp).toContain(window.location.origin)
     expect(csp).not.toContain("'self'")
   })
 
-  it('still blocks the article\'s own remote fonts', () => {
+  it("still blocks the article's own remote fonts", () => {
     const csp = cspOf(docFor('inter'))
 
     // Only our origin and data: — a font from the publisher's CDN has no way in.
@@ -37,7 +37,7 @@ describe('the reading view CSP lets our own fonts through', () => {
   })
 
   it('still forbids scripts', () => {
-    expect(cspOf(docFor('inter'))).toContain('script-src none')
+    expect(cspOf(docFor('inter'))).toContain("script-src 'none'")
   })
 
   it('embeds the @font-face whose family the stack actually asks for', () => {
@@ -55,7 +55,9 @@ describe('the reading view CSP lets our own fonts through', () => {
   it('embeds only the chosen font, not all of them', () => {
     const html = docFor('inter')
 
-    expect((html.match(/@font-face/g) || []).length).toBe(1)
+    // One family, in its latin and latin-ext subsets.
+    expect((html.match(/@font-face/g) || []).length).toBe(2)
+    expect(html).toContain('unicode-range')
     expect(html).not.toContain('Special Elite')
   })
 
@@ -90,5 +92,36 @@ describe('applyTheme tells Framework7 about dark themes', () => {
     // wrong there.
     applyTheme('sepia')
     expect(document.documentElement.classList.contains('dark')).toBe(false)
+  })
+})
+
+describe('the reading view is locked down', () => {
+  it('denies everything by default and quotes its keywords', () => {
+    const csp = cspOf(docFor('inter'))
+
+    expect(csp).toContain("default-src 'none'")
+    expect(csp).toContain("frame-src 'none'")
+    expect(csp).toContain("object-src 'none'")
+    // An unquoted `none` is a host name, not the keyword.
+    expect(csp).not.toMatch(/-src none/)
+  })
+
+  it("cannot be broken out of through the feed's cover URL", () => {
+    const evil = 'https://cdn.example/a.jpg"><iframe src="https://evil.example"></iframe><img x="'
+    const html = buildIframeDoc('<p>Text</p>', evil, 'light')
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+
+    expect(doc.querySelector('iframe')).toBeNull()
+    expect(doc.querySelectorAll('img')).toHaveLength(1)
+    expect(doc.querySelector('.article-hero img').getAttribute('src')).toContain('cdn.example')
+  })
+
+  it('drops a cover that is not http(s)', () => {
+    const html = buildIframeDoc('<p>Text</p>', 'javascript:alert(1)', 'light')
+
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+
+    expect(doc.querySelector('.article-hero')).toBeNull()
+    expect(html).not.toContain('javascript:')
   })
 })

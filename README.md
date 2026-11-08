@@ -25,15 +25,15 @@ code says so instead of pretending.
 
 | Layer | Technology |
 |---|---|
-| UI | Framework7 v8 + Vue 3 (**Options API**, no TypeScript) |
-| Native shell | Capacitor v6 (Android; minSdk 26, target 35) |
+| UI | Framework7 v9 + Vue 3 (**Options API**, no TypeScript) + Pinia |
+| Native shell | Capacitor v8 (Android; minSdk 26, target 36 · iOS 15) |
 | Icons | Ionicons — inlined as SVG, see below |
 | i18n | vue-i18n (de/en, picked from `navigator.language`) |
 | HTTP (native) | `CapacitorHttp` — no CORS to fight |
 | HTTP (dev web) | same-origin proxy as Vite middleware |
 | Feed parsing | own `DOMParser`-based parser (RSS + Atom) |
 | Article extraction | `@mozilla/readability` + `dompurify` |
-| Persistence | `@capacitor/preferences` |
+| Persistence | `@capacitor/filesystem` (articles), `@capacitor/preferences` (feeds, settings), `@aparajita/capacitor-secure-storage` (keys, passwords) |
 | Tests | Vitest (jsdom) |
 
 ## Getting started
@@ -41,7 +41,9 @@ code says so instead of pretending.
 ```bash
 npm install
 npm run dev      # Vite, dev proxy included — one single process
-npm test         # Vitest
+npm test         # Vitest (watch); npm run test:run for a single run
+npm run lint     # ESLint
+npm run format   # Prettier
 npm run build    # production build into dist/
 
 npx cap sync android
@@ -55,7 +57,7 @@ the Vite server**, so it is same-origin by construction. A different port change
 
 In a browser, CORS blocks fetching foreign feeds and article pages. Natively it does not —
 everything goes through `CapacitorHttp`. So the dev web build has proxy middleware in
-[vite.config.js](vite.config.js):
+[vite.config.mjs](vite.config.mjs):
 
 ```
 GET /__proxy?url=https%3A%2F%2Fexample.com%2Ffeed     # feeds and articles
@@ -239,6 +241,25 @@ settings    language, theme, reading{font,size,width},
 `source` is only set on link articles; for feed articles the feed title is the source name.
 `cachedHtml` exists only for saved articles and is what makes them readable offline.
 
+### Where it lives
+
+| What | Where | Why |
+|---|---|---|
+| Articles | `quell/articles.json` in the app's files dir, **without** `cachedHtml` | Small; rewritten on every change |
+| Offline copies | `quell/html/<id>.html`, one per article | Written only when they change; excluded from cloud backup |
+| Feeds, settings, tombstones | `@capacitor/preferences` | Small key/value data — what it is made for |
+| API keys, passwords | Android Keystore / iOS Keychain | Never in the settings blob, never in a backup |
+
+The articles used to be a single Preferences entry — SharedPreferences on Android, read and
+rewritten as a whole on every tap, offline HTML included. [`articleStorage.js`](src/utils/articleStorage.js)
+moves an old entry over on first start. Saves are serialised and collapse, so a burst of taps
+causes one or two writes.
+
+**Retention.** Unsaved feed articles older than 60 days are pruned after each refresh
+([`retention.js`](src/utils/retention.js)), unless the feed still carries them — otherwise
+they would return as "new". Saved, archived and link articles are never pruned. The WebDAV
+merge applies the same rule, so the shared file shrinks too.
+
 ## Domain configs
 
 Readability does not do well on every site. A per-domain JSON config can prescribe
@@ -270,7 +291,7 @@ always DOMPurify, rendered in a sandboxed iframe with no JavaScript.
 src/
   main.js            app bootstrap
   routes.js          Framework7 routes
-  store/index.js     the one reactive store, global as $store
+  store/index.js     the one Pinia store (options style), global as $store
   pages/             Feed · Saved · ReadingView · AddFeed · AddLink · settings/
   components/        ArticleCard (swipe + hold actions), AppIcon
   utils/             http · feedParser · articleParser · articleText · speech ·

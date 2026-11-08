@@ -52,7 +52,8 @@ export default {
     translating: 'Übersetze Artikel…',
     translatingProgress: 'Übersetze Artikel… ({done}/{total})',
     translated: 'Übersetzt. Nochmal antippen zeigt das Original.',
-    translationInterrupted: 'Übersetzung unterbrochen — Übersetzen erneut antippen, um fortzusetzen. Fertige Absätze bleiben erhalten.',
+    translationInterrupted:
+      'Übersetzung unterbrochen — Übersetzen erneut antippen, um fortzusetzen. Fertige Absätze bleiben erhalten.',
     showOriginal: 'Original anzeigen',
     updated: 'Artikel aktualisiert.',
     summarize: 'Zusammenfassen',
@@ -122,7 +123,8 @@ export default {
     },
     readingFont: 'Schriftart',
     readingFontSize: 'Schriftgröße',
-    readingFontSizeHint: 'Aktuell {percent} % der normalen Lesegröße. Relativ angegeben, folgt also der Schriftgröße deines Systems.',
+    readingFontSizeHint:
+      'Aktuell {percent} % der normalen Lesegröße. Relativ angegeben, folgt also der Schriftgröße deines Systems.',
     readingWidth: 'Lesebreite',
     readingWidths: {
       narrow: 'Schmal',
@@ -133,30 +135,36 @@ export default {
     syncIndex: {
       hint: 'Alles läuft direkt zwischen deinem Gerät und deinem Server. Wir betreiben nichts davon und sehen nichts davon.',
       on: 'An',
-      difference: 'WebDAV gleicht Feeds und Artikel in beide Richtungen ab, inklusive Löschungen. KaraKeep und Linkwarden sind Lesezeichen-Dienste: dort liegt die Wahrheit auf dem Server, es werden nur die gespeicherten Artikel abgeglichen — und Feeds gar nicht.',
+      difference:
+        'WebDAV gleicht Feeds und Artikel in beide Richtungen ab, inklusive Löschungen. KaraKeep und Linkwarden sind Lesezeichen-Dienste: dort liegt die Wahrheit auf dem Server, es werden nur die gespeicherten Artikel abgeglichen — und Feeds gar nicht.',
       webdav: {
         title: 'WebDAV',
-        subtitle: 'Nextcloud, ownCloud, Synology … — eine Datei in unserem eigenen JSON-Format auf deinem Server: Feeds, Artikel und Gelesen-Status wandern mit, in beide Richtungen.',
+        subtitle:
+          'Nextcloud, ownCloud, Synology … — eine Datei in unserem eigenen JSON-Format auf deinem Server: Feeds, Artikel und Gelesen-Status wandern mit, in beide Richtungen.',
       },
       karakeep: {
         title: 'KaraKeep',
-        subtitle: 'Dein eigener KaraKeep-Server — nur die gespeicherten Artikel, dafür mit dem besten Feld-Fit: Erscheinungsdatum, Archiv und Speichern-Markierung haben dort alle ihren Platz.',
+        subtitle:
+          'Dein eigener KaraKeep-Server — nur die gespeicherten Artikel, dafür mit dem besten Feld-Fit: Erscheinungsdatum, Archiv und Speichern-Markierung haben dort alle ihren Platz.',
       },
       linkwarden: {
         title: 'Linkwarden',
-        subtitle: 'Dein eigener Linkwarden-Server — nur die gespeicherten Artikel; das Archiv wird als zweite Collection abgebildet, Erscheinungsdatum und Gelesen-Status kann er nicht speichern.',
+        subtitle:
+          'Dein eigener Linkwarden-Server — nur die gespeicherten Artikel; das Archiv wird als zweite Collection abgebildet, Erscheinungsdatum und Gelesen-Status kann er nicht speichern.',
       },
     },
     karakeep: {
       title: 'KaraKeep',
       hint: 'Gleicht deine gespeicherten Artikel mit deiner KaraKeep-Instanz ab. Speichern-Markierung und Archiv wandern mit — Quells Archiv ist KaraKeeps „Archived"; ein hier gelöschter Artikel wird auch dort gelöscht.',
-      noReadState: 'Der Gelesen-Status wird mit KaraKeep nicht abgeglichen: KaraKeep hat kein Gelesen-Feld, und sein „Archived" gehört dem Archiv. Gelesen wandert weiterhin über WebDAV.',
+      noReadState:
+        'Der Gelesen-Status wird mit KaraKeep nicht abgeglichen: KaraKeep hat kein Gelesen-Feld, und sein „Archived" gehört dem Archiv. Gelesen wandert weiterhin über WebDAV.',
       baseUrl: 'Server-URL',
       baseUrlPlaceholder: 'https://karakeep.example.de',
       apiKey: 'API-Key',
       apiKeyHint: 'Den Key erzeugst du in KaraKeep unter Einstellungen → API Keys.',
       favouritesOnly: 'Nur Favoriten holen',
-      favouritesOnlyHint: 'Empfohlen. Sonst landet deine komplette KaraKeep-Bibliothek im Reader, nicht nur das, was du dort als Favorit markiert hast.',
+      favouritesOnlyHint:
+        'Empfohlen. Sonst landet deine komplette KaraKeep-Bibliothek im Reader, nicht nur das, was du dort als Favorit markiert hast.',
       enabled: 'Automatisch abgleichen',
       lastSync: 'Zuletzt abgeglichen',
       never: 'Noch nie',
@@ -182,7 +190,8 @@ export default {
     linkwarden: {
       title: 'Linkwarden',
       hint: 'Gleicht deine gespeicherten Artikel mit deiner Linkwarden-Instanz ab.',
-      archiveCollection: 'Linkwarden kennt kein Archiv-Feld, deshalb landet dein Archiv in einer zweiten Collection „{name} Archive". Sie wird erst angelegt, wenn du zum ersten Mal etwas archivierst. Ohne Collection (leer = „Unorganized") wird das Archiv nicht abgeglichen.',
+      archiveCollection:
+        'Linkwarden kennt kein Archiv-Feld, deshalb landet dein Archiv in einer zweiten Collection „{name} Archive". Sie wird erst angelegt, wenn du zum ersten Mal etwas archivierst. Ohne Collection (leer = „Unorganized") wird das Archiv nicht abgeglichen.',
       baseUrl: 'Server-URL',
       baseUrlPlaceholder: 'https://linkwarden.example.de',
       apiKey: 'Access Token',
@@ -190,8 +199,10 @@ export default {
       cloudPlan:
         'Achtung bei cloud.linkwarden.app: die API ist dort an ein Abo gebunden. Ohne Abo wird der Token zwar ausgestellt, aber jeder Zugriff antwortet mit „You are not a subscriber". Bei einer selbst gehosteten Instanz gibt es diese Sperre nicht.',
       collection: 'Collection',
-      collectionHint: 'Artikel werden in diese Collection geschrieben und nur von dort geholt. Leer lassen für „Unorganized" — dann kommt allerdings deine ganze Linkwarden-Bibliothek herüber.',
-      noDate: 'Linkwarden kann kein Erscheinungsdatum speichern — von dort geholte Artikel tragen das Importdatum, nicht das echte.',
+      collectionHint:
+        'Artikel werden in diese Collection geschrieben und nur von dort geholt. Leer lassen für „Unorganized" — dann kommt allerdings deine ganze Linkwarden-Bibliothek herüber.',
+      noDate:
+        'Linkwarden kann kein Erscheinungsdatum speichern — von dort geholte Artikel tragen das Importdatum, nicht das echte.',
       noReadState: 'Der Gelesen-Status wird mit Linkwarden nicht abgeglichen; er bleibt rein lokal.',
       enabled: 'Automatisch abgleichen',
       lastSync: 'Zuletzt abgeglichen',
@@ -203,7 +214,8 @@ export default {
       notConfigured: 'Noch keine Linkwarden-Instanz eingerichtet — Server-URL und Access Token fehlen.',
       errors: {
         unauthorized: 'Linkwarden hat den Access Token abgelehnt.',
-        forbidden: 'Linkwarden verweigert den Zugriff. Bei cloud.linkwarden.app steckt dahinter fast immer das fehlende Abo.',
+        forbidden:
+          'Linkwarden verweigert den Zugriff. Bei cloud.linkwarden.app steckt dahinter fast immer das fehlende Abo.',
         notFound: 'Unter dieser Server-URL ist keine Linkwarden-API zu finden. Existiert die Collection?',
         conflict: 'Ein anderes Gerät hat gleichzeitig geschrieben. Versuch es nochmal.',
         rateLimited: 'Zu viele Anfragen an Linkwarden — bitte kurz warten.',
@@ -222,8 +234,10 @@ export default {
       serverUrlPlaceholder: 'https://cloud.example.de/remote.php/dav/files/DEINNAME/',
       username: 'Benutzername',
       password: 'Passwort',
-      passwordHint: 'Nutze ein App-Passwort, kein Kontopasswort. Bei aktiver Zwei-Faktor-Anmeldung geht es sowieso nur so. Das Passwort liegt unverschlüsselt auf dem Gerät.',
-      pathHint: 'Der Ordner muss auf dem Server schon existieren — die App kann keine Ordner anlegen (Android lässt die dafür nötige WebDAV-Methode nicht zu). Die Datei selbst wird beim ersten Abgleich angelegt.',
+      passwordHint:
+        'Nutze ein App-Passwort, kein Kontopasswort. Bei aktiver Zwei-Faktor-Anmeldung geht es sowieso nur so. Das Passwort liegt unverschlüsselt auf dem Gerät.',
+      pathHint:
+        'Der Ordner muss auf dem Server schon existieren — die App kann keine Ordner anlegen (Android lässt die dafür nötige WebDAV-Methode nicht zu). Die Datei selbst wird beim ersten Abgleich angelegt.',
       path: 'Dateiname',
       test: 'Verbindung testen',
       testOk: 'Verbindung steht.',
@@ -253,7 +267,8 @@ export default {
       loginUrl: 'Login-Adresse der Zeitung',
       loginUrlPlaceholder: 'https://www.spektrum.de/login',
       add: 'Seite hinzufügen und anmelden',
-      stayLoggedIn: 'Wichtig: Kreuze bei der Anmeldung „Angemeldet bleiben" an. Ohne das wirft das System die Sitzung beim nächsten Start der App weg, und du müsstest dich jedes Mal neu anmelden.',
+      stayLoggedIn:
+        'Wichtig: Kreuze bei der Anmeldung „Angemeldet bleiben" an. Ohne das wirft das System die Sitzung beim nächsten Start der App weg, und du müsstest dich jedes Mal neu anmelden.',
       sites: 'Deine Seiten',
       noSites: 'Noch keine Seite hinterlegt.',
       signIn: 'Erneut anmelden',
@@ -266,7 +281,8 @@ export default {
       unsupported: 'Das geht nur in der App, nicht im Browser.',
     },
     cache: 'Cache',
-    cacheHint: 'Löscht Domain-Configs, gespeicherte Artikelinhalte und den Feed-Refresh-Cache. Deine Feeds und Artikel bleiben.',
+    cacheHint:
+      'Löscht Domain-Configs, gespeicherte Artikelinhalte und den Feed-Refresh-Cache. Deine Feeds und Artikel bleiben.',
     feeds: 'Abonnierte Feeds',
     noFeeds: 'Keine Feeds abonniert.',
     feedDetail: {
@@ -275,7 +291,8 @@ export default {
       filterTitle: 'KI-Filter',
       filterLabel: 'KI-Filter',
       filterPlaceholder: 'z. B. keine Themen zur Astronomie',
-      filterHint: 'Beschreibe frei, was du in diesem Feed nicht sehen möchtest. Bewertet werden nur NEUE Beiträge beim Abrufen — Unterdrücktes wird nicht gelöscht, sondern bleibt gespeichert und lässt sich im Feed über das Drei-Punkte-Menü einblenden.',
+      filterHint:
+        'Beschreibe frei, was du in diesem Feed nicht sehen möchtest. Bewertet werden nur NEUE Beiträge beim Abrufen — Unterdrücktes wird nicht gelöscht, sondern bleibt gespeichert und lässt sich im Feed über das Drei-Punkte-Menü einblenden.',
       needsAiKey: 'Der Filter braucht einen hinterlegten KI-Key, sonst bleibt er wirkungslos.',
       openAiSettings: 'KI-Einstellungen öffnen',
       quelledCount: 'Derzeit unterdrückt: {n} Beiträge.',
@@ -285,7 +302,8 @@ export default {
     bookmarks: 'Leseliste',
     importBookmarks: 'Lesezeichen importieren',
     exportBookmarks: 'Lesezeichen exportieren',
-    bookmarksHint: 'Netscape-Bookmark-Format — dasselbe, das jeder Browser und floccus lesen und schreiben. OPML ist für die Feeds; Leseliste und Archiv sind je eine eigene Lesezeichen-Datei, damit beim Wiederherstellen alles auf seinem Regal landet.',
+    bookmarksHint:
+      'Netscape-Bookmark-Format — dasselbe, das jeder Browser und floccus lesen und schreiben. OPML ist für die Feeds; Leseliste und Archiv sind je eine eigene Lesezeichen-Datei, damit beim Wiederherstellen alles auf seinem Regal landet.',
     bookmarksImported: '{imported} Artikel importiert, {skipped} bereits vorhanden.',
     noBookmarks: 'Noch keine Artikel gespeichert.',
     bookmarkCount: '{n} gespeicherte Artikel',
@@ -297,7 +315,8 @@ export default {
     domainConfigBaseUrl: 'Config-Basis-URL',
     domainConfigPlaceholder: 'https://quellfeed.de/configs',
     domainConfigReset: 'Standard wiederherstellen',
-    domainConfigHint: 'Lese-Regeln für einzelne Websites, geladen von dieser Adresse (unter /<domain>.json). Leer lassen, um den Abruf ganz abzuschalten — dann rendert überall die eingebaute Automatik.',
+    domainConfigHint:
+      'Lese-Regeln für einzelne Websites, geladen von dieser Adresse (unter /<domain>.json). Leer lassen, um den Abruf ganz abzuschalten — dann rendert überall die eingebaute Automatik.',
     ai: {
       title: 'KI-Zusammenfassung',
       providers: {
@@ -326,7 +345,8 @@ export default {
       model: 'Modell',
       modelPlaceholder: 'z. B. deepseek/deepseek-v4-flash',
       features: 'Was die KI macht',
-      featuresHint: 'Zusammenfassen: eine TL;DR oben im Artikel, auf Tipp. Übersetzen: das Sprach-Symbol in der Artikelleiste übersetzt den ganzen Text in deine App-Sprache. Beides läuft nur, wenn du es anstößt — es wird nie ungefragt dein Guthaben verbraucht.',
+      featuresHint:
+        'Zusammenfassen: eine TL;DR oben im Artikel, auf Tipp. Übersetzen: das Sprach-Symbol in der Artikelleiste übersetzt den ganzen Text in deine App-Sprache. Beides läuft nur, wenn du es anstößt — es wird nie ungefragt dein Guthaben verbraucht.',
       transfer: {
         title: 'Vom Rechner übertragen',
         hint: 'Öffne quellfeed.de/setup-ai am Rechner, fülle dort Anbieter, Key und Modell aus und scanne den angezeigten QR-Code mit der Kamera-App deines Handys. Die App fragt vor dem Übernehmen nach — nichts wird ungefragt gespeichert.',
@@ -339,7 +359,8 @@ export default {
       hint: 'Dein Key bleibt auf dem Gerät und geht nur an den gewählten Anbieter. Quell Feed hat kein Backend — es gibt niemanden, der ihn sonst sehen könnte.',
       notConfigured: 'Kein API-Key hinterlegt.',
       notes: {
-        freeRouter: 'Der Free Models Router nutzt kostenfreie Modelle — du brauchst nur einen eigenen Key. Ob deren Ausgaben weiterverwendet werden dürfen, ist ungeklärt; wir wandeln nichts um.',
+        freeRouter:
+          'Der Free Models Router nutzt kostenfreie Modelle — du brauchst nur einen eigenen Key. Ob deren Ausgaben weiterverwendet werden dürfen, ist ungeklärt; wir wandeln nichts um.',
       },
       errors: {
         notConfigured: 'Bitte zuerst einen API-Key in den Einstellungen hinterlegen.',
@@ -355,7 +376,8 @@ export default {
       },
     },
     clearCache: 'Cache löschen',
-    clearCacheConfirm: 'Domain-Configs, gespeicherte Artikelinhalte und der Feed-Refresh-Cache werden gelöscht. Fortfahren?',
+    clearCacheConfirm:
+      'Domain-Configs, gespeicherte Artikelinhalte und der Feed-Refresh-Cache werden gelöscht. Fortfahren?',
     clearCacheDone: '{articles} Artikel-Caches und {configs} Domain-Config-Caches gelöscht.',
     lastUpdated: 'Zuletzt aktualisiert',
     never: 'Nie',

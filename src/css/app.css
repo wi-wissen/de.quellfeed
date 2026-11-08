@@ -41,6 +41,10 @@
   --f7-toolbar-text-color: var(--q-text);
   --f7-tabbar-link-inactive-color: var(--q-text-muted);
   --f7-tabbar-link-active-color: var(--q-accent);
+  /* Framework7 9 derives the tab highlight from its Material You palette (a greyed-out
+     blue) and sets the tab bar border to transparent. Both are pinned to the brand. */
+  --f7-tabbar-link-active-border-color: var(--q-accent);
+  --f7-toolbar-border-color: var(--q-bar-border);
   --f7-list-bg-color: var(--q-surface-elevated);
   /* F7 paints `.list-strong ul` and the floating label of outline inputs inside a
      strong list from this one variable (bundle: 3552-3555, 10636-10642). Its default

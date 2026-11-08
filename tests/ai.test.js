@@ -98,10 +98,13 @@ describe('resolveAiConfig', () => {
   })
 
   it('normalizes trailing slashes and a pasted /chat/completions path', () => {
-    expect(resolveAiConfig({ provider: 'custom', baseUrl: 'https://api.groq.com/openai/v1///' }).baseUrl)
-      .toBe('https://api.groq.com/openai/v1')
-    expect(resolveAiConfig({ provider: 'custom', baseUrl: 'https://api.groq.com/openai/v1/chat/completions' }).baseUrl)
-      .toBe('https://api.groq.com/openai/v1')
+    expect(
+      resolveAiConfig({ provider: 'custom', baseUrl: 'https://api.groq.com/openai/v1///' }).baseUrl,
+    ).toBe('https://api.groq.com/openai/v1')
+    expect(
+      resolveAiConfig({ provider: 'custom', baseUrl: 'https://api.groq.com/openai/v1/chat/completions' })
+        .baseUrl,
+    ).toBe('https://api.groq.com/openai/v1')
   })
 
   it('defaults to the openrouter preset when nothing is stored', () => {
@@ -143,7 +146,9 @@ describe('isAiConfigured', () => {
   })
 
   it('is false for custom without a model', () => {
-    expect(isAiConfigured({ provider: 'custom', apiKey: API_KEY, baseUrl: 'http://localhost:11434/v1' })).toBe(false)
+    expect(
+      isAiConfigured({ provider: 'custom', apiKey: API_KEY, baseUrl: 'http://localhost:11434/v1' }),
+    ).toBe(false)
   })
 
   it('is true for a complete preset config', () => {
@@ -153,11 +158,15 @@ describe('isAiConfigured', () => {
 
 describe('detectArticleLanguage', () => {
   it('detects german', () => {
-    expect(detectArticleLanguage('Der Bericht ist nicht neu und wurde auch schon über die Medien verbreitet.')).toBe('de')
+    expect(
+      detectArticleLanguage('Der Bericht ist nicht neu und wurde auch schon über die Medien verbreitet.'),
+    ).toBe('de')
   })
 
   it('detects english', () => {
-    expect(detectArticleLanguage('The report is not new and was also shared with the press about a week ago.')).toBe('en')
+    expect(
+      detectArticleLanguage('The report is not new and was also shared with the press about a week ago.'),
+    ).toBe('en')
   })
 
   it('falls back for empty text', () => {
@@ -185,7 +194,10 @@ describe('summarizeArticle', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const summary = await summarizeArticle(
-      { title: 'Titel', text: 'Der Artikel ist nicht besonders lang und wurde schon über die Medien verbreitet.' },
+      {
+        title: 'Titel',
+        text: 'Der Artikel ist nicht besonders lang und wurde schon über die Medien verbreitet.',
+      },
       openRouterSettings,
     )
 
@@ -211,12 +223,15 @@ describe('summarizeArticle', () => {
     expect(lastRequest(fetchMock)[1].headers['X-Title']).toBe('Quell Feed')
     expect(lastRequest(fetchMock)[1].headers['HTTP-Referer']).toBeTruthy()
 
-    await summarizeArticle({ title: 'T', text: 'The article is not long.' }, {
-      provider: 'custom',
-      baseUrl: 'http://localhost:11434/v1',
-      apiKey: 'ollama',
-      model: 'llama3.2',
-    })
+    await summarizeArticle(
+      { title: 'T', text: 'The article is not long.' },
+      {
+        provider: 'custom',
+        baseUrl: 'http://localhost:11434/v1',
+        apiKey: 'ollama',
+        model: 'llama3.2',
+      },
+    )
     expect(lastRequest(fetchMock)[0]).toBe('http://localhost:11434/v1/chat/completions')
     expect(lastRequest(fetchMock)[1].headers['X-Title']).toBeUndefined()
     expect(lastRequest(fetchMock)[1].headers['HTTP-Referer']).toBeUndefined()
@@ -257,11 +272,19 @@ describe('summarizeArticle', () => {
   })
 
   it('reads content that comes back as parts', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => mockJsonResponse({
-      choices: [{ message: { content: [{ type: 'text', text: 'Teil eins.' }] } }],
-    })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        mockJsonResponse({
+          choices: [{ message: { content: [{ type: 'text', text: 'Teil eins.' }] } }],
+        }),
+      ),
+    )
 
-    const summary = await summarizeArticle({ title: 'T', text: 'The article is not long.' }, openRouterSettings)
+    const summary = await summarizeArticle(
+      { title: 'T', text: 'The article is not long.' },
+      openRouterSettings,
+    )
     expect(summary).toBe('Teil eins.')
   })
 
@@ -269,15 +292,21 @@ describe('summarizeArticle', () => {
     const fetchMock = mockCompletion()
     vi.stubGlobal('fetch', fetchMock)
 
-    await expect(summarizeArticle({ title: 'T', text: '   ' }, openRouterSettings)).rejects.toThrow('no_content')
+    await expect(summarizeArticle({ title: 'T', text: '   ' }, openRouterSettings)).rejects.toThrow(
+      'no_content',
+    )
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('throws empty_response when the provider returns no content', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => mockJsonResponse({ choices: [] })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => mockJsonResponse({ choices: [] })),
+    )
 
-    await expect(summarizeArticle({ title: 'T', text: 'The article is not long.' }, openRouterSettings))
-      .rejects.toThrow('empty_response')
+    await expect(
+      summarizeArticle({ title: 'T', text: 'The article is not long.' }, openRouterSettings),
+    ).rejects.toThrow('empty_response')
   })
 })
 
@@ -288,10 +317,12 @@ describe('error handling', () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
 
-    await expect(summarizeArticle(article, { ...openRouterSettings, apiKey: '' }))
-      .rejects.toThrow('not_configured')
-    await expect(chatCompletion([{ role: 'user', content: 'hi' }], { ...openRouterSettings, apiKey: '' }))
-      .rejects.toThrow('not_configured')
+    await expect(summarizeArticle(article, { ...openRouterSettings, apiKey: '' })).rejects.toThrow(
+      'not_configured',
+    )
+    await expect(
+      chatCompletion([{ role: 'user', content: 'hi' }], { ...openRouterSettings, apiKey: '' }),
+    ).rejects.toThrow('not_configured')
 
     expect(fetchMock).not.toHaveBeenCalled()
   })
@@ -305,36 +336,49 @@ describe('error handling', () => {
     [503, 'server_error'],
     [400, 'request_failed'],
   ])('maps status %i to %s', async (status, code) => {
-    vi.stubGlobal('fetch', vi.fn(async () => mockJsonResponse({ error: { message: 'nope' } }, status)))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => mockJsonResponse({ error: { message: 'nope' } }, status)),
+    )
 
     await expect(summarizeArticle(article, openRouterSettings)).rejects.toThrow(code)
   })
 
   it('maps an error object in a 200 response', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => mockJsonResponse({ error: { code: 429, message: 'slow down' } })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => mockJsonResponse({ error: { code: 429, message: 'slow down' } })),
+    )
 
     await expect(summarizeArticle(article, openRouterSettings)).rejects.toThrow('rate_limited')
   })
 
   it('maps a failed fetch to network_error', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => {
-      throw new TypeError('Failed to fetch')
-    }))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new TypeError('Failed to fetch')
+      }),
+    )
 
     await expect(summarizeArticle(article, openRouterSettings)).rejects.toThrow('network_error')
   })
 
   it('maps an aborted request to aborted', async () => {
     const controller = new AbortController()
-    vi.stubGlobal('fetch', vi.fn(async () => {
-      controller.abort()
-      const err = new Error('The operation was aborted.')
-      err.name = 'AbortError'
-      throw err
-    }))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        controller.abort()
+        const err = new Error('The operation was aborted.')
+        err.name = 'AbortError'
+        throw err
+      }),
+    )
 
-    await expect(summarizeArticle(article, openRouterSettings, { signal: controller.signal }))
-      .rejects.toThrow('aborted')
+    await expect(
+      summarizeArticle(article, openRouterSettings, { signal: controller.signal }),
+    ).rejects.toThrow('aborted')
   })
 
   it('passes the abort signal on to fetch', async () => {
@@ -351,11 +395,21 @@ describe('error handling', () => {
     const infoSpy = console.info
     const errorSpy = console.error
 
-    vi.stubGlobal('fetch', vi.fn(async () => mockJsonResponse(
-      // A provider that echoes the request back — the worst case.
-      { error: { message: `Invalid key: ${API_KEY}`, request: { headers: { Authorization: `Bearer ${API_KEY}` } } } },
-      401,
-    )))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        mockJsonResponse(
+          // A provider that echoes the request back — the worst case.
+          {
+            error: {
+              message: `Invalid key: ${API_KEY}`,
+              request: { headers: { Authorization: `Bearer ${API_KEY}` } },
+            },
+          },
+          401,
+        ),
+      ),
+    )
 
     let caught
     try {
@@ -378,11 +432,9 @@ describe('chatCompletion', () => {
     const fetchMock = mockCompletion('ok')
     vi.stubGlobal('fetch', fetchMock)
 
-    const result = await chatCompletion(
-      [{ role: 'user', content: 'Hallo' }],
-      openRouterSettings,
-      { maxTokens: 42 },
-    )
+    const result = await chatCompletion([{ role: 'user', content: 'Hallo' }], openRouterSettings, {
+      maxTokens: 42,
+    })
 
     expect(result).toBe('ok')
     expect(JSON.parse(lastRequest(fetchMock)[1].body).max_tokens).toBe(42)

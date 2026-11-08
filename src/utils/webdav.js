@@ -1,3 +1,4 @@
+import { debug } from './log.js'
 // WebDAV transport for the sync file. The format itself lives in src/utils/sync.js —
 // this module only moves bytes and turns HTTP status codes into the project's error
 // codes.
@@ -38,7 +39,9 @@ const READ_TIMEOUT_MS = 30000
 // ── Config ──────────────────────────────────────────────────────────────────
 
 function normalizeBaseUrl(raw) {
-  const value = String(raw || '').trim().replace(/\/+$/, '')
+  const value = String(raw || '')
+    .trim()
+    .replace(/\/+$/, '')
   if (!value) return ''
 
   try {
@@ -136,7 +139,7 @@ function basicAuthHeader(username, password) {
 
 // ── Transport ───────────────────────────────────────────────────────────────
 
-// Same-origin dev proxy for WebDAV, served by the middleware in vite.config.js.
+// Same-origin dev proxy for WebDAV, served by the middleware in vite.config.mjs.
 // Unlike /__proxy it passes PUT bodies, Authorization and If-Match through, and hands
 // the ETag back — without which conflict detection would be dead in the browser.
 const DEV_DAV_PROXY_PATH = '/__dav'
@@ -158,7 +161,7 @@ export function getWebdavTransport() {
  * The dev-build path. Deliberately fetch() and not CapacitorHttp: in the browser the
  * latter is a shim that would hit the same CORS wall we are routing around.
  */
-async function proxyRequest({ method, url, headers, data, responseType }) {
+async function proxyRequest({ method, url, headers, data }) {
   const proxyUrl = `${DEV_DAV_PROXY_PATH}?url=${encodeURIComponent(url)}`
 
   let res
@@ -170,7 +173,9 @@ async function proxyRequest({ method, url, headers, data, responseType }) {
   }
 
   const responseHeaders = {}
-  res.headers.forEach((value, key) => { responseHeaders[key] = value })
+  res.headers.forEach((value, key) => {
+    responseHeaders[key] = value
+  })
 
   return {
     status: res.status,
@@ -284,7 +289,7 @@ export async function getFile(config, path = '') {
     responseType: 'text',
   })
 
-  console.info('[webdav] GET', { url, status: res.status })
+  debug('[webdav] GET', { url, status: res.status })
 
   if (res.status === 404) return { status: 404, data: null, etag: null }
   if (res.status < 200 || res.status > 299) throwForStatus(res.status)
@@ -342,7 +347,7 @@ export async function putFile(config, path, content, options = {}) {
     responseType: 'text',
   })
 
-  console.info('[webdav] PUT', { url, status: res.status, ifMatch: Boolean(options.etag) })
+  debug('[webdav] PUT', { url, status: res.status, ifMatch: Boolean(options.etag) })
 
   if (res.status < 200 || res.status > 299) throwForStatus(res.status)
 
@@ -383,7 +388,7 @@ export async function testConnection(config, path = '') {
     responseType: 'text',
   })
 
-  console.info('[webdav] testConnection', { url, status: res.status })
+  debug('[webdav] testConnection', { url, status: res.status })
 
   if (res.status === 401 || res.status === 403 || res.status >= 500) throwForStatus(res.status)
 

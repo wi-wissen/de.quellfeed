@@ -150,7 +150,7 @@ describe('applyTheme', () => {
     expect(root.style.getPropertyValue('--q-accent')).toBe(sepiaAccent)
   })
 
-  it('toggles Framework7\'s .dark class from the palette, not from the theme name', () => {
+  it("toggles Framework7's .dark class from the palette, not from the theme name", () => {
     applyTheme('slate', root)
     expect(root.classList.contains('dark')).toBe(true)
 

@@ -29,11 +29,7 @@ import xcode from 'xcode'
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..')
 const projectPath = join(repoRoot, 'ios', 'App', 'App.xcodeproj', 'project.pbxproj')
 
-const APP_GROUP_FILES = [
-  'AppViewController.swift',
-  'ShareIntentPlugin.swift',
-  'MediaControlPlugin.swift',
-]
+const APP_GROUP_FILES = ['AppViewController.swift', 'ShareIntentPlugin.swift', 'MediaControlPlugin.swift']
 
 const EXTENSION_NAME = 'QuellShare'
 const EXTENSION_BUNDLE_ID = 'de.quellfeed.QuellShare'
@@ -104,10 +100,10 @@ function addAppEntitlements(project, appGroupKey, appTargetUuid) {
   return changed
 }
 
-function addExtensionTarget(project, appTargetUuid) {
+function addExtensionTarget(project) {
   const targets = project.hash.project.objects.PBXNativeTarget
   const exists = Object.keys(targets).some(
-    key => !key.endsWith('_comment') && targets[key].name?.replace(/"/g, '') === EXTENSION_NAME
+    key => !key.endsWith('_comment') && targets[key].name?.replace(/"/g, '') === EXTENSION_NAME,
   )
   if (exists) return false
 
@@ -235,7 +231,7 @@ const before = readFileSync(projectPath, 'utf8')
 const changed = [
   addAppTargetSources(project, appGroupKey, appTargetUuid),
   addAppEntitlements(project, appGroupKey, appTargetUuid),
-  addExtensionTarget(project, appTargetUuid),
+  addExtensionTarget(project),
 ].some(Boolean)
 
 if (!changed) {

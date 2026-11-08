@@ -62,7 +62,9 @@ describe('exportBookmarks', () => {
   })
 
   it('writes a description as a <DD> line only when there is one', () => {
-    const html = exportBookmarks([{ url: 'https://example.com/', title: 'Kein Text', description: '', publishedAt: null }])
+    const html = exportBookmarks([
+      { url: 'https://example.com/', title: 'Kein Text', description: '', publishedAt: null },
+    ])
     expect(html).toContain('<DT><A HREF="https://example.com/"')
     expect(html).not.toContain('<DD>')
   })

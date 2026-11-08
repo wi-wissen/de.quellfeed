@@ -57,10 +57,7 @@ describe('consumePendingShares (iOS)', () => {
   it('drains the queue the share extension filled', async () => {
     plugin.consumePending.mockResolvedValue({ urls: ['https://a.example/1', 'https://b.example/2'] })
 
-    await expect(consumePendingShares()).resolves.toEqual([
-      'https://a.example/1',
-      'https://b.example/2',
-    ])
+    await expect(consumePendingShares()).resolves.toEqual(['https://a.example/1', 'https://b.example/2'])
   })
 
   it('drops junk a future native side might send', async () => {

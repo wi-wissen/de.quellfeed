@@ -1,6 +1,9 @@
 export function exportOpml(feeds) {
   const outlines = feeds
-    .map(f => `    <outline type="rss" text="${escXml(f.title)}" title="${escXml(f.title)}" xmlUrl="${escXml(f.url)}"/>`)
+    .map(
+      f =>
+        `    <outline type="rss" text="${escXml(f.title)}" title="${escXml(f.title)}" xmlUrl="${escXml(f.url)}"/>`,
+    )
     .join('\n')
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -26,5 +29,9 @@ export function parseOpml(xmlString) {
 }
 
 function escXml(str) {
-  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return (str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }

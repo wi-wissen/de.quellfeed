@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { buildIframeDoc, FEED_FALLBACK_MARKER_CLASS, fetchArticleContent } from '../src/utils/articleParser.js'
+import {
+  buildIframeDoc,
+  FEED_FALLBACK_MARKER_CLASS,
+  fetchArticleContent,
+} from '../src/utils/articleParser.js'
 
 vi.mock('../src/utils/http.js', () => ({
   httpGet: vi.fn(),
@@ -29,7 +33,10 @@ describe('buildIframeDoc', () => {
   })
 
   it('does not duplicate the feed header image when it is already present in the article HTML', () => {
-    const doc = buildIframeDoc('<img src="https://example.com/header.jpg"><p>Body</p>', 'https://example.com/header.jpg')
+    const doc = buildIframeDoc(
+      '<img src="https://example.com/header.jpg"><p>Body</p>',
+      'https://example.com/header.jpg',
+    )
 
     expect(doc).not.toContain('<figure class="article-hero">')
   })

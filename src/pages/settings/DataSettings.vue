@@ -44,7 +44,9 @@
       <f7-list-item
         class="settings-action-item"
         :title="$t('settings.exportBookmarks')"
-        :footer="savedCount === 0 ? $t('settings.noBookmarks') : $t('settings.bookmarkCount', { n: savedCount })"
+        :footer="
+          savedCount === 0 ? $t('settings.noBookmarks') : $t('settings.bookmarkCount', { n: savedCount })
+        "
         @click="exportBookmarksFile"
       >
         <template #media>
@@ -57,11 +59,7 @@
          each article onto the shelf it came from. -->
     <f7-block-title>{{ $t('nav.archive') }}</f7-block-title>
     <f7-list strong inset dividers>
-      <f7-list-item
-        class="settings-action-item"
-        :title="$t('settings.importArchive')"
-        @click="importArchive"
-      >
+      <f7-list-item class="settings-action-item" :title="$t('settings.importArchive')" @click="importArchive">
         <template #media>
           <AppIcon name="arrow-down-outline" class="color-success" />
         </template>
@@ -69,7 +67,9 @@
       <f7-list-item
         class="settings-action-item"
         :title="$t('settings.exportArchive')"
-        :footer="archiveCount === 0 ? $t('settings.noArchive') : $t('settings.archiveCount', { n: archiveCount })"
+        :footer="
+          archiveCount === 0 ? $t('settings.noArchive') : $t('settings.archiveCount', { n: archiveCount })
+        "
         @click="exportArchiveFile"
       >
         <template #media>
@@ -83,21 +83,21 @@
       ref="opmlInput"
       type="file"
       accept=".opml,application/xml,text/xml"
-      style="display:none"
+      style="display: none"
       @change="onOpmlFile"
     />
     <input
       ref="bookmarksInput"
       type="file"
       accept=".html,.htm,text/html"
-      style="display:none"
+      style="display: none"
       @change="onBookmarksFile"
     />
     <input
       ref="archiveInput"
       type="file"
       accept=".html,.htm,text/html"
-      style="display:none"
+      style="display: none"
       @change="onArchiveFile"
     />
   </f7-page>

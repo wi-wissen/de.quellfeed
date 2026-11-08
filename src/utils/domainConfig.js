@@ -24,7 +24,9 @@ function isFresh(entry, now) {
 }
 
 export function normalizeConfigBaseUrl(baseUrl = '') {
-  return String(baseUrl || '').trim().replace(/\/+$/, '')
+  return String(baseUrl || '')
+    .trim()
+    .replace(/\/+$/, '')
 }
 
 export function getDefaultConfigBaseUrl() {

@@ -1,15 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import {
-  splitHtmlBlocks,
-  planTranslationChunks,
-  createHtmlBlockScanner,
-} from '../src/utils/htmlBlocks.js'
+import { splitHtmlBlocks, planTranslationChunks, createHtmlBlockScanner } from '../src/utils/htmlBlocks.js'
 import { normalizeLanguageTag } from '../src/utils/language.js'
 
 describe('splitHtmlBlocks', () => {
   it('splits along top-level elements', () => {
     expect(splitHtmlBlocks('<p>One</p><h2>Two</h2><p>Three</p>')).toEqual([
-      '<p>One</p>', '<h2>Two</h2>', '<p>Three</p>',
+      '<p>One</p>',
+      '<h2>Two</h2>',
+      '<p>Three</p>',
     ])
   })
 
@@ -56,7 +54,10 @@ describe('planTranslationChunks', () => {
     const blocks = ['<p>aaaa</p>', '<p>bbbb</p>', '<p>cccc</p>']
     const plan = planTranslationChunks(blocks, 24)
 
-    expect(plan.map(c => [c.start, c.count])).toEqual([[0, 2], [2, 1]])
+    expect(plan.map(c => [c.start, c.count])).toEqual([
+      [0, 2],
+      [2, 1],
+    ])
     expect(plan.map(c => c.html).join('')).toBe(blocks.join(''))
   })
 

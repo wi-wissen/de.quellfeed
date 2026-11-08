@@ -20,6 +20,7 @@
 		CB14494640F844919C231DA4 /* MediaControlPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4588FF86E8AE4A09A13C240B /* MediaControlPlugin.swift */; };
 		6B9FD6491FEC410987F63AD7 /* QuellShare.appex in Copy Files */ = {isa = PBXBuildFile; fileRef = 1961A3E817D14E4DAA3946AB /* QuellShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		ED347E110E164743897E74DF /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67B41466A4F43FA934B0337 /* ShareViewController.swift */; };
+		1183DDB388F6410C9CEE3CAC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE01DF81E85E435399C88FB9 /* SceneDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 		B67B41466A4F43FA934B0337 /* ShareViewController.swift */ = {isa = PBXFileReference; name = "ShareViewController.swift"; path = "ShareViewController.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
 		EB472F53E17D4B108BA166A4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FB8D72EF1D20428AA7AF9827 /* QuellShare.entitlements */ = {isa = PBXFileReference; name = "QuellShare.entitlements"; path = "QuellShare.entitlements"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		DE01DF81E85E435399C88FB9 /* SceneDelegate.swift */ = {isa = PBXFileReference; name = "SceneDelegate.swift"; path = "SceneDelegate.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +109,7 @@
 				443D01AAB9DE4586A2FA43B7 /* ShareIntentPlugin.swift */,
 				4588FF86E8AE4A09A13C240B /* MediaControlPlugin.swift */,
 				43524E9115BD4949894CD9E7 /* App.entitlements */,
+				DE01DF81E85E435399C88FB9 /* SceneDelegate.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -269,6 +272,7 @@
 				75EDA526DD8B4DF9BC85CDCB /* AppViewController.swift in Sources */,
 				F24B41CD77B048388A93447B /* ShareIntentPlugin.swift in Sources */,
 				CB14494640F844919C231DA4 /* MediaControlPlugin.swift in Sources */,
+				1183DDB388F6410C9CEE3CAC /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -350,7 +354,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -401,7 +405,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -417,7 +421,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
@@ -438,7 +442,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = de.quellfeed;
@@ -461,7 +465,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "de.quellfeed.QuellShare";
 				CODE_SIGN_ENTITLEMENTS = "QuellShare/QuellShare.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				MARKETING_VERSION = 1.0;
@@ -481,7 +485,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "de.quellfeed.QuellShare";
 				CODE_SIGN_ENTITLEMENTS = "QuellShare/QuellShare.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				MARKETING_VERSION = 1.0;

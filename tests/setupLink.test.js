@@ -1,15 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import {
-  describeSetupConfig,
-  encodeSetupPayload,
-  parseSetupLink,
-} from '../src/utils/setupLink.js'
+import { describeSetupConfig, encodeSetupPayload, parseSetupLink } from '../src/utils/setupLink.js'
 
 function link(payload, scheme = 'de.quellfeed://setup') {
   return `${scheme}#${encodeSetupPayload(payload)}`
 }
 
-const VALID = { v: 1, ai: { provider: 'openrouter', baseUrl: '', apiKey: 'sk-or-abcdef123456', model: 'deepseek/deepseek-v4-flash' } }
+const VALID = {
+  v: 1,
+  ai: {
+    provider: 'openrouter',
+    baseUrl: '',
+    apiKey: 'sk-or-abcdef123456',
+    model: 'deepseek/deepseek-v4-flash',
+  },
+}
 
 describe('parseSetupLink', () => {
   it('accepts a valid app-scheme link and keeps only the four known fields', () => {
@@ -39,31 +43,46 @@ describe('parseSetupLink', () => {
 
   it('throws on a damaged payload instead of silently ignoring it', () => {
     expect(() => parseSetupLink('de.quellfeed://setup#not-base64!!')).toThrow('invalid_setup_link')
-    expect(() => parseSetupLink(`de.quellfeed://setup#${btoa('"just a string"')}`)).toThrow('invalid_setup_link')
+    expect(() => parseSetupLink(`de.quellfeed://setup#${btoa('"just a string"')}`)).toThrow(
+      'invalid_setup_link',
+    )
   })
 
   it('rejects unknown versions and unknown providers', () => {
     expect(() => parseSetupLink(link({ ...VALID, v: 2 }))).toThrow('invalid_setup_link')
-    expect(() => parseSetupLink(link({ v: 1, ai: { ...VALID.ai, provider: 'evilcorp' } }))).toThrow('invalid_setup_link')
+    expect(() => parseSetupLink(link({ v: 1, ai: { ...VALID.ai, provider: 'evilcorp' } }))).toThrow(
+      'invalid_setup_link',
+    )
   })
 
   it('rejects a missing key — the whole point of the link is carrying one', () => {
-    expect(() => parseSetupLink(link({ v: 1, ai: { ...VALID.ai, apiKey: '' } }))).toThrow('invalid_setup_link')
+    expect(() => parseSetupLink(link({ v: 1, ai: { ...VALID.ai, apiKey: '' } }))).toThrow(
+      'invalid_setup_link',
+    )
   })
 
   it('requires a plausible base URL for the custom provider and none for presets', () => {
-    const custom = { provider: 'custom', baseUrl: 'https://my.example/v1', apiKey: 'k-123456', model: 'llama-3.3' }
+    const custom = {
+      provider: 'custom',
+      baseUrl: 'https://my.example/v1',
+      apiKey: 'k-123456',
+      model: 'llama-3.3',
+    }
     expect(parseSetupLink(link({ v: 1, ai: custom })).ai.baseUrl).toBe('https://my.example/v1')
 
     expect(() => parseSetupLink(link({ v: 1, ai: { ...custom, baseUrl: '' } }))).toThrow('invalid_setup_link')
-    expect(() => parseSetupLink(link({ v: 1, ai: { ...custom, baseUrl: 'ftp://x' } }))).toThrow('invalid_setup_link')
+    expect(() => parseSetupLink(link({ v: 1, ai: { ...custom, baseUrl: 'ftp://x' } }))).toThrow(
+      'invalid_setup_link',
+    )
     // A preset ignores any base URL the payload tries to bring along.
-    expect(parseSetupLink(link({ v: 1, ai: { ...VALID.ai, baseUrl: 'https://attacker.example' } })).ai.baseUrl).toBe('')
+    expect(
+      parseSetupLink(link({ v: 1, ai: { ...VALID.ai, baseUrl: 'https://attacker.example' } })).ai.baseUrl,
+    ).toBe('')
   })
 
   it('rejects HTML in the model name — the confirm dialog renders HTML', () => {
     expect(() =>
-      parseSetupLink(link({ v: 1, ai: { ...VALID.ai, model: '<img src=x onerror=alert(1)>' } }))
+      parseSetupLink(link({ v: 1, ai: { ...VALID.ai, model: '<img src=x onerror=alert(1)>' } })),
     ).toThrow('invalid_setup_link')
   })
 
@@ -87,7 +106,12 @@ describe('describeSetupConfig', () => {
   it('shows the effective base URL for presets — the user must see where data goes', () => {
     expect(describeSetupConfig(VALID.ai).baseUrl).toContain('openrouter.ai')
     expect(
-      describeSetupConfig({ provider: 'custom', baseUrl: 'https://my.example/v1', apiKey: 'k-12345', model: 'm' }).baseUrl
+      describeSetupConfig({
+        provider: 'custom',
+        baseUrl: 'https://my.example/v1',
+        apiKey: 'k-12345',
+        model: 'm',
+      }).baseUrl,
     ).toBe('https://my.example/v1')
   })
 

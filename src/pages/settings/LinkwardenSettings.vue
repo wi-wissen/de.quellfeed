@@ -32,10 +32,10 @@
         :placeholder="$t('settings.linkwarden.baseUrlPlaceholder')"
         :value="settings.baseUrl"
         clear-button
-        @input="onChange('baseUrl', $event.target.value)"
         inputmode="url"
         autocapitalize="off"
         autocorrect="off"
+        @input="onChange('baseUrl', $event.target.value)"
       ></f7-list-input>
 
       <SecretInput
@@ -51,16 +51,18 @@
         :label="$t('settings.linkwarden.collection')"
         :value="settings.collectionName"
         clear-button
-        @input="onChange('collectionName', $event.target.value)"
         autocapitalize="off"
         autocorrect="off"
+        @input="onChange('collectionName', $event.target.value)"
       ></f7-list-input>
     </f7-list>
 
     <f7-block-footer>
       <p>{{ $t('settings.linkwarden.apiKeyHint') }}</p>
       <p>{{ $t('settings.linkwarden.collectionHint') }}</p>
-      <p>{{ $t('settings.linkwarden.archiveCollection', { name: settings.collectionName || 'Quell Feed' }) }}</p>
+      <p>
+        {{ $t('settings.linkwarden.archiveCollection', { name: settings.collectionName || 'Quell Feed' }) }}
+      </p>
     </f7-block-footer>
 
     <f7-list strong inset dividers>
@@ -122,7 +124,10 @@ export default {
       const iso = this.settings.lastSync
       if (!iso) return this.$t('settings.linkwarden.never')
       return new Date(iso).toLocaleString(undefined, {
-        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
       })
     },
   },

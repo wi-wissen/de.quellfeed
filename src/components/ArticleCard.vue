@@ -1,9 +1,5 @@
 <template>
-  <f7-list-item
-    swipeout
-    class="article-card-item"
-    @click.stop
-  >
+  <f7-list-item swipeout class="article-card-item" @click.stop>
     <!--
       The two gestures go to the two verbs of the list the card sits in. Trailing edge
       (swipe left) is the consequential one everywhere — save or delete in the feed,
@@ -24,13 +20,7 @@
       in the hold menu there — the rare, destructive branch does not get a gesture.
     -->
     <f7-swipeout-actions right>
-      <f7-swipeout-button
-        v-if="context === 'saved'"
-        color="teal"
-        overswipe
-        close
-        @click="onToggleArchive"
-      >
+      <f7-swipeout-button v-if="context === 'saved'" color="teal" overswipe close @click="onToggleArchive">
         <AppIcon name="archive-outline" />
       </f7-swipeout-button>
       <f7-swipeout-button
@@ -54,12 +44,7 @@
     </f7-swipeout-actions>
 
     <f7-swipeout-actions left>
-      <f7-swipeout-button
-        color="blue"
-        overswipe
-        close
-        @click="onShare"
-      >
+      <f7-swipeout-button color="blue" overswipe close @click="onShare">
         <AppIcon name="share-outline" />
       </f7-swipeout-button>
     </f7-swipeout-actions>
@@ -67,7 +52,12 @@
     <template #inner>
       <div
         ref="card"
-        :class="['article-card', article.isSaved && 'is-saved', !article.isRead && 'is-unread', quelled && 'is-quelled']"
+        :class="[
+          'article-card',
+          article.isSaved && 'is-saved',
+          !article.isRead && 'is-unread',
+          quelled && 'is-quelled',
+        ]"
         role="button"
         tabindex="0"
         @click="onTap"
@@ -77,7 +67,12 @@
         <div class="article-card__text">
           <div class="article-card__meta">
             <AppIcon v-if="isLink" name="link-outline" size="inline" class="article-card__link-icon" />
-            {{ sourceLabel }}&thinsp;·&thinsp;{{ timeAgo }}<template v-if="quelled">&thinsp;·&thinsp;<span class="article-card__quelled-tag">{{ $t('article.quelled') }}</span></template>
+            {{ sourceLabel }}&thinsp;·&thinsp;{{ timeAgo
+            }}<template v-if="quelled"
+              >&thinsp;·&thinsp;<span class="article-card__quelled-tag">{{
+                $t('article.quelled')
+              }}</span></template
+            >
           </div>
           <p :class="['article-card__title', !article.isRead && 'unread']">
             {{ article.title }}
@@ -249,7 +244,7 @@ export default {
         buttons.push(
           this.article.isSaved
             ? { text: t('article.removeFromList'), color: 'red', onClick: () => this.onToggleSave() }
-            : { text: t('article.save'), onClick: () => this.onToggleSave() }
+            : { text: t('article.save'), onClick: () => this.onToggleSave() },
         )
       }
 
@@ -302,9 +297,7 @@ export default {
       if (this.actionsSheet) return
 
       this.actionsSheet = f7.actions.create({
-        buttons: [
-          this.buildMenuButtons(),
-        ],
+        buttons: [this.buildMenuButtons()],
         on: {
           // Built per press, so it must not pile up in the DOM.
           closed: () => {

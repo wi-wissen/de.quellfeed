@@ -22,10 +22,10 @@
         :placeholder="$t('settings.sync.serverUrlPlaceholder')"
         :value="webdav.baseUrl"
         clear-button
-        @input="onChange('baseUrl', $event.target.value)"
         inputmode="url"
         autocapitalize="off"
         autocorrect="off"
+        @input="onChange('baseUrl', $event.target.value)"
       ></f7-list-input>
 
       <f7-list-input
@@ -35,9 +35,9 @@
         :label="$t('settings.sync.username')"
         :value="webdav.username"
         clear-button
-        @input="onChange('username', $event.target.value)"
         autocapitalize="off"
         autocorrect="off"
+        @input="onChange('username', $event.target.value)"
       ></f7-list-input>
 
       <SecretInput
@@ -53,9 +53,9 @@
         :label="$t('settings.sync.path')"
         :value="webdav.path"
         clear-button
-        @input="onChange('path', $event.target.value)"
         autocapitalize="off"
         autocorrect="off"
+        @input="onChange('path', $event.target.value)"
       ></f7-list-input>
     </f7-list>
 
@@ -69,10 +69,7 @@
     <f7-list strong inset dividers>
       <f7-list-item>
         <span>{{ $t('settings.sync.enabled') }}</span>
-        <f7-toggle
-          :checked="webdav.enabled"
-          @change="onChange('enabled', $event.target.checked)"
-        ></f7-toggle>
+        <f7-toggle :checked="webdav.enabled" @change="onChange('enabled', $event.target.checked)"></f7-toggle>
       </f7-list-item>
       <f7-list-item
         class="settings-action-item"

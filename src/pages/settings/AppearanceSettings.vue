@@ -75,12 +75,7 @@
 
 <script>
 import { hidesTabbar } from '../../utils/tabbar.js'
-import {
-  READING_FONTS,
-  READING_FONT_SCALES,
-  READING_WIDTHS,
-  injectReadingFonts,
-} from '../../utils/fonts.js'
+import { READING_FONTS, READING_FONT_SCALES, READING_WIDTHS, injectReadingFonts } from '../../utils/fonts.js'
 
 export default {
   name: 'AppearanceSettings',
@@ -102,12 +97,6 @@ export default {
     }
   },
 
-  mounted() {
-    // Puts every reading font's @font-face into the app document so the list can
-    // render each name in its own typeface. Idempotent, local, no network.
-    injectReadingFonts()
-  },
-
   computed: {
     theme() {
       return this.$store.settings.theme
@@ -124,6 +113,12 @@ export default {
     readingWidth() {
       return this.$store.readingPrefs.width
     },
+  },
+
+  mounted() {
+    // Puts every reading font's @font-face into the app document so the list can
+    // render each name in its own typeface. Idempotent, local, no network.
+    injectReadingFonts()
   },
 
   methods: {

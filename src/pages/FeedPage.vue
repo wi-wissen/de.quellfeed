@@ -1,10 +1,5 @@
 <template>
-  <f7-page
-    name="feed"
-    class="article-list"
-    :ptr="!isOffline"
-    @ptr:refresh="onPullRefresh"
-  >
+  <f7-page name="feed" class="article-list" :ptr="!isOffline" @ptr:refresh="onPullRefresh">
     <f7-navbar>
       <f7-nav-title>{{ $t('nav.feed') }}</f7-nav-title>
       <f7-nav-right>

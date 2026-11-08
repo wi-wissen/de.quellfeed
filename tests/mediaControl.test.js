@@ -50,7 +50,14 @@ describe('createMediaSession (native Android)', () => {
   const METADATA = {
     title: 'Der Artikel',
     artist: 'Die Quelle',
-    labels: { play: 'Vorlesen', pause: 'Pause', stop: 'Stopp', next: 'Weiter', previous: 'Zurück', channel: 'Vorlesen' },
+    labels: {
+      play: 'Vorlesen',
+      pause: 'Pause',
+      stop: 'Stopp',
+      next: 'Weiter',
+      previous: 'Zurück',
+      channel: 'Vorlesen',
+    },
   }
 
   it('shows the notification with title, source and the translated labels', async () => {
@@ -89,7 +96,13 @@ describe('createMediaSession (native Android)', () => {
   })
 
   it('routes the notification buttons back into the player', async () => {
-    const handlers = { onPlay: vi.fn(), onPause: vi.fn(), onStop: vi.fn(), onNext: vi.fn(), onPrevious: vi.fn() }
+    const handlers = {
+      onPlay: vi.fn(),
+      onPause: vi.fn(),
+      onStop: vi.fn(),
+      onNext: vi.fn(),
+      onPrevious: vi.fn(),
+    }
     const media = createMediaSession(handlers)
     await media.enable(METADATA)
 
@@ -153,11 +166,13 @@ describe('createMediaSession (native Android)', () => {
 
     media.setMetadata({ title: 'The Article', artist: 'Die Quelle' })
 
-    expect(plugin.show).toHaveBeenCalledWith(expect.objectContaining({
-      title: 'The Article',
-      source: 'Die Quelle',
-      labels: METADATA.labels, // the labels survive a metadata-only update
-    }))
+    expect(plugin.show).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'The Article',
+        source: 'Die Quelle',
+        labels: METADATA.labels, // the labels survive a metadata-only update
+      }),
+    )
   })
 
   it('survives a plugin that rejects everything (broken bridge)', async () => {

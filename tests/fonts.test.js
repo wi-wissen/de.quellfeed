@@ -49,7 +49,10 @@ describe('READING_FONTS', () => {
 
   it('no longer offers Lexend or Tangerine', () => {
     for (const removed of REMOVED_FONTS) {
-      expect(READING_FONTS.map(font => font.id), removed).not.toContain(removed)
+      expect(
+        READING_FONTS.map(font => font.id),
+        removed,
+      ).not.toContain(removed)
     }
   })
 
@@ -144,8 +147,10 @@ describe('buildAllFontFaceCss', () => {
 
   it('emits one @font-face per bundled weight, not one per font', () => {
     const css = buildAllFontFaceCss()
-    // 6 Schriften ohne System, davon eine mit zwei Schnitten (OpenDyslexic).
-    expect(css.match(/@font-face/g)).toHaveLength(7)
+    // 6 Schriften ohne System: OpenDyslexic mit zwei Schnitten, Inter, Literata, Cause
+    // und Special Elite zusätzlich mit ihrem latin-ext-Subset (ř, Ł, ő …), Playwrite ohne.
+    expect(css.match(/@font-face/g)).toHaveLength(11)
+    expect(css.match(/latin-ext/g)).toHaveLength(4)
   })
 
   it('does not bundle the removed fonts any more', () => {
@@ -424,7 +429,7 @@ describe('buildReadingThemeCss', () => {
     const css = buildReadingThemeCss('dark', { font: 'literata', fontSize: 1.15 })
 
     expect(css).toContain('@font-face')
-    expect(css).toContain('--q-reading-font: \'Literata Variable\'')
+    expect(css).toContain("--q-reading-font: 'Literata Variable'")
     expect(css).toContain('--q-reading-font-size: 1.15em')
     expect(css).toContain('--q-text:')
   })
@@ -464,7 +469,7 @@ describe('buildIframeDoc reading prefs', () => {
     expect(csp).toContain(window.location.origin)
     expect(csp).not.toContain("'self'")
     expect(csp).toContain('data:')
-    expect(csp).toContain('script-src none')
+    expect(csp).toContain("script-src 'none'")
     expect(csp).not.toContain('font-src none')
     expect(csp).not.toContain('*')
   })
@@ -505,7 +510,9 @@ describe('buildIframeDoc reading prefs', () => {
       reading: { font: 'literata', fontSize: 1 },
     })
 
-    expect(doc.match(/@font-face/g)).toHaveLength(1)
+    // latin + latin-ext of the one chosen family — nothing else.
+    expect(doc.match(/@font-face/g)).toHaveLength(2)
+    expect(new Set(doc.match(/font-family: '[^']+'/g))).toEqual(new Set(["font-family: 'Literata Variable'"]))
     for (const other of OTHER_FONT_KEYS.literata) {
       expect(doc, `${other} must not be embedded`).not.toContain(`${other}-latin`)
     }

@@ -9,7 +9,6 @@ import {
   resolveLinkwardenConfig,
   syncWithLinkwarden,
   testLinkwardenConnection,
-  urlKey,
 } from '../src/utils/linkwarden.js'
 import { Capacitor, CapacitorHttp } from '@capacitor/core'
 
@@ -107,8 +106,9 @@ function withCollections(routes, collections = [COLLECTION]) {
 }
 
 function callsTo(method, pathname) {
-  return CapacitorHttp.request.mock.calls.filter(([options]) =>
-    options.method === method && new URL(options.url).pathname === pathname)
+  return CapacitorHttp.request.mock.calls.filter(
+    ([options]) => options.method === method && new URL(options.url).pathname === pathname,
+  )
 }
 
 function bodyOf(call) {
@@ -148,10 +148,12 @@ describe('config', () => {
   })
 
   it('strips a trailing slash and a pasted /api/v1 from the address', () => {
-    expect(resolveLinkwardenConfig({ baseUrl: 'https://l.example.com/' }).baseUrl)
-      .toBe('https://l.example.com')
-    expect(resolveLinkwardenConfig({ baseUrl: 'https://l.example.com/api/v1' }).baseUrl)
-      .toBe('https://l.example.com')
+    expect(resolveLinkwardenConfig({ baseUrl: 'https://l.example.com/' }).baseUrl).toBe(
+      'https://l.example.com',
+    )
+    expect(resolveLinkwardenConfig({ baseUrl: 'https://l.example.com/api/v1' }).baseUrl).toBe(
+      'https://l.example.com',
+    )
   })
 
   it('redacts the token when the config is stringified', () => {
@@ -193,8 +195,10 @@ describe('error codes', () => {
   it('carries the status on the error', async () => {
     mockApi({ 'GET /api/v1/collections': { status: 429, body: {} } })
 
-    await expect(testLinkwardenConnection(SETTINGS))
-      .rejects.toMatchObject({ message: 'rate_limited', status: 429 })
+    await expect(testLinkwardenConnection(SETTINGS)).rejects.toMatchObject({
+      message: 'rate_limited',
+      status: 429,
+    })
   })
 
   it('maps an unreachable server to network_error', async () => {
@@ -214,8 +218,11 @@ describe('testLinkwardenConnection', () => {
   it('sends the bearer token and counts the collections', async () => {
     mockApi({ 'GET /api/v1/collections': ok({ response: [COLLECTION] }) })
 
-    await expect(testLinkwardenConnection(SETTINGS))
-      .resolves.toEqual({ ok: true, status: 200, collections: 1 })
+    await expect(testLinkwardenConnection(SETTINGS)).resolves.toEqual({
+      ok: true,
+      status: 200,
+      collections: 1,
+    })
 
     const [options] = CapacitorHttp.request.mock.calls[0]
     expect(options.url).toBe('https://links.example.com/api/v1/collections')
@@ -228,16 +235,21 @@ describe('collections', () => {
     // `collection: { name }` is NOT find-or-create — setCollection.ts unconditionally
     // CREATEs anything that is not literally "Unorganized". Three pushes with { name }
     // would leave three collections called "Quell Feed" behind.
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
+    )
 
-    await pushToLinkwarden([
-      article({ url: 'https://example.com/a' }),
-      article({ url: 'https://example.com/b' }),
-      article({ url: 'https://example.com/c' }),
-    ], SETTINGS)
+    await pushToLinkwarden(
+      [
+        article({ url: 'https://example.com/a' }),
+        article({ url: 'https://example.com/b' }),
+        article({ url: 'https://example.com/c' }),
+      ],
+      SETTINGS,
+    )
 
     expect(callsTo('GET', '/api/v1/collections')).toHaveLength(1)
     expect(callsTo('POST', '/api/v1/collections')).toHaveLength(0)
@@ -249,25 +261,35 @@ describe('collections', () => {
   })
 
   it('creates the collection exactly once when it does not exist yet', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }, []))
+    mockApi(
+      withCollections(
+        {
+          'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+          'POST /api/v1/links': created({ response: link() }),
+        },
+        [],
+      ),
+    )
 
-    await pushToLinkwarden([
-      article({ url: 'https://example.com/a' }),
-      article({ url: 'https://example.com/b' }),
-    ], SETTINGS)
+    await pushToLinkwarden(
+      [article({ url: 'https://example.com/a' }), article({ url: 'https://example.com/b' })],
+      SETTINGS,
+    )
 
     expect(callsTo('POST', '/api/v1/collections')).toHaveLength(1)
     expect(bodyOf(callsTo('POST', '/api/v1/collections')[0])).toEqual({ name: 'Quell Feed' })
   })
 
   it('matches an existing collection case-insensitively instead of creating a twin', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }, [{ id: 9, ownerId: 1, name: 'quell feed' }]))
+    mockApi(
+      withCollections(
+        {
+          'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+          'POST /api/v1/links': created({ response: link() }),
+        },
+        [{ id: 9, ownerId: 1, name: 'quell feed' }],
+      ),
+    )
 
     await pushToLinkwarden([article()], SETTINGS)
 
@@ -290,10 +312,12 @@ describe('collections', () => {
 
 describe('push', () => {
   it('creates a link the server does not have yet', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
+    )
 
     const result = await pushToLinkwarden([article()], SETTINGS)
 
@@ -312,10 +336,12 @@ describe('push', () => {
   // Same fence as the delete: an unscoped per-article lookup would find the user's own
   // bookmark of the same URL in a collection of theirs, and then PUT our title over it.
   it('looks the article up only inside our collection', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
+    )
 
     await pushToLinkwarden([article()], SETTINGS)
 
@@ -325,11 +351,13 @@ describe('push', () => {
 
   // The single most important test in this file.
   it('creates NO duplicate when the url is already on the server', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-      'PUT /api/v1/links/42': ok({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
+        'POST /api/v1/links': created({ response: link() }),
+        'PUT /api/v1/links/42': ok({ response: link() }),
+      }),
+    )
 
     const result = await pushToLinkwarden([article()], SETTINGS)
 
@@ -340,16 +368,18 @@ describe('push', () => {
   // /search matches a SUBSTRING of the url, so it happily answers with a different article
   // whose URL merely contains ours. Believing it would mean never pushing that article.
   it('does not mistake a substring hit for the same article', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({
-        data: {
-          // Our url is https://example.com/artikel — this one merely contains it.
-          links: [link({ id: 99, url: 'https://example.com/artikel/teil-2' })],
-          nextCursor: null,
-        },
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({
+          data: {
+            // Our url is https://example.com/artikel — this one merely contains it.
+            links: [link({ id: 99, url: 'https://example.com/artikel/teil-2' })],
+            nextCursor: null,
+          },
+        }),
+        'POST /api/v1/links': created({ response: link() }),
       }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    )
 
     const result = await pushToLinkwarden([article()], SETTINGS)
 
@@ -358,10 +388,12 @@ describe('push', () => {
   })
 
   it('recognizes the same article under a trailing slash, a fragment and www.', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
+    )
 
     const result = await pushToLinkwarden(
       [article({ url: 'https://www.example.com/artikel/#lesen' })],
@@ -373,33 +405,35 @@ describe('push', () => {
   })
 
   it('treats a 409 "Link already exists" as a skip, not as an error', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': { status: 409, body: { response: 'Link already exists' } },
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'POST /api/v1/links': { status: 409, body: { response: 'Link already exists' } },
+      }),
+    )
 
-    await expect(pushToLinkwarden([article()], SETTINGS))
-      .resolves.toEqual({ pushed: 0, skipped: 1 })
+    await expect(pushToLinkwarden([article()], SETTINGS)).resolves.toEqual({ pushed: 0, skipped: 1 })
   })
 
   it('ignores articles that are not saved and urls it cannot use', async () => {
     mockApi(withCollections({}))
 
-    const result = await pushToLinkwarden([
-      article({ isSaved: false }),
-      article({ url: 'javascript:alert(1)' }),
-      article({ url: '' }),
-    ], SETTINGS)
+    const result = await pushToLinkwarden(
+      [article({ isSaved: false }), article({ url: 'javascript:alert(1)' }), article({ url: '' })],
+      SETTINGS,
+    )
 
     expect(CapacitorHttp.request).not.toHaveBeenCalled()
     expect(result).toEqual({ pushed: 0, skipped: 0 })
   })
 
   it('never uploads cachedHtml or the paid-for summary', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
+    )
 
     await pushToLinkwarden(
       [article({ cachedHtml: '<p>Megabytes</p>', summary: 'Die teure KI-Zusammenfassung.' })],
@@ -414,10 +448,12 @@ describe('push', () => {
   })
 
   it('sends no date — there is nowhere to put one', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
+    )
 
     await pushToLinkwarden([article({ publishedAt: '2026-03-15T06:00:00.000Z' })], SETTINGS)
 
@@ -427,11 +463,13 @@ describe('push', () => {
     expect(body).not.toHaveProperty('importDate')
   })
 
-  it('never sends `image` — Linkwarden\'s image is an archive format, not a picture', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+  it("never sends `image` — Linkwarden's image is an archive format, not a picture", async () => {
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
+    )
 
     await pushToLinkwarden([article({ image: 'https://example.com/bild.jpg' })], SETTINGS)
 
@@ -440,12 +478,13 @@ describe('push', () => {
 })
 
 describe('the PUT trap — a partial update WIPES what it omits', () => {
-  const routes = extra => withCollections({
-    'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
-    'PUT /api/v1/links/42': ok({ response: link() }),
-    'POST /api/v1/links': created({ response: link() }),
-    ...extra,
-  })
+  const routes = extra =>
+    withCollections({
+      'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
+      'PUT /api/v1/links/42': ok({ response: link() }),
+      'POST /api/v1/links': created({ response: link() }),
+      ...extra,
+    })
 
   it('sends a fully hydrated body when the title changed', async () => {
     mockApi(routes())
@@ -486,17 +525,28 @@ describe('the PUT trap — a partial update WIPES what it omits', () => {
 
   it('carries the existing tags back, because an omitted `tags` removes them all', async () => {
     // removePreviousTags is hardcoded true in the route: tags: { set: [], connectOrCreate }.
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({
-        data: { links: [link({ tags: [{ id: 1, name: 'rss' }, { id: 2, name: 'lesen' }] })], nextCursor: null },
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({
+          data: {
+            links: [
+              link({
+                tags: [
+                  { id: 1, name: 'rss' },
+                  { id: 2, name: 'lesen' },
+                ],
+              }),
+            ],
+            nextCursor: null,
+          },
+        }),
+        'PUT /api/v1/links/42': ok({ response: link() }),
       }),
-      'PUT /api/v1/links/42': ok({ response: link() }),
-    }))
+    )
 
     await pushToLinkwarden([article({ title: 'Neuer Titel' })], SETTINGS)
 
-    expect(bodyOf(callsTo('PUT', '/api/v1/links/42')[0]).tags)
-      .toEqual([{ name: 'rss' }, { name: 'lesen' }])
+    expect(bodyOf(callsTo('PUT', '/api/v1/links/42')[0]).tags).toEqual([{ name: 'rss' }, { name: 'lesen' }])
   })
 
   // Measured against a live server: omitting `pinnedBy` PRESERVES an existing pin and the
@@ -504,10 +554,12 @@ describe('the PUT trap — a partial update WIPES what it omits', () => {
   // populated `pinnedBy` does not short-circuit the route, contrary to the folklore — but
   // Quell has no pin to send, so it sends none.)
   it('omits pinnedBy — sending it empty would unpin what the user pinned', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [link({ pinnedBy: [{ id: 1 }] })], nextCursor: null } }),
-      'PUT /api/v1/links/42': ok({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [link({ pinnedBy: [{ id: 1 }] })], nextCursor: null } }),
+        'PUT /api/v1/links/42': ok({ response: link() }),
+      }),
+    )
 
     await pushToLinkwarden([article({ title: 'Neuer Titel' })], SETTINGS)
 
@@ -526,37 +578,43 @@ describe('the PUT trap — a partial update WIPES what it omits', () => {
 
 describe('pull', () => {
   it('maps a link into the store article shape', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
+      }),
+    )
 
     const { articles } = await pullFromLinkwarden(SETTINGS, { newId })
 
-    expect(articles).toEqual([{
-      id: 'id-1',
-      feedId: null,
-      source: 'example.com',
-      url: 'https://example.com/artikel',
-      // `name` is the title.
-      title: 'Der Titel',
-      description: 'Die Beschreibung',
-      // NOT link.image — that is "archives/preview/3/42.jpeg", an archive path.
-      image: null,
-      isRead: false,
-      isSaved: true,
-      // The main collection is the saved shelf; the archive one is read separately.
-      isArchived: false,
-      // The IMPORT date. Linkwarden cannot carry a publish date.
-      publishedAt: '2026-06-01T10:00:00.000Z',
-      cachedHtml: null,
-      updatedAt: '2026-06-01T10:00:00.000Z',
-    }])
+    expect(articles).toEqual([
+      {
+        id: 'id-1',
+        feedId: null,
+        source: 'example.com',
+        url: 'https://example.com/artikel',
+        // `name` is the title.
+        title: 'Der Titel',
+        description: 'Die Beschreibung',
+        // NOT link.image — that is "archives/preview/3/42.jpeg", an archive path.
+        image: null,
+        isRead: false,
+        isSaved: true,
+        // The main collection is the saved shelf; the archive one is read separately.
+        isArchived: false,
+        // The IMPORT date. Linkwarden cannot carry a publish date.
+        publishedAt: '2026-06-01T10:00:00.000Z',
+        cachedHtml: null,
+        updatedAt: '2026-06-01T10:00:00.000Z',
+      },
+    ])
   })
 
-  it('scopes the pull to our collection — not the user\'s whole library', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-    }))
+  it("scopes the pull to our collection — not the user's whole library", async () => {
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+      }),
+    )
 
     await pullFromLinkwarden(SETTINGS, { newId })
 
@@ -565,9 +623,11 @@ describe('pull', () => {
   })
 
   it('uses /search, not the deprecated /links', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+      }),
+    )
 
     await pullFromLinkwarden(SETTINGS, { newId })
 
@@ -576,9 +636,11 @@ describe('pull', () => {
   })
 
   it('survives the `data: []` a Meilisearch instance answers with when nothing matched', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: [], success: true, message: 'Success' }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: [], success: true, message: 'Success' }),
+      }),
+    )
 
     await expect(pullFromLinkwarden(SETTINGS, { newId })).resolves.toEqual({ articles: [] })
   })
@@ -592,9 +654,11 @@ describe('pagination', () => {
       2: { links: [link({ id: 3, url: 'https://example.com/3' })], nextCursor: null },
     }
 
-    mockApi(withCollections({
-      'GET /api/v1/search': url => ok({ data: pages[url.searchParams.get('cursor') || ''] }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': url => ok({ data: pages[url.searchParams.get('cursor') || ''] }),
+      }),
+    )
 
     const { articles } = await pullFromLinkwarden(SETTINGS, { newId })
 
@@ -608,9 +672,11 @@ describe('pagination', () => {
 
   it('terminates on a broken server that keeps handing back the same cursor', async () => {
     // Without the guard this is an infinite loop that pins the CPU and never resolves.
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: 7 } }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: 7 } }),
+      }),
+    )
 
     const { articles } = await pullFromLinkwarden(SETTINGS, { newId })
 
@@ -621,9 +687,12 @@ describe('pagination', () => {
 
   it('stops at the page cap even when every cursor is new', async () => {
     let n = 0
-    mockApi(withCollections({
-      'GET /api/v1/search': () => ok({ data: { links: [link({ id: ++n, url: `https://example.com/${n}` })], nextCursor: n } }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': () =>
+          ok({ data: { links: [link({ id: ++n, url: `https://example.com/${n}` })], nextCursor: n } }),
+      }),
+    )
 
     await pullFromLinkwarden(SETTINGS, { newId })
 
@@ -631,9 +700,11 @@ describe('pagination', () => {
   })
 
   it('stops on an empty page even if the server keeps offering a cursor', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: 5 } }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: 5 } }),
+      }),
+    )
 
     await pullFromLinkwarden(SETTINGS, { newId })
 
@@ -642,11 +713,12 @@ describe('pagination', () => {
 })
 
 describe('syncWithLinkwarden', () => {
-  const routes = (links = []) => withCollections({
-    'GET /api/v1/search': ok({ data: { links, nextCursor: null } }),
-    'POST /api/v1/links': created({ response: link() }),
-    'PUT /api/v1/links/42': ok({ response: link() }),
-  })
+  const routes = (links = []) =>
+    withCollections({
+      'GET /api/v1/search': ok({ data: { links, nextCursor: null } }),
+      'POST /api/v1/links': created({ response: link() }),
+      'PUT /api/v1/links/42': ok({ response: link() }),
+    })
 
   it('pulls what is new, pushes what is missing, and returns the full list', async () => {
     mockApi(routes([link({ id: 9, url: 'https://example.com/nur-remote' })]))
@@ -676,10 +748,11 @@ describe('syncWithLinkwarden', () => {
   it('resolves the collection exactly once for the whole round-trip', async () => {
     mockApi(routes([]))
 
-    await syncWithLinkwarden([
-      article({ url: 'https://example.com/a' }),
-      article({ url: 'https://example.com/b' }),
-    ], SETTINGS, { newId })
+    await syncWithLinkwarden(
+      [article({ url: 'https://example.com/a' }), article({ url: 'https://example.com/b' })],
+      SETTINGS,
+      { newId },
+    )
 
     expect(callsTo('GET', '/api/v1/collections')).toHaveLength(1)
   })
@@ -734,7 +807,7 @@ describe('syncWithLinkwarden', () => {
     expect(articles[0].publishedAt).toBe('2026-06-01T10:00:00.000Z')
   })
 
-  it('keeps the local id — nobody else\'s id ever enters this device', async () => {
+  it("keeps the local id — nobody else's id ever enters this device", async () => {
     mockApi(routes([link()]))
 
     const { articles } = await syncWithLinkwarden([article({ id: 'local-1' })], SETTINGS, { newId })
@@ -770,11 +843,13 @@ describe('the archive — a second collection "<name> Archive"', () => {
     ok({ data: { links: shelves[url.searchParams.get('collectionId')] || [], nextCursor: null } })
 
   it('creates the archive collection lazily and posts the archived article into it', async () => {
-    const request = mockApi(withCollections({
-      'GET /api/v1/search': searchByShelf({}),
-      'POST /api/v1/collections': created({ response: ARCHIVE }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    const request = mockApi(
+      withCollections({
+        'GET /api/v1/search': searchByShelf({}),
+        'POST /api/v1/collections': created({ response: ARCHIVE }),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
+    )
 
     await pushToLinkwarden([article({ isArchived: true })], SETTINGS)
 
@@ -784,10 +859,12 @@ describe('the archive — a second collection "<name> Archive"', () => {
   })
 
   it('creates NO archive collection while nothing is archived', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': searchByShelf({}),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': searchByShelf({}),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
+    )
 
     await pushToLinkwarden([article()], SETTINGS)
 
@@ -795,10 +872,15 @@ describe('the archive — a second collection "<name> Archive"', () => {
   })
 
   it('archives by MOVING the link — a fully hydrated PUT with the archive collection id', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': searchByShelf({ 3: [link()], 4: [] }),
-      'PUT /api/v1/links/42': ok({ response: link() }),
-    }, [COLLECTION, ARCHIVE]))
+    mockApi(
+      withCollections(
+        {
+          'GET /api/v1/search': searchByShelf({ 3: [link()], 4: [] }),
+          'PUT /api/v1/links/42': ok({ response: link() }),
+        },
+        [COLLECTION, ARCHIVE],
+      ),
+    )
 
     const result = await pushToLinkwarden([article({ isArchived: true })], SETTINGS)
 
@@ -812,10 +894,18 @@ describe('the archive — a second collection "<name> Archive"', () => {
   })
 
   it('restores by moving it back into the main collection', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': searchByShelf({ 3: [], 4: [link({ collection: { id: 4, ownerId: 1, name: 'Quell Feed Archive' } })] }),
-      'PUT /api/v1/links/42': ok({ response: link() }),
-    }, [COLLECTION, ARCHIVE]))
+    mockApi(
+      withCollections(
+        {
+          'GET /api/v1/search': searchByShelf({
+            3: [],
+            4: [link({ collection: { id: 4, ownerId: 1, name: 'Quell Feed Archive' } })],
+          }),
+          'PUT /api/v1/links/42': ok({ response: link() }),
+        },
+        [COLLECTION, ARCHIVE],
+      ),
+    )
 
     await pushToLinkwarden([article({ isArchived: false })], SETTINGS)
 
@@ -823,9 +913,17 @@ describe('the archive — a second collection "<name> Archive"', () => {
   })
 
   it('leaves a correctly shelved link alone', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': searchByShelf({ 3: [], 4: [link({ collection: { id: 4, ownerId: 1, name: 'Quell Feed Archive' } })] }),
-    }, [COLLECTION, ARCHIVE]))
+    mockApi(
+      withCollections(
+        {
+          'GET /api/v1/search': searchByShelf({
+            3: [],
+            4: [link({ collection: { id: 4, ownerId: 1, name: 'Quell Feed Archive' } })],
+          }),
+        },
+        [COLLECTION, ARCHIVE],
+      ),
+    )
 
     const result = await pushToLinkwarden([article({ isArchived: true })], SETTINGS)
 
@@ -834,12 +932,17 @@ describe('the archive — a second collection "<name> Archive"', () => {
   })
 
   it('pulls archive links as isArchived: true, main links as false', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': searchByShelf({
-        3: [link()],
-        4: [link({ id: 43, url: 'https://example.com/abgelegt', collection: { id: 4, ownerId: 1 } })],
-      }),
-    }, [COLLECTION, ARCHIVE]))
+    mockApi(
+      withCollections(
+        {
+          'GET /api/v1/search': searchByShelf({
+            3: [link()],
+            4: [link({ id: 43, url: 'https://example.com/abgelegt', collection: { id: 4, ownerId: 1 } })],
+          }),
+        },
+        [COLLECTION, ARCHIVE],
+      ),
+    )
 
     const { articles } = await pullFromLinkwarden(SETTINGS, { newId })
 
@@ -850,11 +953,18 @@ describe('the archive — a second collection "<name> Archive"', () => {
   })
 
   it('syncs the archive state down — a link archived on the server archives the article', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': searchByShelf({ 3: [], 4: [link({ collection: { id: 4, ownerId: 1 } })] }),
-    }, [COLLECTION, ARCHIVE]))
+    mockApi(
+      withCollections(
+        {
+          'GET /api/v1/search': searchByShelf({ 3: [], 4: [link({ collection: { id: 4, ownerId: 1 } })] }),
+        },
+        [COLLECTION, ARCHIVE],
+      ),
+    )
 
-    const { articles, pulled } = await syncWithLinkwarden([article({ isArchived: false })], SETTINGS, { newId })
+    const { articles, pulled } = await syncWithLinkwarden([article({ isArchived: false })], SETTINGS, {
+      newId,
+    })
 
     expect(articles[0].isArchived).toBe(true)
     expect(pulled).toBe(1)
@@ -863,13 +973,18 @@ describe('the archive — a second collection "<name> Archive"', () => {
   it('restore travels through the sync: a NEWER local un-archive moves the link back', async () => {
     // The OR trap: without last-write-wins the sync right after a restore would read the
     // archive shelf, set isArchived back to true, and never move the link.
-    mockApi(withCollections({
-      'GET /api/v1/search': searchByShelf({
-        3: [],
-        4: [link({ collection: { id: 4, ownerId: 1 }, updatedAt: '2026-06-02T10:00:00.000Z' })],
-      }),
-      'PUT /api/v1/links/42': ok({ response: link() }),
-    }, [COLLECTION, ARCHIVE]))
+    mockApi(
+      withCollections(
+        {
+          'GET /api/v1/search': searchByShelf({
+            3: [],
+            4: [link({ collection: { id: 4, ownerId: 1 }, updatedAt: '2026-06-02T10:00:00.000Z' })],
+          }),
+          'PUT /api/v1/links/42': ok({ response: link() }),
+        },
+        [COLLECTION, ARCHIVE],
+      ),
+    )
 
     const local = article({ isArchived: false, updatedAt: '2026-06-03T10:00:00.000Z' })
     const { articles } = await syncWithLinkwarden([local], SETTINGS, { newId })
@@ -879,12 +994,17 @@ describe('the archive — a second collection "<name> Archive"', () => {
   })
 
   it('a NEWER archive on the server beats an older local state', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': searchByShelf({
-        3: [],
-        4: [link({ collection: { id: 4, ownerId: 1 }, updatedAt: '2026-06-05T10:00:00.000Z' })],
-      }),
-    }, [COLLECTION, ARCHIVE]))
+    mockApi(
+      withCollections(
+        {
+          'GET /api/v1/search': searchByShelf({
+            3: [],
+            4: [link({ collection: { id: 4, ownerId: 1 }, updatedAt: '2026-06-05T10:00:00.000Z' })],
+          }),
+        },
+        [COLLECTION, ARCHIVE],
+      ),
+    )
 
     const local = article({ isArchived: false, updatedAt: '2026-06-03T10:00:00.000Z' })
     const { articles } = await syncWithLinkwarden([local], SETTINGS, { newId })
@@ -894,13 +1014,19 @@ describe('the archive — a second collection "<name> Archive"', () => {
   })
 
   it('deletes a link that lives on the archive shelf', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': searchByShelf({ 3: [], 4: [link({ collection: { id: 4, ownerId: 1 } })] }),
-      'DELETE /api/v1/links/42': ok({ response: {} }),
-    }, [COLLECTION, ARCHIVE]))
+    mockApi(
+      withCollections(
+        {
+          'GET /api/v1/search': searchByShelf({ 3: [], 4: [link({ collection: { id: 4, ownerId: 1 } })] }),
+          'DELETE /api/v1/links/42': ok({ response: {} }),
+        },
+        [COLLECTION, ARCHIVE],
+      ),
+    )
 
-    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS))
-      .resolves.toEqual({ deleted: true })
+    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS)).resolves.toEqual({
+      deleted: true,
+    })
     expect(callsTo('DELETE', '/api/v1/links/42')).toHaveLength(1)
   })
 
@@ -920,7 +1046,13 @@ describe('the archive — a second collection "<name> Archive"', () => {
       'GET /api/v1/search': url =>
         ok({ data: { links: [...(shelves[url.searchParams.get('collectionId')] || [])], nextCursor: null } }),
       'POST /api/v1/links': (_url, body) => {
-        const row = link({ id: 100, url: body.url, name: body.name, description: body.description, collection: { id: body.collection.id, ownerId: 1 } })
+        const row = link({
+          id: 100,
+          url: body.url,
+          name: body.name,
+          description: body.description,
+          collection: { id: body.collection.id, ownerId: 1 },
+        })
         shelves[body.collection.id].push(row)
         return created({ response: row })
       },
@@ -939,13 +1071,15 @@ describe('the archive — a second collection "<name> Archive"', () => {
 
   it('does not round-trip the archive in "Unorganized" mode — and does not move anything', async () => {
     mockApi({
-      'GET /api/v1/search': ok({ data: { links: [link({ collection: { id: 1, ownerId: 1, name: 'Unorganized' } })], nextCursor: null } }),
+      'GET /api/v1/search': ok({
+        data: { links: [link({ collection: { id: 1, ownerId: 1, name: 'Unorganized' } })], nextCursor: null },
+      }),
     })
 
-    const result = await pushToLinkwarden(
-      [article({ isArchived: true })],
-      { ...SETTINGS, collectionName: '' },
-    )
+    const result = await pushToLinkwarden([article({ isArchived: true })], {
+      ...SETTINGS,
+      collectionName: '',
+    })
 
     // No collections request, no PUT — the link stays exactly where it is.
     expect(callsTo('GET', '/api/v1/collections')).toHaveLength(0)
@@ -956,44 +1090,55 @@ describe('the archive — a second collection "<name> Archive"', () => {
 
 describe('deleteFromLinkwarden', () => {
   it('deletes the link behind a url', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
-      'DELETE /api/v1/links/42': ok({ response: {} }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
+        'DELETE /api/v1/links/42': ok({ response: {} }),
+      }),
+    )
 
-    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS))
-      .resolves.toEqual({ deleted: true })
+    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS)).resolves.toEqual({
+      deleted: true,
+    })
     expect(callsTo('DELETE', '/api/v1/links/42')).toHaveLength(1)
   })
 
   it('is a no-op when there is nothing to delete', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+      }),
+    )
 
-    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS))
-      .resolves.toEqual({ deleted: false })
+    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS)).resolves.toEqual({
+      deleted: false,
+    })
   })
 
   it('does not delete a link that merely contains the url as a substring', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({
-        data: { links: [link({ id: 99, url: 'https://example.com/artikel/teil-2' })], nextCursor: null },
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({
+          data: { links: [link({ id: 99, url: 'https://example.com/artikel/teil-2' })], nextCursor: null },
+        }),
       }),
-    }))
+    )
 
-    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS))
-      .resolves.toEqual({ deleted: false })
+    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS)).resolves.toEqual({
+      deleted: false,
+    })
     expect(callsTo('DELETE', '/api/v1/links/99')).toHaveLength(0)
   })
 
   // The bug this replaced: the lookup was unscoped, so unsaving an article in Quell
   // deleted the user's OWN bookmark of the same URL out of a collection Quell never wrote
   // to. Reproduced against a live server before the fix, and it really was gone.
-  it('searches only inside our collection — never the user\'s whole library', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-    }))
+  it("searches only inside our collection — never the user's whole library", async () => {
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+      }),
+    )
 
     await deleteFromLinkwarden('https://example.com/artikel', SETTINGS)
 
@@ -1001,39 +1146,51 @@ describe('deleteFromLinkwarden', () => {
     expect(new URL(search[0].url).searchParams.get('collectionId')).toBe('3')
   })
 
-  it('leaves a link alone that lives in a collection of the user\'s own', async () => {
+  it("leaves a link alone that lives in a collection of the user's own", async () => {
     // The server, asked only about OUR collection, has nothing — the bookmark sits in
     // "User Private Stuff". A scoped search is what makes that invisible to us.
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'DELETE /api/v1/links/42': ok({ response: {} }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'DELETE /api/v1/links/42': ok({ response: {} }),
+      }),
+    )
 
-    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS))
-      .resolves.toEqual({ deleted: false })
+    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS)).resolves.toEqual({
+      deleted: false,
+    })
     expect(callsTo('DELETE', '/api/v1/links/42')).toHaveLength(0)
   })
 
   it('does not CREATE the collection just to discover it has nothing to delete', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-    }, []))
+    mockApi(
+      withCollections(
+        {
+          'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        },
+        [],
+      ),
+    )
 
-    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS))
-      .resolves.toEqual({ deleted: false })
+    await expect(deleteFromLinkwarden('https://example.com/artikel', SETTINGS)).resolves.toEqual({
+      deleted: false,
+    })
     expect(callsTo('POST', '/api/v1/collections')).toHaveLength(0)
     // Nothing of ours can exist without the collection, so it does not even search.
     expect(callsTo('GET', '/api/v1/search')).toHaveLength(0)
   })
 
   it('falls back to the whole library when no collection is configured', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
-      'DELETE /api/v1/links/42': ok({ response: {} }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
+        'DELETE /api/v1/links/42': ok({ response: {} }),
+      }),
+    )
 
-    await expect(deleteFromLinkwarden('https://example.com/artikel', { ...SETTINGS, collectionName: '' }))
-      .resolves.toEqual({ deleted: true })
+    await expect(
+      deleteFromLinkwarden('https://example.com/artikel', { ...SETTINGS, collectionName: '' }),
+    ).resolves.toEqual({ deleted: true })
 
     const [search] = callsTo('GET', '/api/v1/search')
     expect(new URL(search[0].url).searchParams.has('collectionId')).toBe(false)
@@ -1047,10 +1204,12 @@ describe('shapes and behaviours observed on a live server', () => {
   // both called "Quell Feed" — setCollection.ts special-cases only "Unorganized" and
   // CREATEs anything else, unconditionally. This is the whole reason for resolveCollectionId.
   it('never sends collection:{name} on a link — that is a create, not a find-or-create', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
+    )
 
     await pushToLinkwarden([article()], SETTINGS)
 
@@ -1074,7 +1233,12 @@ describe('shapes and behaviours observed on a live server', () => {
       },
       'GET /api/v1/search': () => ok({ data: { links: [...links], nextCursor: null } }),
       'POST /api/v1/links': (_url, body) => {
-        const row = link({ id: 100 + links.length, url: body.url, name: body.name, description: body.description })
+        const row = link({
+          id: 100 + links.length,
+          url: body.url,
+          name: body.name,
+          description: body.description,
+        })
         links.push(row)
         return created({ response: row })
       },
@@ -1113,10 +1277,12 @@ describe('shapes and behaviours observed on a live server', () => {
   // one that omits `tags`, `collection` or `id` is a 400. Both halves say the same thing:
   // hydrate everything.
   it('sends every field the PUT schema needs, none of them empty by accident', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
-      'PUT /api/v1/links/42': ok({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [link()], nextCursor: null } }),
+        'PUT /api/v1/links/42': ok({ response: link() }),
+      }),
+    )
 
     await pushToLinkwarden([article({ title: 'Neuer Titel' })], SETTINGS)
 
@@ -1133,15 +1299,14 @@ describe('shapes and behaviours observed on a live server', () => {
   // The server caps both at 2048 and answers a longer one with
   // 400 "Too big: expected string to have <=2048 characters".
   it('truncates name and description to the 2048 the schema allows', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
-
-    await pushToLinkwarden(
-      [article({ title: 'x'.repeat(3000), description: 'y'.repeat(3000) })],
-      SETTINGS,
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
     )
+
+    await pushToLinkwarden([article({ title: 'x'.repeat(3000), description: 'y'.repeat(3000) })], SETTINGS)
 
     const body = bodyOf(callsTo('POST', '/api/v1/links')[0])
     expect(body.name).toHaveLength(2048)
@@ -1151,24 +1316,27 @@ describe('shapes and behaviours observed on a live server', () => {
   // With preventDuplicateLinks on, a duplicate POST is 409 { response: "Link already
   // exists" }. That is the outcome we wanted anyway, not an error to show the user.
   it('treats the 409 body the server really sends as a skip', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': { status: 409, body: { response: 'Link already exists' } },
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'POST /api/v1/links': { status: 409, body: { response: 'Link already exists' } },
+      }),
+    )
 
-    await expect(pushToLinkwarden([article()], SETTINGS))
-      .resolves.toEqual({ pushed: 0, skipped: 1 })
+    await expect(pushToLinkwarden([article()], SETTINGS)).resolves.toEqual({ pushed: 0, skipped: 1 })
   })
 
   // createdAt on a pulled link is the day it was IMPORTED — the API has no field for a
   // publish date at all, so this is the best that exists, and it must never overwrite ours.
   it('takes the import date as publishedAt, and never sends a date back', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({
-        data: { links: [link({ createdAt: '2026-07-12T09:37:28.558Z' })], nextCursor: null },
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({
+          data: { links: [link({ createdAt: '2026-07-12T09:37:28.558Z' })], nextCursor: null },
+        }),
+        'POST /api/v1/links': created({ response: link() }),
       }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    )
 
     const { articles } = await pullFromLinkwarden(SETTINGS, { newId })
     expect(articles[0].publishedAt).toBe('2026-07-12T09:37:28.558Z')
@@ -1208,7 +1376,12 @@ describe('the browser dev build goes through the Vite proxy', () => {
 
   it('reports network_error when the proxy itself is unreachable', async () => {
     Capacitor.isNativePlatform.mockReturnValue(false)
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch') }))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new TypeError('Failed to fetch')
+      }),
+    )
 
     await expect(testLinkwardenConnection(SETTINGS)).rejects.toThrow('network_error')
   })
@@ -1254,10 +1427,12 @@ describe('the access token never leaves the device in a log or an error', () => 
   })
 
   it('keeps it out of every log line', async () => {
-    mockApi(withCollections({
-      'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
-      'POST /api/v1/links': created({ response: link() }),
-    }))
+    mockApi(
+      withCollections({
+        'GET /api/v1/search': ok({ data: { links: [], nextCursor: null } }),
+        'POST /api/v1/links': created({ response: link() }),
+      }),
+    )
 
     await pullFromLinkwarden(SETTINGS, { newId })
     await pushToLinkwarden([article()], SETTINGS)
@@ -1265,11 +1440,7 @@ describe('the access token never leaves the device in a log or an error', () => 
     CapacitorHttp.request.mockRejectedValue(new Error(`boom ${API_KEY}`))
     await testLinkwardenConnection(SETTINGS).catch(() => {})
 
-    const logged = [
-      ...console.info.mock.calls,
-      ...console.warn.mock.calls,
-      ...console.error.mock.calls,
-    ]
+    const logged = [...console.info.mock.calls, ...console.warn.mock.calls, ...console.error.mock.calls]
     expect(logged.length).toBeGreaterThan(0)
     for (const call of logged) {
       expect(leaks(call)).toBe(false)

@@ -30,10 +30,10 @@
         :placeholder="$t('settings.karakeep.baseUrlPlaceholder')"
         :value="settings.baseUrl"
         clear-button
-        @input="onChange('baseUrl', $event.target.value)"
         inputmode="url"
         autocapitalize="off"
         autocorrect="off"
+        @input="onChange('baseUrl', $event.target.value)"
       ></f7-list-input>
 
       <SecretInput
@@ -113,7 +113,10 @@ export default {
       const iso = this.settings.lastSync
       if (!iso) return this.$t('settings.karakeep.never')
       return new Date(iso).toLocaleString(undefined, {
-        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
       })
     },
   },

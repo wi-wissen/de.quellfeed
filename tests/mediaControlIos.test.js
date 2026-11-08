@@ -55,15 +55,23 @@ describe('createMediaSession (native iOS)', () => {
     await expect(media.enable(METADATA)).resolves.toBe(true)
 
     // The proof: the plugin was driven, and no carrier <audio> was ever created.
-    expect(plugin.show).toHaveBeenCalledWith(expect.objectContaining({
-      title: 'Der Artikel',
-      source: 'Die Quelle',
-      playing: true,
-    }))
+    expect(plugin.show).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Der Artikel',
+        source: 'Die Quelle',
+        playing: true,
+      }),
+    )
   })
 
   it('routes lock-screen and headset commands back into the player', async () => {
-    const handlers = { onPlay: vi.fn(), onPause: vi.fn(), onStop: vi.fn(), onNext: vi.fn(), onPrevious: vi.fn() }
+    const handlers = {
+      onPlay: vi.fn(),
+      onPause: vi.fn(),
+      onStop: vi.fn(),
+      onNext: vi.fn(),
+      onPrevious: vi.fn(),
+    }
     const media = createMediaSession(handlers)
     await media.enable(METADATA)
 

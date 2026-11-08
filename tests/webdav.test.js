@@ -61,13 +61,13 @@ describe('config', () => {
   })
 
   it('appends an extra path when one is given', () => {
-    expect(buildWebdavUrl({ ...CONFIG, path: 'Quell' }, 'quellfeed-sync.json'))
-      .toBe('https://cloud.example.com/remote.php/dav/files/jd/Quell/quellfeed-sync.json')
+    expect(buildWebdavUrl({ ...CONFIG, path: 'Quell' }, 'quellfeed-sync.json')).toBe(
+      'https://cloud.example.com/remote.php/dav/files/jd/Quell/quellfeed-sync.json',
+    )
   })
 
   it('does not double-encode a path that is already encoded', () => {
-    expect(buildWebdavUrl({ ...CONFIG, path: 'Quell%20Sync/a.json' }))
-      .toContain('/Quell%20Sync/a.json')
+    expect(buildWebdavUrl({ ...CONFIG, path: 'Quell%20Sync/a.json' })).toContain('/Quell%20Sync/a.json')
   })
 
   it('strips credentials the user pasted into the url itself', () => {
@@ -299,7 +299,7 @@ describe('the password never leaves the device in a log or an error', () => {
 describe('the browser dev build goes through the Vite proxy', () => {
   // A direct call would die on CORS — no WebDAV server sends
   // Access-Control-Allow-Origin for an authenticated PUT. The /__dav middleware in
-  // vite.config.js passes the body, the Authorization header and If-Match through,
+  // vite.config.mjs passes the body, the Authorization header and If-Match through,
   // and hands the ETag back, which is what keeps conflict detection alive here.
   it('routes through /__dav instead of CapacitorHttp, carrying auth and If-Match', async () => {
     Capacitor.isNativePlatform.mockReturnValue(false)
@@ -329,7 +329,12 @@ describe('the browser dev build goes through the Vite proxy', () => {
 
   it('reports network_error when the proxy itself is unreachable', async () => {
     Capacitor.isNativePlatform.mockReturnValue(false)
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch') }))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new TypeError('Failed to fetch')
+      }),
+    )
 
     await expect(getFile(CONFIG)).rejects.toThrow('network_error')
 

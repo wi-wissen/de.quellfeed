@@ -5,6 +5,9 @@
  * wrongly "known" language would hide it exactly when it is needed.
  */
 export function normalizeLanguageTag(value) {
-  const match = String(value || '').trim().toLowerCase().match(/^([a-z]{2,3})(?=$|[-_,;\s])/)
+  const match = String(value || '')
+    .trim()
+    .toLowerCase()
+    .match(/^([a-z]{2,3})(?=$|[-_,;\s])/)
   return match ? match[1] : ''
 }

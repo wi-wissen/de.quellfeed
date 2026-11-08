@@ -23,6 +23,10 @@ const READING_CSS = `
     /* em, not px: reading size is a factor on the system font size. */
     font-size: var(--q-reading-font-size, 1em);
   }
+  /* Headings used to inherit the body's 1.7 — fine for running text, but a heading
+     that wraps (and at 115 % or more on a phone most do) fell apart into lines with
+     a paragraph's worth of air between them. */
+  h1, h2, h3, h4, h5, h6 { line-height: 1.25; text-wrap: balance; margin: 1.6em 0 0.6em; }
   img { max-width: 100%; border-radius: 8px; height: auto; display: block; }
   .article-title {
     margin: 0 0 1.25rem;
@@ -82,15 +86,15 @@ export function buildIframeDoc(html, headerImageUrl = null, themeChoice = 'syste
     (headerImageUrl && html.includes(headerImageUrl)) || articleLeadsWithImage(html)
   const showFeedImage = options.showFeedImage
   const showArticleTitle = options.showArticleTitle === true && articleTitle
-  const shouldShowHeaderImage = headerImageUrl && (
-    showFeedImage === true ||
-    (showFeedImage !== false && !articleAlreadyShowsImage)
-  )
-  const title = showArticleTitle
-    ? `<h1 class="article-title">${escapeHtml(articleTitle)}</h1>`
-    : ''
-  const header = shouldShowHeaderImage
-    ? `<figure class="article-hero"><img src="${headerImageUrl}" alt=""></figure>`
+  const shouldShowHeaderImage =
+    headerImageUrl && (showFeedImage === true || (showFeedImage !== false && !articleAlreadyShowsImage))
+  const title = showArticleTitle ? `<h1 class="article-title">${escapeHtml(articleTitle)}</h1>` : ''
+  // The cover URL comes straight out of the feed XML and is NOT run through DOMPurify
+  // like the article body. Unescaped, a `"` in it would let the feed write its own
+  // markup into the reading view. Only http(s) URLs get in, and always escaped.
+  const heroUrl = shouldShowHeaderImage ? safeImageUrl(headerImageUrl) : ''
+  const header = heroUrl
+    ? `<figure class="article-hero"><img src="${escapeHtml(heroUrl)}" alt=""></figure>`
     : ''
   // The article text lives in its own container so the streaming translation can
   // address "top-level block n" without counting past the title and the hero image.
@@ -144,7 +148,32 @@ function buildCsp() {
   const origin = typeof window !== 'undefined' && window.location?.origin
   const fontSrc = origin && origin !== 'null' ? `${origin} data:` : `'self' data:`
 
-  return `font-src ${fontSrc}; script-src none;`
+  // Deny by default, then open exactly what an article needs: images from anywhere
+  // (that is what articles are made of), our inline reading CSS and the `style`
+  // attributes DOMPurify lets through, our own fonts. Everything else — frames,
+  // objects, forms, fetches, media, the publisher's webfonts — stays shut.
+  // CSP keywords MUST be quoted: an unquoted `none` is read as a host named "none".
+  return [
+    "default-src 'none'",
+    'img-src https: http: data:',
+    "style-src 'unsafe-inline'",
+    `font-src ${fontSrc}`,
+    "script-src 'none'",
+    "frame-src 'none'",
+    "object-src 'none'",
+    "form-action 'none'",
+    "base-uri 'none'",
+  ].join('; ')
+}
+
+/** Only http(s) URLs may become the cover image — anything else is dropped. */
+export function safeImageUrl(value) {
+  try {
+    const url = new URL(String(value))
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : ''
+  } catch {
+    return ''
+  }
 }
 
 export async function fetchArticleContent(url, configBaseUrl = '', options = {}) {
@@ -175,7 +204,9 @@ export async function fetchArticleContent(url, configBaseUrl = '', options = {})
   })
 
   let html = null
-  let fallbackImages = collectFallbackImages(doc.querySelector('article') || doc.querySelector('main') || doc.body)
+  let fallbackImages = collectFallbackImages(
+    doc.querySelector('article') || doc.querySelector('main') || doc.body,
+  )
 
   if (config) {
     const extracted = extractWithConfig(doc, config)
@@ -184,7 +215,7 @@ export async function fetchArticleContent(url, configBaseUrl = '', options = {})
   }
 
   if (!html) {
-    html = extractWithReadability(doc, url)
+    html = extractWithReadability(doc)
   }
 
   if (!html) {
@@ -204,8 +235,8 @@ export async function fetchArticleContent(url, configBaseUrl = '', options = {})
     // What the page itself claims to be written in (<html lang>, or the old-school
     // meta header). '' means "the page didn't say" — never guessed here.
     language: normalizeLanguageTag(
-      doc.documentElement.getAttribute('lang')
-      || doc.querySelector('meta[http-equiv="content-language" i]')?.getAttribute('content')
+      doc.documentElement.getAttribute('lang') ||
+        doc.querySelector('meta[http-equiv="content-language" i]')?.getAttribute('content'),
     ),
   }
 }
@@ -231,7 +262,7 @@ function extractWithConfig(doc, config) {
   return null
 }
 
-function extractWithReadability(doc, url) {
+function extractWithReadability(doc) {
   try {
     const clone = doc.cloneNode(true)
     const reader = new Readability(clone)
@@ -257,7 +288,7 @@ function hasFeedFallbackContent(feedFallback) {
   return Boolean(
     String(feedFallback.title || '').trim() ||
     String(feedFallback.description || '').trim() ||
-    String(feedFallback.url || '').trim()
+    String(feedFallback.url || '').trim(),
   )
 }
 

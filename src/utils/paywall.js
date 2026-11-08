@@ -76,7 +76,7 @@ export function normalizePaywallDomain(url) {
 
   let hostname
   try {
-    ({ hostname } = new URL(withScheme))
+    ;({ hostname } = new URL(withScheme))
   } catch {
     throw new Error('invalid_url')
   }
@@ -119,17 +119,19 @@ export function findSiteForUrl(sites, url) {
     return null
   }
 
-  return sites
-    .filter(site => {
-      let domain
-      try {
-        domain = normalizePaywallDomain(site?.domain)
-      } catch {
-        return false
-      }
-      return target === domain || target.endsWith(`.${domain}`)
-    })
-    .sort((a, b) => String(b.domain).length - String(a.domain).length)[0] || null
+  return (
+    sites
+      .filter(site => {
+        let domain
+        try {
+          domain = normalizePaywallDomain(site?.domain)
+        } catch {
+          return false
+        }
+        return target === domain || target.endsWith(`.${domain}`)
+      })
+      .sort((a, b) => String(b.domain).length - String(a.domain).length)[0] || null
+  )
 }
 
 /**
@@ -164,9 +166,7 @@ async function teardown() {
   const { handles } = session
   session = null
 
-  await Promise.all(
-    handles.map(handle => Promise.resolve(handle?.remove?.()).catch(() => {})),
-  )
+  await Promise.all(handles.map(handle => Promise.resolve(handle?.remove?.()).catch(() => {})))
 }
 
 /**

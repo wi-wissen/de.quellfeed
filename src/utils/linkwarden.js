@@ -1,3 +1,4 @@
+import { debug } from './log.js'
 // Linkwarden sync for the saved articles.
 //
 // Same contract as src/utils/karakeep.js, and the same warning: this is NOT the two-way
@@ -81,7 +82,7 @@
 // Linkwarden sends no Access-Control-Allow-Origin at all (no headers() in next.config.js,
 // no middleware, no cors dependency), so a direct browser call dies on CORS. Native goes
 // through CapacitorHttp; the browser dev build goes through the /__dav middleware in
-// vite.config.js, which is only *named* after WebDAV — it passes the method, the body, the
+// vite.config.mjs, which is only *named* after WebDAV — it passes the method, the body, the
 // Authorization header and Content-Type straight through. Exactly what webdav.js does.
 
 import { Capacitor, CapacitorHttp } from '@capacitor/core'
@@ -169,7 +170,8 @@ function normalizeBaseUrl(raw) {
     // a URL. It belongs in the Authorization header and nowhere else.
     url.username = ''
     url.password = ''
-    return url.toString()
+    return url
+      .toString()
       .replace(/\/+$/, '')
       .replace(new RegExp(`${API_PATH}/*$`), '')
   } catch {
@@ -329,7 +331,7 @@ async function rawRequest(config, { method, path, query, body }) {
   }
 
   // The url is logged, the token is not — it only ever lives in the header.
-  console.info('[linkwarden]', method, { url, status: res.status })
+  debug('[linkwarden]', method, { url, status: res.status })
 
   return { status: res.status, data: parseBody(res.data) }
 }
@@ -357,8 +359,7 @@ async function listCollections(config) {
 
 function collectionByName(collections, wanted) {
   if (!wanted) return null
-  return collections.find(c =>
-    toText(c?.name).trim().toLowerCase() === wanted.toLowerCase()) || null
+  return collections.find(c => toText(c?.name).trim().toLowerCase() === wanted.toLowerCase()) || null
 }
 
 /**
@@ -540,9 +541,7 @@ async function fetchLinks(config, query = {}) {
     })
 
     const payload = data?.data
-    const pageLinks = Array.isArray(payload)
-      ? payload
-      : Array.isArray(payload?.links) ? payload.links : []
+    const pageLinks = Array.isArray(payload) ? payload : Array.isArray(payload?.links) ? payload.links : []
 
     links.push(...pageLinks)
 
@@ -641,8 +640,9 @@ export async function testLinkwardenConnection(settings) {
 
 /** The articles this sync is about: saved ones, with a usable URL. */
 function pushable(articles) {
-  return (Array.isArray(articles) ? articles : [])
-    .filter(article => article?.isSaved && isHttpUrl(article.url))
+  return (Array.isArray(articles) ? articles : []).filter(
+    article => article?.isSaved && isHttpUrl(article.url),
+  )
 }
 
 /**
@@ -674,7 +674,7 @@ export async function pushToLinkwarden(articles, settings, options = {}) {
   const todo = pushable(articles)
   if (todo.length === 0) return { pushed: 0, skipped: 0 }
 
-  const scope = options.scope || await resolveScope(config, { create: true })
+  const scope = options.scope || (await resolveScope(config, { create: true }))
 
   const index = options.remoteIndex || null
   let pushed = 0
@@ -761,7 +761,7 @@ export async function pullFromLinkwarden(settings, options = {}) {
   if (!isLinkwardenConfigured(config)) throw new Error('not_configured')
 
   const newId = options.newId || (() => crypto.randomUUID())
-  const scope = options.scope || await resolveScope(config, { create: true })
+  const scope = options.scope || (await resolveScope(config, { create: true }))
 
   // Deduped by URL, not by id: a library can hold the same link twice (and a broken
   // paginator can serve the same page twice), and two articles with one URL is a bug the
@@ -844,10 +844,12 @@ function pickArchived(local, remote, remoteUpdatedAt) {
 }
 
 function changed(before, after) {
-  return before.isSaved !== after.isSaved
-    || Boolean(before.isArchived) !== Boolean(after.isArchived)
-    || before.title !== after.title
-    || before.description !== after.description
+  return (
+    before.isSaved !== after.isSaved ||
+    Boolean(before.isArchived) !== Boolean(after.isArchived) ||
+    before.title !== after.title ||
+    before.description !== after.description
+  )
 }
 
 /**

@@ -1,3 +1,6 @@
+import { debug } from './log.js'
+import { timeoutSignal } from './http.js'
+
 // KaraKeep (ex Hoarder) sync for the saved articles.
 //
 // The WebDAV round-trip in src/utils/sync.js is a *two-way* sync: it owns the file, it
@@ -52,6 +55,8 @@
 // must never send credentials: 'include'. We don't.)
 
 const API_PATH = '/api/v1'
+// Per request, connect to last header. The same budget the WebDAV and Linkwarden paths get.
+const REQUEST_TIMEOUT_MS = 45000
 
 // The server rejects anything above 100 (MAX_NUM_BOOKMARKS_PER_PAGE) with a 400.
 const PAGE_LIMIT = 100
@@ -140,10 +145,13 @@ function normalizeBaseUrl(raw) {
     // from a URL. The key belongs in the Authorization header and nowhere else.
     url.username = ''
     url.password = ''
-    return url.toString()
-      .replace(/\/+$/, '')
-      // Users paste the endpoint they found in the docs, not the server root.
-      .replace(new RegExp(`${API_PATH}/*$`), '')
+    return (
+      url
+        .toString()
+        .replace(/\/+$/, '')
+        // Users paste the endpoint they found in the docs, not the server root.
+        .replace(new RegExp(`${API_PATH}/*$`), '')
+    )
   } catch {
     return value.replace(new RegExp(`${API_PATH}/*$`), '')
   }
@@ -242,23 +250,30 @@ async function request(config, { method, path, query, body, signal }) {
   if (body !== undefined) headers['Content-Type'] = 'application/json'
 
   let res
+  // Own deadline on top of the caller's signal: a server that accepts the connection
+  // and then never answers would otherwise stall the sync for good.
+  const timeout = timeoutSignal(REQUEST_TIMEOUT_MS, signal)
   try {
     res = await fetch(url, {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
-      signal,
+      signal: timeout.signal,
     })
   } catch (err) {
+    // Our own deadline ran out — to the user that is an unreachable server, not a cancel.
+    if (timeout.signal.aborted && !signal?.aborted) throw new Error('network_error')
     if (err?.name === 'AbortError' || signal?.aborted) throw new Error('aborted')
     // Only the error's *name*. Its message may be the transport's, and a transport that
     // echoes the request back would otherwise put the key in the log.
     console.error('[karakeep] request failed:', err?.name || 'Error')
     throw new Error('network_error')
+  } finally {
+    timeout.clear()
   }
 
   // The url is logged, the key is not — it only ever lives in the header.
-  console.info('[karakeep]', method, { url, status: res.status })
+  debug('[karakeep]', method, { url, status: res.status })
 
   if (res.status < 200 || res.status > 299) throwForStatus(res.status)
 
@@ -442,8 +457,9 @@ export async function testKarakeepConnection(settings) {
 
 /** The articles this sync is about: saved ones, with a usable URL. */
 function pushable(articles) {
-  return (Array.isArray(articles) ? articles : [])
-    .filter(article => article?.isSaved && isHttpUrl(article.url))
+  return (Array.isArray(articles) ? articles : []).filter(
+    article => article?.isSaved && isHttpUrl(article.url),
+  )
 }
 
 /**
@@ -491,7 +507,10 @@ async function upsertBookmark(config, article, existing, options) {
   // `existing` is either an indexed bookmark (id + flags) or a bare id from check-url,
   // whose flags we have not paid a request to learn.
   let id = typeof existing === 'string' ? existing : existing?.id || null
-  let have = typeof existing === 'object' && existing ? { archived: Boolean(existing.archived), favourited: Boolean(existing.favourited) } : null
+  let have =
+    typeof existing === 'object' && existing
+      ? { archived: Boolean(existing.archived), favourited: Boolean(existing.favourited) }
+      : null
 
   if (!id) {
     const { data } = await request(config, {
@@ -555,7 +574,7 @@ export async function pushToKarakeep(articles, settings, options = {}) {
 
   for (const article of pushable(articles)) {
     const indexed = index ? index.get(urlKey(article.url)) || null : null
-    const existing = indexed || await findBookmarkIdByUrl(config, article.url, options)
+    const existing = indexed || (await findBookmarkIdByUrl(config, article.url, options))
 
     const result = await upsertBookmark(config, article, existing, options)
     if (result === 'skipped') skipped++
@@ -651,10 +670,12 @@ function pickArchived(local, remote, remoteModifiedAt) {
 }
 
 function changed(before, after) {
-  return before.isSaved !== after.isSaved
-    || Boolean(before.isArchived) !== Boolean(after.isArchived)
-    || before.title !== after.title
-    || before.description !== after.description
+  return (
+    before.isSaved !== after.isSaved ||
+    Boolean(before.isArchived) !== Boolean(after.isArchived) ||
+    before.title !== after.title ||
+    before.description !== after.description
+  )
 }
 
 /**

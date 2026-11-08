@@ -1,3 +1,4 @@
+import { debug } from './log.js'
 // BYOK (Bring Your Own Key) AI helpers.
 //
 // Quell has no backend and never will, so every AI call goes straight from the
@@ -124,7 +125,7 @@ export function getAiPreset(presetId) {
  * to be a preset.
  */
 export function matchPreset(settings) {
-  const s = settings?.ai ? settings.ai : (settings || {})
+  const s = settings?.ai ? settings.ai : settings || {}
   if (s.provider === 'custom') return 'custom'
 
   const hit = AI_PRESETS.find(p => p.provider === s.provider && p.model === s.model)
@@ -132,11 +133,13 @@ export function matchPreset(settings) {
 }
 
 function normalizeBaseUrl(baseUrl = '') {
-  return String(baseUrl || '')
-    .trim()
-    // Users happily paste the full endpoint they found in some doc.
-    .replace(/\/+chat\/completions\/*$/i, '')
-    .replace(/\/+$/, '')
+  return (
+    String(baseUrl || '')
+      .trim()
+      // Users happily paste the full endpoint they found in some doc.
+      .replace(/\/+chat\/completions\/*$/i, '')
+      .replace(/\/+$/, '')
+  )
 }
 
 // Accepts either the AI settings object itself or the whole store settings with
@@ -198,7 +201,8 @@ export function isAiConfigured(settings) {
 // speaks. Used by the read-aloud feature to pick the right TTS voice for the
 // article. (The SUMMARY deliberately does not use it: a summary is written for
 // the reader and therefore in the app language, whatever the article speaks.)
-const DE_STOPWORDS = /\b(der|die|das|und|ist|nicht|mit|ein|eine|für|auch|sich|werden|wurde|aber|noch|schon|beim|durch|über)\b/gi
+const DE_STOPWORDS =
+  /\b(der|die|das|und|ist|nicht|mit|ein|eine|für|auch|sich|werden|wurde|aber|noch|schon|beim|durch|über)\b/gi
 const EN_STOPWORDS = /\b(the|and|is|not|with|a|an|for|also|of|to|that|this|was|were|but|from|have|about)\b/gi
 
 export function detectArticleLanguage(text = '', fallback = 'en') {
@@ -327,7 +331,7 @@ export async function chatCompletion(messages, settings, options = {}) {
   const url = `${config.baseUrl}/chat/completions`
 
   // Logs carry the model and the endpoint, never the key or the article.
-  console.info('[ai] chatCompletion', { provider: config.provider, url, model })
+  debug('[ai] chatCompletion', { provider: config.provider, url, model })
 
   let res
   try {
@@ -371,8 +375,15 @@ export async function chatCompletion(messages, settings, options = {}) {
 // Provider error codes chatCompletion(Stream) can throw — used to tell "already
 // classified" apart from raw transport errors when a stream dies halfway.
 const PROVIDER_ERROR_CODES = new Set([
-  'unauthorized', 'insufficient_credits', 'rate_limited', 'server_error',
-  'request_failed', 'empty_response', 'aborted', 'network_error', 'not_configured',
+  'unauthorized',
+  'insufficient_credits',
+  'rate_limited',
+  'server_error',
+  'request_failed',
+  'empty_response',
+  'aborted',
+  'network_error',
+  'not_configured',
   'truncated',
 ])
 
@@ -430,7 +441,7 @@ async function requestCompletionStream(fetchFn, messages, settings, options = {}
   const url = `${config.baseUrl}/chat/completions`
 
   // Logs carry the model and the endpoint, never the key or the article.
-  console.info('[ai] chatCompletionStream', { provider: config.provider, url, model })
+  debug('[ai] chatCompletionStream', { provider: config.provider, url, model })
 
   let res
   try {
@@ -509,11 +520,12 @@ async function requestCompletionStream(fetchFn, messages, settings, options = {}
         finishReason = json?.choices?.[0]?.finish_reason || finishReason
 
         const delta = json?.choices?.[0]?.delta?.content ?? json?.choices?.[0]?.message?.content
-        const piece = typeof delta === 'string'
-          ? delta
-          : Array.isArray(delta)
-            ? delta.map(part => (typeof part === 'string' ? part : part?.text || '')).join('')
-            : ''
+        const piece =
+          typeof delta === 'string'
+            ? delta
+            : Array.isArray(delta)
+              ? delta.map(part => (typeof part === 'string' ? part : part?.text || '')).join('')
+              : ''
         if (piece) {
           content += piece
           options.onText?.(content)
@@ -645,14 +657,19 @@ export async function translateText(text, settings, options = {}) {
 
   const target = LANGUAGE_NAMES[options.targetLanguage] ? options.targetLanguage : 'en'
 
-  return stripCodeFence(await chatCompletion(
-    [
-      { role: 'system', content: `Translate this article headline into ${LANGUAGE_NAMES[target]}. Return only the headline, nothing else.` },
-      { role: 'user', content: value },
-    ],
-    settings,
-    { signal: options.signal, maxTokens: TITLE_MAX_TOKENS },
-  ))
+  return stripCodeFence(
+    await chatCompletion(
+      [
+        {
+          role: 'system',
+          content: `Translate this article headline into ${LANGUAGE_NAMES[target]}. Return only the headline, nothing else.`,
+        },
+        { role: 'user', content: value },
+      ],
+      settings,
+      { signal: options.signal, maxTokens: TITLE_MAX_TOKENS },
+    ),
+  )
 }
 
 /**
@@ -824,7 +841,7 @@ export function parseQuellIndices(text, count) {
   const size = Number.isInteger(count) && count > 0 ? count : 0
   if (size === 0) return []
 
-  for (const match of String(text || '').matchAll(/\[[^\[\]]*\]/g)) {
+  for (const match of String(text || '').matchAll(/\[[^[\]]*\]/g)) {
     let parsed
     try {
       parsed = JSON.parse(match[0])
@@ -836,7 +853,9 @@ export function parseQuellIndices(text, count) {
     const indices = parsed
       // Accept "3" as 3 — a stringified index is unambiguous, and dropping it
       // would only make the filter weaker, not safer.
-      .map(v => (typeof v === 'number' ? v : (typeof v === 'string' && /^\d+$/.test(v.trim()) ? Number(v) : NaN)))
+      .map(v =>
+        typeof v === 'number' ? v : typeof v === 'string' && /^\d+$/.test(v.trim()) ? Number(v) : NaN,
+      )
       .filter(v => Number.isInteger(v) && v >= 0 && v < size)
 
     return [...new Set(indices)].sort((a, b) => a - b)

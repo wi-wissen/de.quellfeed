@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { normalizeArticle, extractImage, parseFeedString } from '../src/utils/feedParser.js'
 
 // Mock http so feedParser tests don't make real network calls
@@ -65,11 +65,14 @@ describe('normalizeArticle', () => {
   })
 
   it('decodes escaped HTML entities in title and description', () => {
-    const result = normalizeArticle({
-      link: 'https://example.com/article',
-      title: 'Rock &#39;n&#39; Roll',
-      contentSnippet: 'Tom &amp; Jerry',
-    }, 'feed-1')
+    const result = normalizeArticle(
+      {
+        link: 'https://example.com/article',
+        title: 'Rock &#39;n&#39; Roll',
+        contentSnippet: 'Tom &amp; Jerry',
+      },
+      'feed-1',
+    )
 
     expect(result.title).toBe("Rock 'n' Roll")
     expect(result.description).toBe('Tom & Jerry')

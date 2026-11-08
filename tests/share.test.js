@@ -103,9 +103,7 @@ describe('shareArticle — fallback path', () => {
   })
 
   it('shows the fallback sheet when the browser blocks share without a user gesture', async () => {
-    Share.share.mockRejectedValue(
-      Object.assign(new Error('Permission denied'), { name: 'NotAllowedError' }),
-    )
+    Share.share.mockRejectedValue(Object.assign(new Error('Permission denied'), { name: 'NotAllowedError' }))
     stubSheet()
 
     expect(await shareArticle(ARTICLE, t)).toBe('fallback')
@@ -172,7 +170,7 @@ describe('shareArticle — the fallback sheet sizes itself to its content', () =
     await shareArticle(ARTICLE, t)
   })
 
-  it('overrides framework7\'s fixed sheet height so nothing is clipped', () => {
+  it("overrides framework7's fixed sheet height so nothing is clipped", () => {
     const sheetTag = sheetContent().match(/<div class="sheet-modal[^>]*>/)[0]
 
     // Inline beats the `.sheet-modal { height: var(--f7-sheet-height) }` class rule.
@@ -223,9 +221,7 @@ describe('shareArticle — user cancellation', () => {
   })
 
   it('shows no sheet when the user dismisses the Web Share popup (AbortError)', async () => {
-    Share.share.mockRejectedValue(
-      Object.assign(new Error('Share canceled'), { name: 'AbortError' }),
-    )
+    Share.share.mockRejectedValue(Object.assign(new Error('Share canceled'), { name: 'AbortError' }))
     stubSheet()
 
     const result = await shareArticle(ARTICLE, t)
@@ -267,9 +263,14 @@ describe('shareArticle — texts come from t()', () => {
     const content = sheetContent()
 
     const literals = [
-      'Kopieren', 'Copy link', 'Link kopieren',
-      'Im Browser öffnen', 'Open in browser',
-      'Teilen', 'Abbrechen', 'Cancel',
+      'Kopieren',
+      'Copy link',
+      'Link kopieren',
+      'Im Browser öffnen',
+      'Open in browser',
+      'Teilen',
+      'Abbrechen',
+      'Cancel',
     ]
     for (const literal of literals) {
       expect(content).not.toContain(literal)
@@ -286,9 +287,7 @@ describe('copyLink', () => {
 
     expect(copied).toBe(true)
     expect(writeText).toHaveBeenCalledWith('https://example.com/story')
-    expect(f7.toast.show).toHaveBeenCalledWith(
-      expect.objectContaining({ text: '[[share.copied]]' }),
-    )
+    expect(f7.toast.show).toHaveBeenCalledWith(expect.objectContaining({ text: '[[share.copied]]' }))
 
     vi.unstubAllGlobals()
   })
@@ -301,9 +300,7 @@ describe('copyLink', () => {
 
     expect(copied).toBe(true)
     expect(document.execCommand).toHaveBeenCalledWith('copy')
-    expect(f7.toast.show).toHaveBeenCalledWith(
-      expect.objectContaining({ text: '[[share.copied]]' }),
-    )
+    expect(f7.toast.show).toHaveBeenCalledWith(expect.objectContaining({ text: '[[share.copied]]' }))
 
     vi.unstubAllGlobals()
   })

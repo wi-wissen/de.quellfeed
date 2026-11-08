@@ -52,7 +52,8 @@ export default {
     translating: 'Translating article…',
     translatingProgress: 'Translating article… ({done}/{total})',
     translated: 'Translated. Tap again for the original.',
-    translationInterrupted: 'Translation interrupted — tap translate again to continue. Finished paragraphs are kept.',
+    translationInterrupted:
+      'Translation interrupted — tap translate again to continue. Finished paragraphs are kept.',
     showOriginal: 'Show original',
     updated: 'Article updated.',
     summarize: 'Summarize',
@@ -122,7 +123,8 @@ export default {
     },
     readingFont: 'Font',
     readingFontSize: 'Font size',
-    readingFontSizeHint: 'Currently {percent} % of the normal reading size. Relative, so it follows your system font size.',
+    readingFontSizeHint:
+      'Currently {percent} % of the normal reading size. Relative, so it follows your system font size.',
     readingWidth: 'Line width',
     readingWidths: {
       narrow: 'Narrow',
@@ -133,30 +135,36 @@ export default {
     syncIndex: {
       hint: 'Everything runs straight between your device and your server. We run none of it and see none of it.',
       on: 'On',
-      difference: 'WebDAV syncs feeds and articles in both directions, deletions included. KaraKeep and Linkwarden are bookmark services: the server holds the truth there, only saved articles are synced — and feeds not at all.',
+      difference:
+        'WebDAV syncs feeds and articles in both directions, deletions included. KaraKeep and Linkwarden are bookmark services: the server holds the truth there, only saved articles are synced — and feeds not at all.',
       webdav: {
         title: 'WebDAV',
-        subtitle: 'Nextcloud, ownCloud, Synology … — one file in our own JSON format on your server: feeds, articles and read state all travel with it, both ways.',
+        subtitle:
+          'Nextcloud, ownCloud, Synology … — one file in our own JSON format on your server: feeds, articles and read state all travel with it, both ways.',
       },
       karakeep: {
         title: 'KaraKeep',
-        subtitle: 'Your own KaraKeep server — saved articles only, but the best field fit: publication date, archive and the saved flag all have a home there.',
+        subtitle:
+          'Your own KaraKeep server — saved articles only, but the best field fit: publication date, archive and the saved flag all have a home there.',
       },
       linkwarden: {
         title: 'Linkwarden',
-        subtitle: 'Your own Linkwarden server — saved articles only; the archive is mirrored as a second collection, and it can store neither the publication date nor the read state.',
+        subtitle:
+          'Your own Linkwarden server — saved articles only; the archive is mirrored as a second collection, and it can store neither the publication date nor the read state.',
       },
     },
     karakeep: {
       title: 'KaraKeep',
       hint: 'Syncs your saved articles with your KaraKeep instance. Saved flag and archive travel with them — Quell\'s archive is KaraKeep\'s "Archived"; an article deleted here is deleted there too.',
-      noReadState: 'Read state is not synced with KaraKeep: KaraKeep has no read field, and its "Archived" belongs to the archive. Read state still travels via WebDAV.',
+      noReadState:
+        'Read state is not synced with KaraKeep: KaraKeep has no read field, and its "Archived" belongs to the archive. Read state still travels via WebDAV.',
       baseUrl: 'Server URL',
       baseUrlPlaceholder: 'https://karakeep.example.com',
       apiKey: 'API key',
       apiKeyHint: 'Create the key in KaraKeep under Settings → API Keys.',
       favouritesOnly: 'Only pull favourites',
-      favouritesOnlyHint: 'Recommended. Otherwise your entire KaraKeep library lands in the reader, not just what you favourited there.',
+      favouritesOnlyHint:
+        'Recommended. Otherwise your entire KaraKeep library lands in the reader, not just what you favourited there.',
       enabled: 'Sync automatically',
       lastSync: 'Last synced',
       never: 'Never',
@@ -182,7 +190,8 @@ export default {
     linkwarden: {
       title: 'Linkwarden',
       hint: 'Syncs your saved articles with your Linkwarden instance.',
-      archiveCollection: 'Linkwarden has no archive field, so your archive lives in a second collection "{name} Archive". It is only created the first time you archive something. Without a collection (empty = "Unorganized") the archive is not synced.',
+      archiveCollection:
+        'Linkwarden has no archive field, so your archive lives in a second collection "{name} Archive". It is only created the first time you archive something. Without a collection (empty = "Unorganized") the archive is not synced.',
       baseUrl: 'Server URL',
       baseUrlPlaceholder: 'https://linkwarden.example.com',
       apiKey: 'Access token',
@@ -190,8 +199,10 @@ export default {
       cloudPlan:
         'Careful with cloud.linkwarden.app: its API is gated behind a subscription. Without one the token is issued but every call answers "You are not a subscriber". A self-hosted instance has no such gate.',
       collection: 'Collection',
-      collectionHint: 'Articles are written to this collection and pulled only from it. Leave empty for "Unorganized" — but then your whole Linkwarden library comes across.',
-      noDate: 'Linkwarden cannot store a publication date — articles pulled from there carry the import date, not the real one.',
+      collectionHint:
+        'Articles are written to this collection and pulled only from it. Leave empty for "Unorganized" — but then your whole Linkwarden library comes across.',
+      noDate:
+        'Linkwarden cannot store a publication date — articles pulled from there carry the import date, not the real one.',
       noReadState: 'Read state is not synced with Linkwarden; it stays purely local.',
       enabled: 'Sync automatically',
       lastSync: 'Last synced',
@@ -203,7 +214,8 @@ export default {
       notConfigured: 'No Linkwarden instance set up yet — server URL and access token are missing.',
       errors: {
         unauthorized: 'Linkwarden rejected the access token.',
-        forbidden: 'Linkwarden denied access. On cloud.linkwarden.app this is almost always the missing subscription.',
+        forbidden:
+          'Linkwarden denied access. On cloud.linkwarden.app this is almost always the missing subscription.',
         notFound: 'No Linkwarden API found at that server URL. Does the collection exist?',
         conflict: 'Another device wrote at the same time. Try again.',
         rateLimited: 'Too many requests to Linkwarden — please wait a moment.',
@@ -222,8 +234,10 @@ export default {
       serverUrlPlaceholder: 'https://cloud.example.com/remote.php/dav/files/YOURNAME/',
       username: 'Username',
       password: 'Password',
-      passwordHint: 'Use an app password, not your account password. With two-factor auth enabled it is the only way anyway. The password is stored unencrypted on the device.',
-      pathHint: 'The folder has to exist on the server already — the app cannot create folders (Android does not allow the WebDAV method that would be needed). The file itself is created on the first sync.',
+      passwordHint:
+        'Use an app password, not your account password. With two-factor auth enabled it is the only way anyway. The password is stored unencrypted on the device.',
+      pathHint:
+        'The folder has to exist on the server already — the app cannot create folders (Android does not allow the WebDAV method that would be needed). The file itself is created on the first sync.',
       path: 'File name',
       test: 'Test connection',
       testOk: 'Connection works.',
@@ -249,11 +263,12 @@ export default {
       },
     },
     paywall: {
-      hint: 'Subscribe to a newspaper? Sign in here once and Quell Feed will read the full article instead of the teaser. The sign-in happens on the paper\'s own page — we never see your password and it never leaves your device.',
-      loginUrl: 'The paper\'s login page',
+      hint: "Subscribe to a newspaper? Sign in here once and Quell Feed will read the full article instead of the teaser. The sign-in happens on the paper's own page — we never see your password and it never leaves your device.",
+      loginUrl: "The paper's login page",
       loginUrlPlaceholder: 'https://www.example.com/login',
       add: 'Add site and sign in',
-      stayLoggedIn: 'Important: tick "stay signed in" when you log in. Without it the system discards the session the next time the app starts, and you would have to sign in every time.',
+      stayLoggedIn:
+        'Important: tick "stay signed in" when you log in. Without it the system discards the session the next time the app starts, and you would have to sign in every time.',
       sites: 'Your sites',
       noSites: 'No sites yet.',
       signIn: 'Sign in again',
@@ -266,7 +281,8 @@ export default {
       unsupported: 'This only works in the app, not in the browser.',
     },
     cache: 'Cache',
-    cacheHint: 'Clears domain configs, saved article content and the feed refresh cache. Your feeds and articles stay.',
+    cacheHint:
+      'Clears domain configs, saved article content and the feed refresh cache. Your feeds and articles stay.',
     feeds: 'Subscribed feeds',
     noFeeds: 'No feeds subscribed.',
     feedDetail: {
@@ -275,7 +291,8 @@ export default {
       filterTitle: 'Quell filter',
       filterLabel: 'Quell filter',
       filterPlaceholder: 'e.g. no astronomy topics',
-      filterHint: 'Describe, in your own words, what you do not want to see in this feed. Only NEW items are rated when the feed refreshes — quelled items are not deleted, they stay stored and can be shown again from the three-dot menu in the feed.',
+      filterHint:
+        'Describe, in your own words, what you do not want to see in this feed. Only NEW items are rated when the feed refreshes — quelled items are not deleted, they stay stored and can be shown again from the three-dot menu in the feed.',
       needsAiKey: 'The filter needs an AI key on file, otherwise it does nothing.',
       openAiSettings: 'Open AI settings',
       quelledCount: 'Currently quelled: {n} items.',
@@ -285,7 +302,8 @@ export default {
     bookmarks: 'Reading list',
     importBookmarks: 'Import bookmarks',
     exportBookmarks: 'Export bookmarks',
-    bookmarksHint: 'Netscape bookmark format — the same one every browser and floccus reads and writes. OPML is for the feeds; reading list and archive are one bookmark file each, so a restore puts everything back on its own shelf.',
+    bookmarksHint:
+      'Netscape bookmark format — the same one every browser and floccus reads and writes. OPML is for the feeds; reading list and archive are one bookmark file each, so a restore puts everything back on its own shelf.',
     bookmarksImported: 'Imported {imported} articles, {skipped} already present.',
     noBookmarks: 'No articles saved yet.',
     bookmarkCount: '{n} saved articles',
@@ -321,7 +339,8 @@ export default {
       model: 'Model',
       modelPlaceholder: 'e.g. deepseek/deepseek-v4-flash',
       features: 'What the AI does',
-      featuresHint: 'Summarize: a TL;DR at the top of an article, on request. Translate: the language icon in the article bar translates the whole text into your app language. Both only run when you ask — your credit is never spent unprompted.',
+      featuresHint:
+        'Summarize: a TL;DR at the top of an article, on request. Translate: the language icon in the article bar translates the whole text into your app language. Both only run when you ask — your credit is never spent unprompted.',
       transfer: {
         title: 'Transfer from your computer',
         hint: 'Open quellfeed.de/setup-ai on your computer, fill in provider, key and model, then scan the QR code with your phone camera. The app asks before applying anything.',
@@ -334,7 +353,8 @@ export default {
       hint: 'Your key stays on the device and only ever goes to the provider you pick. Quell Feed has no backend — there is nobody else who could see it.',
       notConfigured: 'No API key set.',
       notes: {
-        freeRouter: 'The Free Models Router uses free models — you only need your own key. Whether their output may be reused is unclear; we make no claim either way.',
+        freeRouter:
+          'The Free Models Router uses free models — you only need your own key. Whether their output may be reused is unclear; we make no claim either way.',
       },
       errors: {
         notConfigured: 'Set an API key in the settings first.',
@@ -353,9 +373,11 @@ export default {
     domainConfigBaseUrl: 'Config base URL',
     domainConfigPlaceholder: 'https://quellfeed.de/configs',
     domainConfigReset: 'Restore default',
-    domainConfigHint: 'Per-site reading rules, fetched from this address (under /<domain>.json). Leave empty to turn the fetching off entirely — the built-in extraction then handles every site.',
+    domainConfigHint:
+      'Per-site reading rules, fetched from this address (under /<domain>.json). Leave empty to turn the fetching off entirely — the built-in extraction then handles every site.',
     clearCache: 'Clear cache',
-    clearCacheConfirm: 'This clears domain configs, saved article content, and the feed refresh cache. Continue?',
+    clearCacheConfirm:
+      'This clears domain configs, saved article content, and the feed refresh cache. Continue?',
     clearCacheDone: 'Cleared {articles} article caches and {configs} domain config caches.',
     lastUpdated: 'Last updated',
     never: 'Never',

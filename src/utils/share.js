@@ -212,7 +212,7 @@ function buildSheetHtml({ url, qrDataUrl }, t) {
  * app are entitled to the default.
  */
 export async function openShareFallbackSheet({ url }, t) {
-  let qrDataUrl = ''
+  let qrDataUrl
   try {
     qrDataUrl = await buildQrDataUrl(url)
   } catch {
@@ -270,7 +270,7 @@ export async function shareArticle(article, t) {
   // Ask before trying. canShare() is the supported way to know whether the platform
   // can share at all (native always says yes; the web shim says no when there is no
   // navigator.share), and it means we don't have to guess from a thrown error.
-  let canShare = false
+  let canShare
   try {
     const result = await Share.canShare()
     canShare = Boolean(result?.value)

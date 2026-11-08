@@ -19,12 +19,12 @@
         :placeholder="$t('settings.domainConfigPlaceholder')"
         :value="domainConfigBaseUrl"
         clear-button
-        @input="domainConfigBaseUrl = $event.target.value"
-        @keyup.enter="saveDomainConfigBaseUrl"
-        @blur="saveDomainConfigBaseUrl"
         inputmode="url"
         autocapitalize="off"
         autocorrect="off"
+        @input="domainConfigBaseUrl = $event.target.value"
+        @keyup.enter="saveDomainConfigBaseUrl"
+        @blur="saveDomainConfigBaseUrl"
       ></f7-list-input>
       <!-- Clearing the URL turns remote configs off entirely (a feature) — which makes
            the way BACK essential: nobody remembers the default address by heart. -->
@@ -76,7 +76,9 @@ export default {
     showReset() {
       return (
         Boolean(this.defaultConfigBaseUrl) &&
-        String(this.domainConfigBaseUrl || '').trim().replace(/\/+$/, '') !== this.defaultConfigBaseUrl
+        String(this.domainConfigBaseUrl || '')
+          .trim()
+          .replace(/\/+$/, '') !== this.defaultConfigBaseUrl
       )
     },
   },
@@ -89,7 +91,9 @@ export default {
       this.saveDomainConfigBaseUrl()
     },
     async saveDomainConfigBaseUrl() {
-      const normalized = String(this.domainConfigBaseUrl || '').trim().replace(/\/+$/, '')
+      const normalized = String(this.domainConfigBaseUrl || '')
+        .trim()
+        .replace(/\/+$/, '')
       if (normalized === this.$store.settings.domainConfigBaseUrl) return
 
       this.domainConfigBaseUrl = normalized

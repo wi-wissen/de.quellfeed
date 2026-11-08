@@ -17,6 +17,10 @@ import interUrl from '@fontsource-variable/inter/files/inter-latin-wght-normal.w
 import literataUrl from '@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url'
 import causeUrl from '@fontsource-variable/cause/files/cause-latin-wght-normal.woff2?url'
 import specialElite400Url from '@fontsource/special-elite/files/special-elite-latin-400-normal.woff2?url'
+import interExtUrl from '@fontsource-variable/inter/files/inter-latin-ext-wght-normal.woff2?url'
+import literataExtUrl from '@fontsource-variable/literata/files/literata-latin-ext-wght-normal.woff2?url'
+import causeExtUrl from '@fontsource-variable/cause/files/cause-latin-ext-wght-normal.woff2?url'
+import specialEliteExtUrl from '@fontsource/special-elite/files/special-elite-latin-ext-400-normal.woff2?url'
 import playwrite400Url from '@fontsource/playwrite-de-va/files/playwrite-de-va-latin-400-normal.woff2?url'
 
 const SYSTEM_STACK = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
@@ -40,28 +44,44 @@ function toAbsoluteUrl(url) {
   }
 }
 
-/** Variable font: one file covers the whole `wght` axis. */
-function variableFace(family, url, weightRange) {
-  return `
-@font-face {
-  font-family: '${family}';
-  font-style: normal;
-  font-display: swap;
-  font-weight: ${weightRange};
-  src: url(${toAbsoluteUrl(url)}) format('woff2-variations');
-}`.trim()
-}
+/**
+ * Fontsource's subset ranges. `latin` alone has ä/ö/ü/ß, but not the ř in Dvořák, the
+ * Ł in Łódź or the ő in Erdős — names that turn up in German articles all the time. A
+ * missing glyph falls back to another font mid-word. The latin-ext face fills that gap;
+ * thanks to `unicode-range` it is only loaded when such a character is on the page.
+ */
+const LATIN_RANGE =
+  'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'
+const LATIN_EXT_RANGE =
+  'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF'
 
-/** Static font: one file per weight. */
-function staticFace(family, url, weight) {
+function face(family, url, weight, format, unicodeRange) {
   return `
 @font-face {
   font-family: '${family}';
   font-style: normal;
   font-display: swap;
   font-weight: ${weight};
-  src: url(${toAbsoluteUrl(url)}) format('woff2');
+  src: url(${toAbsoluteUrl(url)}) format('${format}');${unicodeRange ? `\n  unicode-range: ${unicodeRange};` : ''}
 }`.trim()
+}
+
+/** Variable font: one file covers the whole `wght` axis. `extUrl`: the latin-ext subset. */
+function variableFace(family, url, weightRange, extUrl = null) {
+  if (!extUrl) return face(family, url, weightRange, 'woff2-variations')
+  return joinFaces(
+    face(family, url, weightRange, 'woff2-variations', LATIN_RANGE),
+    face(family, extUrl, weightRange, 'woff2-variations', LATIN_EXT_RANGE),
+  )
+}
+
+/** Static font: one file per weight. `extUrl`: the latin-ext subset. */
+function staticFace(family, url, weight, extUrl = null) {
+  if (!extUrl) return face(family, url, weight, 'woff2')
+  return joinFaces(
+    face(family, url, weight, 'woff2', LATIN_RANGE),
+    face(family, extUrl, weight, 'woff2', LATIN_EXT_RANGE),
+  )
 }
 
 function joinFaces(...faces) {
@@ -101,7 +121,7 @@ export const READING_FONTS = [
     stack: `'Inter Variable', ${SYSTEM_STACK}`,
     sizeFactor: 1,
     get faces() {
-      return variableFace('Inter Variable', interUrl, '100 900')
+      return variableFace('Inter Variable', interUrl, '100 900', interExtUrl)
     },
   },
   {
@@ -110,7 +130,7 @@ export const READING_FONTS = [
     stack: `'Literata Variable', Georgia, 'Times New Roman', serif`,
     sizeFactor: 1,
     get faces() {
-      return variableFace('Literata Variable', literataUrl, '200 900')
+      return variableFace('Literata Variable', literataUrl, '200 900', literataExtUrl)
     },
   },
   {
@@ -119,7 +139,7 @@ export const READING_FONTS = [
     stack: `'Cause Variable', ${SYSTEM_STACK}`,
     sizeFactor: 1,
     get faces() {
-      return variableFace('Cause Variable', causeUrl, '100 900')
+      return variableFace('Cause Variable', causeUrl, '100 900', causeExtUrl)
     },
   },
   {
@@ -128,7 +148,7 @@ export const READING_FONTS = [
     stack: `'Special Elite', ui-monospace, 'Courier New', monospace`,
     sizeFactor: 1,
     get faces() {
-      return staticFace('Special Elite', specialElite400Url, 400)
+      return staticFace('Special Elite', specialElite400Url, 400, specialEliteExtUrl)
     },
   },
   {
@@ -254,7 +274,9 @@ export function buildFontFaceCss(fontId) {
  * display one.
  */
 export function buildAllFontFaceCss() {
-  return READING_FONTS.map(font => font.faces).filter(Boolean).join('\n')
+  return READING_FONTS.map(font => font.faces)
+    .filter(Boolean)
+    .join('\n')
 }
 
 export const READING_FONTS_STYLE_ID = 'quell-reading-fonts'
@@ -271,8 +293,8 @@ export function injectReadingFonts(doc = typeof document === 'undefined' ? null 
   const head = doc?.head
   if (!head) return null
 
-  const existing = doc.getElementById?.(READING_FONTS_STYLE_ID)
-    || head.querySelector(`#${READING_FONTS_STYLE_ID}`)
+  const existing =
+    doc.getElementById?.(READING_FONTS_STYLE_ID) || head.querySelector(`#${READING_FONTS_STYLE_ID}`)
   if (existing) return existing
 
   const style = doc.createElement('style')
@@ -299,9 +321,10 @@ export function resolveFontScale(value) {
   const scale = numeric > LEGACY_PX_THRESHOLD ? numeric / LEGACY_PX_BASE : numeric
   const clamped = Math.min(Math.max(scale, MIN_READING_FONT_SCALE), MAX_READING_FONT_SCALE)
 
-  return READING_FONT_SCALE_VALUES.reduce((best, step) => (
-    Math.abs(step - clamped) < Math.abs(best - clamped) ? step : best
-  ), READING_FONT_SCALE_VALUES[0])
+  return READING_FONT_SCALE_VALUES.reduce(
+    (best, step) => (Math.abs(step - clamped) < Math.abs(best - clamped) ? step : best),
+    READING_FONT_SCALE_VALUES[0],
+  )
 }
 
 /**
@@ -329,8 +352,10 @@ export function resolveFontSizePx(fontId, value, basePx = 16) {
 
 /** Entry from READING_WIDTHS; unknown ids fall back to `normal`. */
 export function getReadingWidth(widthId) {
-  return READING_WIDTHS.find(width => width.id === widthId)
-    || READING_WIDTHS.find(width => width.id === DEFAULT_READING_WIDTH)
+  return (
+    READING_WIDTHS.find(width => width.id === widthId) ||
+    READING_WIDTHS.find(width => width.id === DEFAULT_READING_WIDTH)
+  )
 }
 
 /** Normalized width id (`narrow` | `normal` | `wide`). */
