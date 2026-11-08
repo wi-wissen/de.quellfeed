@@ -147,8 +147,10 @@ describe('buildAllFontFaceCss', () => {
 
   it('emits one @font-face per bundled weight, not one per font', () => {
     const css = buildAllFontFaceCss()
-    // 6 Schriften ohne System, davon eine mit zwei Schnitten (OpenDyslexic).
-    expect(css.match(/@font-face/g)).toHaveLength(7)
+    // 6 Schriften ohne System: OpenDyslexic mit zwei Schnitten, Inter, Literata, Cause
+    // und Special Elite zusätzlich mit ihrem latin-ext-Subset (ř, Ł, ő …), Playwrite ohne.
+    expect(css.match(/@font-face/g)).toHaveLength(11)
+    expect(css.match(/latin-ext/g)).toHaveLength(4)
   })
 
   it('does not bundle the removed fonts any more', () => {
@@ -508,7 +510,9 @@ describe('buildIframeDoc reading prefs', () => {
       reading: { font: 'literata', fontSize: 1 },
     })
 
-    expect(doc.match(/@font-face/g)).toHaveLength(1)
+    // latin + latin-ext of the one chosen family — nothing else.
+    expect(doc.match(/@font-face/g)).toHaveLength(2)
+    expect(new Set(doc.match(/font-family: '[^']+'/g))).toEqual(new Set(["font-family: 'Literata Variable'"]))
     for (const other of OTHER_FONT_KEYS.literata) {
       expect(doc, `${other} must not be embedded`).not.toContain(`${other}-latin`)
     }

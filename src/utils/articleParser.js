@@ -23,6 +23,10 @@ const READING_CSS = `
     /* em, not px: reading size is a factor on the system font size. */
     font-size: var(--q-reading-font-size, 1em);
   }
+  /* Headings used to inherit the body's 1.7 — fine for running text, but a heading
+     that wraps (and at 115 % or more on a phone most do) fell apart into lines with
+     a paragraph's worth of air between them. */
+  h1, h2, h3, h4, h5, h6 { line-height: 1.25; text-wrap: balance; margin: 1.6em 0 0.6em; }
   img { max-width: 100%; border-radius: 8px; height: auto; display: block; }
   .article-title {
     margin: 0 0 1.25rem;

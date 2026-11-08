@@ -55,7 +55,9 @@ describe('the reading view CSP lets our own fonts through', () => {
   it('embeds only the chosen font, not all of them', () => {
     const html = docFor('inter')
 
-    expect((html.match(/@font-face/g) || []).length).toBe(1)
+    // One family, in its latin and latin-ext subsets.
+    expect((html.match(/@font-face/g) || []).length).toBe(2)
+    expect(html).toContain('unicode-range')
     expect(html).not.toContain('Special Elite')
   })
 
