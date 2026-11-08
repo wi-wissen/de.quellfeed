@@ -89,8 +89,12 @@ export function buildIframeDoc(html, headerImageUrl = null, themeChoice = 'syste
   const title = showArticleTitle
     ? `<h1 class="article-title">${escapeHtml(articleTitle)}</h1>`
     : ''
-  const header = shouldShowHeaderImage
-    ? `<figure class="article-hero"><img src="${headerImageUrl}" alt=""></figure>`
+  // The cover URL comes straight out of the feed XML and is NOT run through DOMPurify
+  // like the article body. Unescaped, a `"` in it would let the feed write its own
+  // markup into the reading view. Only http(s) URLs get in, and always escaped.
+  const heroUrl = shouldShowHeaderImage ? safeImageUrl(headerImageUrl) : ''
+  const header = heroUrl
+    ? `<figure class="article-hero"><img src="${escapeHtml(heroUrl)}" alt=""></figure>`
     : ''
   // The article text lives in its own container so the streaming translation can
   // address "top-level block n" without counting past the title and the hero image.
@@ -144,7 +148,32 @@ function buildCsp() {
   const origin = typeof window !== 'undefined' && window.location?.origin
   const fontSrc = origin && origin !== 'null' ? `${origin} data:` : `'self' data:`
 
-  return `font-src ${fontSrc}; script-src none;`
+  // Deny by default, then open exactly what an article needs: images from anywhere
+  // (that is what articles are made of), our inline reading CSS and the `style`
+  // attributes DOMPurify lets through, our own fonts. Everything else — frames,
+  // objects, forms, fetches, media, the publisher's webfonts — stays shut.
+  // CSP keywords MUST be quoted: an unquoted `none` is read as a host named "none".
+  return [
+    "default-src 'none'",
+    'img-src https: http: data:',
+    "style-src 'unsafe-inline'",
+    `font-src ${fontSrc}`,
+    "script-src 'none'",
+    "frame-src 'none'",
+    "object-src 'none'",
+    "form-action 'none'",
+    "base-uri 'none'",
+  ].join('; ')
+}
+
+/** Only http(s) URLs may become the cover image — anything else is dropped. */
+export function safeImageUrl(value) {
+  try {
+    const url = new URL(String(value))
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : ''
+  } catch {
+    return ''
+  }
 }
 
 export async function fetchArticleContent(url, configBaseUrl = '', options = {}) {

@@ -464,7 +464,7 @@ describe('buildIframeDoc reading prefs', () => {
     expect(csp).toContain(window.location.origin)
     expect(csp).not.toContain("'self'")
     expect(csp).toContain('data:')
-    expect(csp).toContain('script-src none')
+    expect(csp).toContain("script-src 'none'")
     expect(csp).not.toContain('font-src none')
     expect(csp).not.toContain('*')
   })
