@@ -687,7 +687,12 @@ export function mergeSyncState(local, remote, options = {}) {
     const feedId = (feedUrl && mergedFeedByUrl.get(feedUrl)?.id)
       || (detached ? null : localArticle?.feedId)
       || null
-    mergedArticles.push(mergeArticle(localArticle, remoteArticle, feedId, newId))
+    const merged = mergeArticle(localArticle, remoteArticle, feedId, newId)
+    // Retention (see retention.js): an expired, unsaved feed article is dropped from BOTH
+    // sides here, without a tombstone — otherwise the shared file would hand every
+    // article that one device pruned straight back to it, forever.
+    if (options.keepArticle && !options.keepArticle(merged)) continue
+    mergedArticles.push(merged)
   }
 
   // Newest first, like the store. The url is a tie-break, not decoration: feed items very

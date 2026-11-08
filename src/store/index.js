@@ -26,9 +26,12 @@ import { clearDomainConfigCache, getDefaultConfigBaseUrl, normalizeConfigBaseUrl
 import { getFaviconUrl } from '../utils/favicon.js'
 import { applyTheme, resolveThemeChoice } from '../utils/theme.js'
 import { mapSettledWithLimit } from '../utils/concurrency.js'
+import { loadArticles as loadArticleFiles, saveArticles as saveArticleFiles } from '../utils/articleStorage.js'
+import { splitSecrets, hasPlainSecrets, loadSecrets, saveSecrets } from '../utils/secretStorage.js'
+import { retentionCutoff, isKeptArticle, pruneArticles } from '../utils/retention.js'
 
 const FEEDS_KEY = 'quell:feeds'
-const ARTICLES_KEY = 'quell:articles'
+const FEED_ITEMS_KEY = 'quell:feedItems'
 const SETTINGS_KEY = 'quell:settings'
 const TOMBSTONES_KEY = 'quell:tombstones'
 const LAST_FETCH_KEY = 'quell:lastFetch'
@@ -51,6 +54,9 @@ export const store = reactive({
   // Deletions need graves. Without them a feed deleted on the phone would simply
   // come back from the tablet on the next sync.
   tombstones: createEmptyTombstones(),
+  // feedId -> URLs the feed delivered on its last successful refresh. Retention never
+  // prunes what a feed still carries — it would only come back as "new" (retention.js).
+  feedItemUrls: {},
   settings: {
     language: navigator.language?.startsWith('de') ? 'de' : 'en',
     theme: 'system',
@@ -116,6 +122,16 @@ export const store = reactive({
     this.settings.karakeep = { ...DEFAULT_KARAKEEP_SETTINGS, ...(karakeep || {}) }
     this.settings.linkwarden = { ...DEFAULT_LINKWARDEN_SETTINGS, ...(linkwarden || {}) }
     this.settings.paywall = { ...DEFAULT_PAYWALL_SETTINGS, ...(paywall || {}) }
+
+    // Passwords and keys come from the secure store (secretStorage.js). A blob written by
+    // an older version still has them in the clear: they win once, are moved over, and
+    // the blob is rewritten without them.
+    const secrets = await loadSecrets()
+    for (const [name, value] of Object.entries(secrets)) {
+      const [section, field] = name.split('.')
+      if (value) this.settings[section][field] = value
+    }
+    if (hasPlainSecrets(saved)) await this.saveSettings()
   },
   async loadTombstones() {
     this.tombstones = normalizeTombstones(await storageGet(TOMBSTONES_KEY))
@@ -157,6 +173,7 @@ export const store = reactive({
       const result = await syncWithWebdav(
         { feeds: this.feeds, articles: this.articles, tombstones: this.tombstones },
         this.settings.webdav,
+        { keepArticle: this._keepArticlePredicate() },
       )
 
       // Only touch local storage when the merge actually produced something new —
@@ -208,7 +225,11 @@ export const store = reactive({
     }
   },
   async saveSettings() {
-    await storageSet(SETTINGS_KEY, this.settings)
+    const { settings, secrets } = splitSecrets(this.settings)
+    // Secrets first: when the blob is migrated, it must never be written without them
+    // before they are safe in the secure store.
+    await saveSecrets(secrets)
+    await storageSet(SETTINGS_KEY, settings)
   },
   async setTheme(theme) {
     this.settings.theme = theme || 'system'
@@ -269,8 +290,9 @@ export const store = reactive({
     await this.saveFeeds()
 
     const newArticles = parsed.items.map(item => normalizeArticle(item, feed.id))
+    this.feedItemUrls[feed.id] = newArticles.map(a => a.url)
     this._mergeArticles(newArticles)
-    await this.saveArticles()
+    await Promise.all([this.saveArticles(), storageSet(FEED_ITEMS_KEY, this.feedItemUrls)])
     return feed
   },
   /**
@@ -402,10 +424,35 @@ export const store = reactive({
 
   // ── Articles ──────────────────────────────────────────────
   async loadArticles() {
-    this.articles = (await storageGet(ARTICLES_KEY)) || []
+    const [articles, feedItems] = await Promise.all([loadArticleFiles(), storageGet(FEED_ITEMS_KEY)])
+    this.articles = articles
+    this.feedItemUrls = feedItems && typeof feedItems === 'object' ? feedItems : {}
   },
   async saveArticles() {
-    await storageSet(ARTICLES_KEY, this.articles)
+    await saveArticleFiles(this.articles)
+  },
+  /** feedId -> Set of the URLs that feed carried on its last successful refresh. */
+  _currentUrlsByFeed() {
+    const map = new Map()
+    for (const [feedId, urls] of Object.entries(this.feedItemUrls || {})) {
+      if (Array.isArray(urls)) map.set(feedId, new Set(urls))
+    }
+    return map
+  },
+  /** The retention rule as one predicate — the same one the WebDAV merge applies. */
+  _keepArticlePredicate(now = Date.now()) {
+    const cutoff = retentionCutoff(now)
+    const current = this._currentUrlsByFeed()
+    return article => isKeptArticle(article, cutoff, current)
+  },
+  /**
+   * Drops unsaved feed articles past the retention window (retention.js). Returns how
+   * many went. Saved, archived and link articles are never touched.
+   */
+  pruneOldArticles(now = Date.now()) {
+    const { articles, removed } = pruneArticles(this.articles, retentionCutoff(now), this._currentUrlsByFeed())
+    if (removed > 0) this.articles = articles
+    return removed
   },
   _mergeArticles(incoming) {
     const existingUrls = new Set(this.articles.map(a => a.url))
@@ -640,7 +687,14 @@ export const store = reactive({
     this.refreshing = true
     try {
       await mapSettledWithLimit(this.feeds, REFRESH_CONCURRENCY, f => this._refreshFeed(f))
+      // Forget the item lists of feeds that no longer exist.
+      const feedIds = new Set(this.feeds.map(f => f.id))
+      for (const id of Object.keys(this.feedItemUrls)) {
+        if (!feedIds.has(id)) delete this.feedItemUrls[id]
+      }
+      this.pruneOldArticles()
       await storageSet(LAST_FETCH_KEY, new Date().toISOString())
+      await storageSet(FEED_ITEMS_KEY, this.feedItemUrls)
       await this.saveArticles()
       await this.saveFeeds()
     } finally {
@@ -654,6 +708,7 @@ export const store = reactive({
       if (parsed.title) feed.title = parsed.title
       if (parsed.language) feed.language = parsed.language
       const newArticles = parsed.items.map(item => normalizeArticle(item, feed.id))
+      this.feedItemUrls[feed.id] = newArticles.map(a => a.url)
       // BEFORE the merge, deliberately: once merged, an item's URL is "known" and
       // will never be rated again — rating costs the user's own API credit.
       await this._applyQuellFilter(feed, newArticles)

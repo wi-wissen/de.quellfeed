@@ -33,7 +33,7 @@ code says so instead of pretending.
 | HTTP (dev web) | same-origin proxy as Vite middleware |
 | Feed parsing | own `DOMParser`-based parser (RSS + Atom) |
 | Article extraction | `@mozilla/readability` + `dompurify` |
-| Persistence | `@capacitor/preferences` |
+| Persistence | `@capacitor/filesystem` (articles), `@capacitor/preferences` (feeds, settings), `@aparajita/capacitor-secure-storage` (keys, passwords) |
 | Tests | Vitest (jsdom) |
 
 ## Getting started
@@ -238,6 +238,25 @@ settings    language, theme, reading{font,size,width},
 
 `source` is only set on link articles; for feed articles the feed title is the source name.
 `cachedHtml` exists only for saved articles and is what makes them readable offline.
+
+### Where it lives
+
+| What | Where | Why |
+|---|---|---|
+| Articles | `quell/articles.json` in the app's files dir, **without** `cachedHtml` | Small; rewritten on every change |
+| Offline copies | `quell/html/<id>.html`, one per article | Written only when they change; excluded from cloud backup |
+| Feeds, settings, tombstones | `@capacitor/preferences` | Small key/value data — what it is made for |
+| API keys, passwords | Android Keystore / iOS Keychain | Never in the settings blob, never in a backup |
+
+The articles used to be a single Preferences entry — SharedPreferences on Android, read and
+rewritten as a whole on every tap, offline HTML included. [`articleStorage.js`](src/utils/articleStorage.js)
+moves an old entry over on first start. Saves are serialised and collapse, so a burst of taps
+causes one or two writes.
+
+**Retention.** Unsaved feed articles older than 60 days are pruned after each refresh
+([`retention.js`](src/utils/retention.js)), unless the feed still carries them — otherwise
+they would return as "new". Saved, archived and link articles are never pruned. The WebDAV
+merge applies the same rule, so the shared file shrinks too.
 
 ## Domain configs
 
