@@ -55,7 +55,7 @@ the Vite server**, so it is same-origin by construction. A different port change
 
 In a browser, CORS blocks fetching foreign feeds and article pages. Natively it does not —
 everything goes through `CapacitorHttp`. So the dev web build has proxy middleware in
-[vite.config.js](vite.config.js):
+[vite.config.mjs](vite.config.mjs):
 
 ```
 GET /__proxy?url=https%3A%2F%2Fexample.com%2Ffeed     # feeds and articles

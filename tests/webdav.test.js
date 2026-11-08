@@ -299,7 +299,7 @@ describe('the password never leaves the device in a log or an error', () => {
 describe('the browser dev build goes through the Vite proxy', () => {
   // A direct call would die on CORS — no WebDAV server sends
   // Access-Control-Allow-Origin for an authenticated PUT. The /__dav middleware in
-  // vite.config.js passes the body, the Authorization header and If-Match through,
+  // vite.config.mjs passes the body, the Authorization header and If-Match through,
   // and hands the ETag back, which is what keeps conflict detection alive here.
   it('routes through /__dav instead of CapacitorHttp, carrying auth and If-Match', async () => {
     Capacitor.isNativePlatform.mockReturnValue(false)

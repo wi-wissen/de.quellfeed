@@ -1,7 +1,7 @@
 import { CapacitorHttp } from '@capacitor/core'
 import { debug } from './log.js'
 
-// Same-origin dev proxy, served by the Vite middleware in vite.config.js.
+// Same-origin dev proxy, served by the Vite middleware in vite.config.mjs.
 // Relative on purpose: it keeps working no matter which port Vite ends up on.
 const DEV_PROXY_PATH = '/__proxy'
 

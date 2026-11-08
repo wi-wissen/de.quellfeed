@@ -82,7 +82,7 @@ import { debug } from './log.js'
 // Linkwarden sends no Access-Control-Allow-Origin at all (no headers() in next.config.js,
 // no middleware, no cors dependency), so a direct browser call dies on CORS. Native goes
 // through CapacitorHttp; the browser dev build goes through the /__dav middleware in
-// vite.config.js, which is only *named* after WebDAV — it passes the method, the body, the
+// vite.config.mjs, which is only *named* after WebDAV — it passes the method, the body, the
 // Authorization header and Content-Type straight through. Exactly what webdav.js does.
 
 import { Capacitor, CapacitorHttp } from '@capacitor/core'

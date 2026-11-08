@@ -137,7 +137,7 @@ function basicAuthHeader(username, password) {
 
 // ── Transport ───────────────────────────────────────────────────────────────
 
-// Same-origin dev proxy for WebDAV, served by the middleware in vite.config.js.
+// Same-origin dev proxy for WebDAV, served by the middleware in vite.config.mjs.
 // Unlike /__proxy it passes PUT bodies, Authorization and If-Match through, and hands
 // the ETag back — without which conflict detection would be dead in the browser.
 const DEV_DAV_PROXY_PATH = '/__dav'

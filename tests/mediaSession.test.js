@@ -28,7 +28,8 @@ function stubMediaSession() {
 
 function stubAudio() {
   const element = { play: vi.fn().mockResolvedValue(undefined), pause: vi.fn(), removeAttribute: vi.fn(), load: vi.fn() }
-  window.Audio = vi.fn(() => element)
+  // A `function`, not an arrow: since Vitest 4 a mock called with `new` must be constructible.
+  window.Audio = vi.fn(function () { return element })
   return element
 }
 
