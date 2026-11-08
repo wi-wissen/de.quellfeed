@@ -1,3 +1,4 @@
+import { debug } from './log.js'
 // WebDAV transport for the sync file. The format itself lives in src/utils/sync.js —
 // this module only moves bytes and turns HTTP status codes into the project's error
 // codes.
@@ -284,7 +285,7 @@ export async function getFile(config, path = '') {
     responseType: 'text',
   })
 
-  console.info('[webdav] GET', { url, status: res.status })
+  debug('[webdav] GET', { url, status: res.status })
 
   if (res.status === 404) return { status: 404, data: null, etag: null }
   if (res.status < 200 || res.status > 299) throwForStatus(res.status)
@@ -342,7 +343,7 @@ export async function putFile(config, path, content, options = {}) {
     responseType: 'text',
   })
 
-  console.info('[webdav] PUT', { url, status: res.status, ifMatch: Boolean(options.etag) })
+  debug('[webdav] PUT', { url, status: res.status, ifMatch: Boolean(options.etag) })
 
   if (res.status < 200 || res.status > 299) throwForStatus(res.status)
 
@@ -383,7 +384,7 @@ export async function testConnection(config, path = '') {
     responseType: 'text',
   })
 
-  console.info('[webdav] testConnection', { url, status: res.status })
+  debug('[webdav] testConnection', { url, status: res.status })
 
   if (res.status === 401 || res.status === 403 || res.status >= 500) throwForStatus(res.status)
 

@@ -151,6 +151,7 @@
 </template>
 
 <script>
+import { debug } from '../utils/log.js'
 import { f7 } from 'framework7-vue'
 import { Clipboard } from '@capacitor/clipboard'
 import { shareArticle as shareArticleTo } from '../utils/share.js'
@@ -514,7 +515,7 @@ export default {
       const startedAt = performance.now()
       const articleMeta = buildArticleDebugMeta(this.article)
 
-      console.info('[ReadingView] loadArticle:start', {
+      debug('[ReadingView] loadArticle:start', {
         ...articleMeta,
         forceRefresh,
         loadingState: this.loadingState,
@@ -526,7 +527,7 @@ export default {
         const domain = new URL(this.article.url).hostname.replace(/^www\./, '')
         this.articleConfig = await getDomainConfig(domain, this.$store.settings.domainConfigBaseUrl)
         this.renderIframe()
-        console.info('[ReadingView] loadArticle:cache-hit', {
+        debug('[ReadingView] loadArticle:cache-hit', {
           ...articleMeta,
           domain,
           durationMs: Math.round(performance.now() - startedAt),
@@ -547,7 +548,7 @@ export default {
       }
 
       try {
-        console.info('[ReadingView] loadArticle:fetching', {
+        debug('[ReadingView] loadArticle:fetching', {
           ...articleMeta,
           forceRefresh,
           loadingState: this.loadingState,
@@ -571,12 +572,12 @@ export default {
         this.renderIframe()
         if (this.article.isSaved) {
           await this.$store.cacheHtml(this.article.id, html)
-          console.info('[ReadingView] loadArticle:cached', {
+          debug('[ReadingView] loadArticle:cached', {
             ...articleMeta,
             htmlLength: html.length,
           })
         }
-        console.info('[ReadingView] loadArticle:success', {
+        debug('[ReadingView] loadArticle:success', {
           ...articleMeta,
           loadingState: this.loadingState,
           htmlLength: html.length,

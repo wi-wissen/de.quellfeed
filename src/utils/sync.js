@@ -1,3 +1,4 @@
+import { debug } from './log.js'
 // WebDAV sync: the file format, the merge, and the round-trip that ties them together.
 // The HTTP side lives in src/utils/webdav.js.
 //
@@ -877,7 +878,7 @@ export async function syncWithWebdav(localState, settings, options = {}) {
     if (err?.message !== 'conflict') throw err
     // Someone else wrote first. Everything we know still holds — merge it with what is
     // there now and write once more.
-    console.info('[sync] write conflict, merging again')
+    debug('[sync] write conflict, merging again')
     result = await attempt()
   }
 

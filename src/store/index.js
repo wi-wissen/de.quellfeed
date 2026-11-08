@@ -1,3 +1,4 @@
+import { debug } from '../utils/log.js'
 import { reactive } from 'vue'
 import { storageGet, storageSet, storageRemove } from '../utils/storage.js'
 import { fetchAndParseFeed, normalizeArticle, discoverFeedUrl } from '../utils/feedParser.js'
@@ -24,6 +25,7 @@ import { DEFAULT_LINKWARDEN_SETTINGS, syncWithLinkwarden, deleteFromLinkwarden }
 import { clearDomainConfigCache, getDefaultConfigBaseUrl, normalizeConfigBaseUrl } from '../utils/domainConfig.js'
 import { getFaviconUrl } from '../utils/favicon.js'
 import { applyTheme, resolveThemeChoice } from '../utils/theme.js'
+import { mapSettledWithLimit } from '../utils/concurrency.js'
 
 const FEEDS_KEY = 'quell:feeds'
 const ARTICLES_KEY = 'quell:articles'
@@ -31,6 +33,9 @@ const SETTINGS_KEY = 'quell:settings'
 const TOMBSTONES_KEY = 'quell:tombstones'
 const LAST_FETCH_KEY = 'quell:lastFetch'
 const REFRESH_INTERVAL = 5 * 60 * 1000 // 5 minutes
+// Feeds fetched at once. Enough to keep a refresh quick, few enough not to choke a
+// phone's connection pool (or a slow feed's neighbours).
+const REFRESH_CONCURRENCY = 6
 
 function hostnameOf(url) {
   try {
@@ -238,13 +243,13 @@ export const store = reactive({
     await storageSet(FEEDS_KEY, this.feeds)
   },
   async addFeed(url) {
-    console.log('[store] addFeed:', url)
+    debug('[store] addFeed:', url)
     const feedUrl = await discoverFeedUrl(url)
-    console.log('[store] discovered feed URL:', feedUrl)
+    debug('[store] discovered feed URL:', feedUrl)
     if (!feedUrl) throw new Error('not_found')
     if (this.feeds.find(f => f.url === feedUrl)) throw new Error('already_added')
 
-    console.log('[store] fetching feed:', feedUrl)
+    debug('[store] fetching feed:', feedUrl)
     const parsed = await fetchAndParseFeed(feedUrl)
     const feed = {
       id: crypto.randomUUID(),
@@ -315,7 +320,7 @@ export const store = reactive({
 
   // ── Links (standalone articles, no feed behind them) ───────
   async addLink(url) {
-    console.log('[store] addLink:', url)
+    debug('[store] addLink:', url)
 
     let metadata
     try {
@@ -634,7 +639,7 @@ export const store = reactive({
     if (this.refreshing || this.feeds.length === 0) return
     this.refreshing = true
     try {
-      await Promise.allSettled(this.feeds.map(f => this._refreshFeed(f)))
+      await mapSettledWithLimit(this.feeds, REFRESH_CONCURRENCY, f => this._refreshFeed(f))
       await storageSet(LAST_FETCH_KEY, new Date().toISOString())
       await this.saveArticles()
       await this.saveFeeds()

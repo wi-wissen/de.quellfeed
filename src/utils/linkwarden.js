@@ -1,3 +1,4 @@
+import { debug } from './log.js'
 // Linkwarden sync for the saved articles.
 //
 // Same contract as src/utils/karakeep.js, and the same warning: this is NOT the two-way
@@ -329,7 +330,7 @@ async function rawRequest(config, { method, path, query, body }) {
   }
 
   // The url is logged, the token is not — it only ever lives in the header.
-  console.info('[linkwarden]', method, { url, status: res.status })
+  debug('[linkwarden]', method, { url, status: res.status })
 
   return { status: res.status, data: parseBody(res.data) }
 }

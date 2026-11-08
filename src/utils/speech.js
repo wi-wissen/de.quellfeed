@@ -1,3 +1,4 @@
+import { debug } from './log.js'
 // Reads an article aloud through the OS speech engine.
 //
 // ── What the plugin actually gives us (@capacitor-community/text-to-speech 5.1.0)
@@ -302,7 +303,7 @@ export function createSpeechController(handlers = {}) {
         if (!speaking && !paused) return
         if (!sawRangeEvent) {
           sawRangeEvent = true
-          console.info('[speech] engine reports word positions — resume will be word-accurate')
+          debug('[speech] engine reports word positions — resume will be word-accurate')
         }
         chunkOffset = (rangeBases[chunkIndex] || 0) + (Number(info?.start) || 0)
       })

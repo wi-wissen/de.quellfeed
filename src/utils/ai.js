@@ -1,3 +1,4 @@
+import { debug } from './log.js'
 // BYOK (Bring Your Own Key) AI helpers.
 //
 // Quell has no backend and never will, so every AI call goes straight from the
@@ -327,7 +328,7 @@ export async function chatCompletion(messages, settings, options = {}) {
   const url = `${config.baseUrl}/chat/completions`
 
   // Logs carry the model and the endpoint, never the key or the article.
-  console.info('[ai] chatCompletion', { provider: config.provider, url, model })
+  debug('[ai] chatCompletion', { provider: config.provider, url, model })
 
   let res
   try {
@@ -430,7 +431,7 @@ async function requestCompletionStream(fetchFn, messages, settings, options = {}
   const url = `${config.baseUrl}/chat/completions`
 
   // Logs carry the model and the endpoint, never the key or the article.
-  console.info('[ai] chatCompletionStream', { provider: config.provider, url, model })
+  debug('[ai] chatCompletionStream', { provider: config.provider, url, model })
 
   let res
   try {
