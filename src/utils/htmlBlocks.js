@@ -9,8 +9,20 @@
 
 /** Elements that never have a closing tag — they must not change the nesting depth. */
 const VOID_TAGS = new Set([
-  'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
-  'link', 'meta', 'param', 'source', 'track', 'wbr',
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
 ])
 
 /**
@@ -23,8 +35,24 @@ const VOID_TAGS = new Set([
 const CONTAINER_TAGS = new Set(['div', 'section', 'article', 'main'])
 
 const BLOCK_TAGS = new Set([
-  'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'table', 'figure',
-  'blockquote', 'pre', 'hr', 'div', 'section', 'article', 'main',
+  'p',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'ul',
+  'ol',
+  'table',
+  'figure',
+  'blockquote',
+  'pre',
+  'hr',
+  'div',
+  'section',
+  'article',
+  'main',
 ])
 
 function hasBlockChild(element) {

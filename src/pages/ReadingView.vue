@@ -20,11 +20,7 @@
            in reach. Everything rarer (save/unsave, copy, reload, mark unread, open in
            browser) lives in the overflow menu. -->
       <f7-nav-right>
-        <f7-link
-          v-if="article && speechAvailable"
-          class="nav-icon-link"
-          @click="toggleSpeechPlayer"
-        >
+        <f7-link v-if="article && speechAvailable" class="nav-icon-link" @click="toggleSpeechPlayer">
           <AppIcon
             name="volume-high-outline"
             :class="speechActive && 'color-accent'"
@@ -115,18 +111,20 @@
          where we are. f7-page hoists a toolbar out of the page content by itself, so
          the article keeps scrolling free underneath it. -->
     <f7-toolbar v-if="speechActive" bottom class="speech-player">
-      <f7-link
-        class="speech-player__button"
-        :class="speechIndex <= 0 && 'disabled'"
-        @click="speechPrevious"
-      >
+      <f7-link class="speech-player__button" :class="speechIndex <= 0 && 'disabled'" @click="speechPrevious">
         <AppIcon name="play-skip-back" :label="$t('article.player.previous')" />
       </f7-link>
 
       <f7-link class="speech-player__button speech-player__button--main" @click="togglePlayback">
         <AppIcon
           :name="speaking ? 'pause' : 'play'"
-          :label="speaking ? $t('article.player.pause') : (speechPaused ? $t('article.player.resume') : $t('article.player.play'))"
+          :label="
+            speaking
+              ? $t('article.player.pause')
+              : speechPaused
+                ? $t('article.player.resume')
+                : $t('article.player.play')
+          "
         />
       </f7-link>
 
@@ -184,7 +182,7 @@ function htmlToText(html) {
  */
 function topLevelNodes(container) {
   return Array.from(container.childNodes).filter(
-    node => node.nodeType === 1 || (node.nodeType === 3 && node.textContent.trim())
+    node => node.nodeType === 1 || (node.nodeType === 3 && node.textContent.trim()),
   )
 }
 
@@ -553,14 +551,18 @@ export default {
           forceRefresh,
           loadingState: this.loadingState,
         })
-        const { html, config, language } = await fetchArticleContent(this.article.url, this.$store.settings.domainConfigBaseUrl, {
-          forceConfigRefresh: forceRefresh,
-          feedFallback: {
-            title: this.article.title,
-            description: this.article.description,
-            url: this.article.url,
+        const { html, config, language } = await fetchArticleContent(
+          this.article.url,
+          this.$store.settings.domainConfigBaseUrl,
+          {
+            forceConfigRefresh: forceRefresh,
+            feedFallback: {
+              title: this.article.title,
+              description: this.article.description,
+              url: this.article.url,
+            },
           },
-        })
+        )
         this.articleHtml = html
         this.articleConfig = config
         if (language) {
@@ -655,10 +657,12 @@ export default {
       // instead of occupying a navbar slot.
       const translate = this.translateInToolbar
         ? []
-        : [{
-            text: this.showTranslation ? this.$t('article.showOriginal') : this.$t('article.translate'),
-            onClick: () => this.toggleTranslation(),
-          }]
+        : [
+            {
+              text: this.showTranslation ? this.$t('article.showOriginal') : this.$t('article.translate'),
+              onClick: () => this.toggleTranslation(),
+            },
+          ]
 
       f7.actions
         .create({
@@ -668,7 +672,10 @@ export default {
               { text: this.$t('article.reload'), onClick: () => this.reloadArticle() },
               { text: this.$t('article.markUnread'), onClick: () => this.markUnread() },
               ...translate,
-              { text: this.$t('article.openInBrowser'), onClick: () => window.open(this.article.url, '_blank') },
+              {
+                text: this.$t('article.openInBrowser'),
+                onClick: () => window.open(this.article.url, '_blank'),
+              },
             ],
             ...(removal.length ? [removal] : []),
           ],
@@ -726,9 +733,11 @@ export default {
     async copy(variant) {
       const html = this.displayedHtml
       const text =
-        variant === 'link' ? this.article.url
-        : variant === 'rich' ? extractArticleMarkdown(html, { skipCaptions: false, skipImages: false })
-        : extractArticleText(html, { skipCaptions: true })
+        variant === 'link'
+          ? this.article.url
+          : variant === 'rich'
+            ? extractArticleMarkdown(html, { skipCaptions: false, skipImages: false })
+            : extractArticleText(html, { skipCaptions: true })
 
       try {
         await Clipboard.write({ string: text })
@@ -1019,9 +1028,7 @@ export default {
         }
       }
       const job = this.translationJob
-      this.previewedBlocks = job.plan
-        .slice(0, job.done.length)
-        .reduce((n, chunk) => n + chunk.count, 0)
+      this.previewedBlocks = job.plan.slice(0, job.done.length).reduce((n, chunk) => n + chunk.count, 0)
 
       // The paragraphs the speech controller points at are about to be replaced.
       await this.closeSpeech()
@@ -1143,9 +1150,7 @@ export default {
       const job = this.translationJob
       if (!job) return
 
-      const doneBlocks = job.plan
-        .slice(0, job.done.length)
-        .reduce((n, chunk) => n + chunk.count, 0)
+      const doneBlocks = job.plan.slice(0, job.done.length).reduce((n, chunk) => n + chunk.count, 0)
       const done = Math.min(job.blocks.length, Math.max(doneBlocks, this.previewedBlocks || 0))
       this.translationNote = this.$t('article.translatingProgress', { done, total: job.blocks.length })
     },
@@ -1191,8 +1196,11 @@ export default {
 
         // A theme or font change rebuilds the srcdoc from the ORIGINAL html while a
         // translation is running or paused — put the translated part back on top.
-        if (this.translationJob && !this.showTranslation
-          && (this.translating || this.translationJob.done.length > 0)) {
+        if (
+          this.translationJob &&
+          !this.showTranslation &&
+          (this.translating || this.translationJob.done.length > 0)
+        ) {
           this.applyTranslationDom()
           this.applyTranslatedTitleDom()
         }

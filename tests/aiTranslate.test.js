@@ -96,9 +96,9 @@ describe('chunkHtml', () => {
 
 describe('translateArticle', () => {
   it('refuses without an API key, without making a request', async () => {
-    await expect(
-      translateArticle({ html: '<p>Hi</p>' }, { ...SETTINGS, apiKey: '' }),
-    ).rejects.toThrow('not_configured')
+    await expect(translateArticle({ html: '<p>Hi</p>' }, { ...SETTINGS, apiKey: '' })).rejects.toThrow(
+      'not_configured',
+    )
 
     expect(fetchMock).not.toHaveBeenCalled()
   })
@@ -109,15 +109,11 @@ describe('translateArticle', () => {
   })
 
   it('translates the body and the title', async () => {
-    fetchMock
-      .mockResolvedValueOnce(reply('<p>Hallo</p>'))
-      .mockResolvedValueOnce(reply('Eine Überschrift'))
+    fetchMock.mockResolvedValueOnce(reply('<p>Hallo</p>')).mockResolvedValueOnce(reply('Eine Überschrift'))
 
-    const result = await translateArticle(
-      { html: '<p>Hello</p>', title: 'A headline' },
-      SETTINGS,
-      { targetLanguage: 'de' },
-    )
+    const result = await translateArticle({ html: '<p>Hello</p>', title: 'A headline' }, SETTINGS, {
+      targetLanguage: 'de',
+    })
 
     expect(result).toEqual({
       html: '<p>Hallo</p>',
@@ -270,12 +266,16 @@ describe('translateArticleBlocks (streaming)', () => {
   it('sends no reasoning field to a custom endpoint — unknown params can 400 there', async () => {
     fetchMock.mockResolvedValueOnce(reply('<p>x</p>'))
 
-    await translateArticleBlocks(['<p>y</p>'], {
-      provider: 'custom',
-      baseUrl: 'http://localhost:11434/v1',
-      apiKey: 'ollama',
-      model: 'llama3.2',
-    }, { targetLanguage: 'de' })
+    await translateArticleBlocks(
+      ['<p>y</p>'],
+      {
+        provider: 'custom',
+        baseUrl: 'http://localhost:11434/v1',
+        apiKey: 'ollama',
+        model: 'llama3.2',
+      },
+      { targetLanguage: 'de' },
+    )
 
     const body = JSON.parse(fetchMock.mock.calls[0][1].body)
     expect(body.reasoning).toBeUndefined()

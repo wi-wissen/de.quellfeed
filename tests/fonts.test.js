@@ -49,7 +49,10 @@ describe('READING_FONTS', () => {
 
   it('no longer offers Lexend or Tangerine', () => {
     for (const removed of REMOVED_FONTS) {
-      expect(READING_FONTS.map(font => font.id), removed).not.toContain(removed)
+      expect(
+        READING_FONTS.map(font => font.id),
+        removed,
+      ).not.toContain(removed)
     }
   })
 
@@ -424,7 +427,7 @@ describe('buildReadingThemeCss', () => {
     const css = buildReadingThemeCss('dark', { font: 'literata', fontSize: 1.15 })
 
     expect(css).toContain('@font-face')
-    expect(css).toContain('--q-reading-font: \'Literata Variable\'')
+    expect(css).toContain("--q-reading-font: 'Literata Variable'")
     expect(css).toContain('--q-reading-font-size: 1.15em')
     expect(css).toContain('--q-text:')
   })

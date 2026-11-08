@@ -136,7 +136,9 @@ describe('unquellArticle', () => {
 
 describe('setFeedFilterPrompt', () => {
   it('stores the prompt and stamps updatedAt so the WebDAV merge can carry it', async () => {
-    store.feeds = [{ id: 'feed-1', url: 'https://example.com/feed', title: 'Ex', updatedAt: '2026-07-01T10:00:00.000Z' }]
+    store.feeds = [
+      { id: 'feed-1', url: 'https://example.com/feed', title: 'Ex', updatedAt: '2026-07-01T10:00:00.000Z' },
+    ]
 
     await store.setFeedFilterPrompt('feed-1', 'keine Themen zur Astronomie')
 
@@ -145,7 +147,9 @@ describe('setFeedFilterPrompt', () => {
   })
 
   it('does not re-stamp when the prompt is unchanged', async () => {
-    store.feeds = [{ id: 'feed-1', url: 'u', title: 'Ex', filterPrompt: 'x', updatedAt: '2026-07-01T10:00:00.000Z' }]
+    store.feeds = [
+      { id: 'feed-1', url: 'u', title: 'Ex', filterPrompt: 'x', updatedAt: '2026-07-01T10:00:00.000Z' },
+    ]
 
     await store.setFeedFilterPrompt('feed-1', 'x')
 
@@ -154,7 +158,7 @@ describe('setFeedFilterPrompt', () => {
 })
 
 describe('getQuelledCount', () => {
-  it('counts only this feed\'s quelled articles', () => {
+  it("counts only this feed's quelled articles", () => {
     store.articles = [
       feedArticle({ isQuelled: true }),
       feedArticle({ id: 'a-2', url: 'u2', isQuelled: true, feedId: 'feed-2' }),

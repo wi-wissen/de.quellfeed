@@ -113,8 +113,9 @@ function mockApi(routes) {
 }
 
 function callsTo(fetchMock, method, pathname) {
-  return fetchMock.mock.calls.filter(([url, init = {}]) =>
-    (init.method || 'GET') === method && new URL(url).pathname === pathname)
+  return fetchMock.mock.calls.filter(
+    ([url, init = {}]) => (init.method || 'GET') === method && new URL(url).pathname === pathname,
+  )
 }
 
 function bodyOf(call) {
@@ -152,12 +153,13 @@ describe('config', () => {
   })
 
   it('strips a trailing slash and a pasted /api/v1 from the address', () => {
-    expect(resolveKarakeepConfig({ baseUrl: 'https://k.example.com/' }).baseUrl)
-      .toBe('https://k.example.com')
-    expect(resolveKarakeepConfig({ baseUrl: 'https://k.example.com/api/v1' }).baseUrl)
-      .toBe('https://k.example.com')
-    expect(resolveKarakeepConfig({ baseUrl: 'https://k.example.com/api/v1/' }).baseUrl)
-      .toBe('https://k.example.com')
+    expect(resolveKarakeepConfig({ baseUrl: 'https://k.example.com/' }).baseUrl).toBe('https://k.example.com')
+    expect(resolveKarakeepConfig({ baseUrl: 'https://k.example.com/api/v1' }).baseUrl).toBe(
+      'https://k.example.com',
+    )
+    expect(resolveKarakeepConfig({ baseUrl: 'https://k.example.com/api/v1/' }).baseUrl).toBe(
+      'https://k.example.com',
+    )
   })
 
   it('strips credentials pasted into the address itself', () => {
@@ -248,9 +250,12 @@ describe('error codes', () => {
     [503, 'server_error'],
     [400, 'request_failed'],
   ])('maps HTTP %i to %s', async (status, code) => {
-    vi.stubGlobal('fetch', mockApi({
-      'GET /api/v1/bookmarks': jsonResponse({ code: 'boom', message: 'no' }, status),
-    }))
+    vi.stubGlobal(
+      'fetch',
+      mockApi({
+        'GET /api/v1/bookmarks': jsonResponse({ code: 'boom', message: 'no' }, status),
+      }),
+    )
 
     await expect(pullFromKarakeep(SETTINGS)).rejects.toThrow(code)
   })
@@ -262,28 +267,39 @@ describe('error codes', () => {
   })
 
   it('survives a 401 that answers text/plain instead of json', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => ({
-      status: 401,
-      ok: false,
-      text: async () => 'Unauthorized',
-    })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        status: 401,
+        ok: false,
+        text: async () => 'Unauthorized',
+      })),
+    )
 
     await expect(pullFromKarakeep(SETTINGS)).rejects.toThrow('unauthorized')
   })
 
   it('maps an unreachable server to network_error', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch') }))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new TypeError('Failed to fetch')
+      }),
+    )
 
     await expect(pullFromKarakeep(SETTINGS)).rejects.toThrow('network_error')
   })
 
   it('maps an aborted request to aborted', async () => {
     const controller = new AbortController()
-    vi.stubGlobal('fetch', vi.fn(async () => {
-      const err = new Error('The operation was aborted.')
-      err.name = 'AbortError'
-      throw err
-    }))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        const err = new Error('The operation was aborted.')
+        err.name = 'AbortError'
+        throw err
+      }),
+    )
 
     await expect(pullFromKarakeep(SETTINGS, { signal: controller.signal })).rejects.toThrow('aborted')
   })
@@ -363,11 +379,10 @@ describe('push', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    const result = await pushToKarakeep([
-      article({ isSaved: false }),
-      article({ url: 'javascript:alert(1)' }),
-      article({ url: '' }),
-    ], SETTINGS)
+    const result = await pushToKarakeep(
+      [article({ isSaved: false }), article({ url: 'javascript:alert(1)' }), article({ url: '' })],
+      SETTINGS,
+    )
 
     expect(fetchMock).not.toHaveBeenCalled()
     expect(result).toEqual({ pushed: 0, skipped: 0 })
@@ -507,8 +522,10 @@ describe('push', () => {
     const result = await pushToKarakeep([article()], SETTINGS, { remoteIndex: new Map() })
 
     expect(callsTo(fetchMock, 'POST', '/api/v1/bookmarks')).toHaveLength(0)
-    expect(bodyOf(callsTo(fetchMock, 'PATCH', '/api/v1/bookmarks/bm-1')[0]))
-      .toEqual({ archived: false, favourited: true })
+    expect(bodyOf(callsTo(fetchMock, 'PATCH', '/api/v1/bookmarks/bm-1')[0])).toEqual({
+      archived: false,
+      favourited: true,
+    })
     expect(result).toEqual({ pushed: 1, skipped: 0 })
   })
 
@@ -520,8 +537,10 @@ describe('push', () => {
       remoteIndex: indexOf(indexed({ archived: false, favourited: false })),
     })
 
-    expect(bodyOf(callsTo(fetchMock, 'PATCH', '/api/v1/bookmarks/bm-1')[0]))
-      .toEqual({ archived: true, favourited: true })
+    expect(bodyOf(callsTo(fetchMock, 'PATCH', '/api/v1/bookmarks/bm-1')[0])).toEqual({
+      archived: true,
+      favourited: true,
+    })
   })
 
   it('patches the flags when a POST turns out to be a no-op on an existing bookmark', async () => {
@@ -539,8 +558,10 @@ describe('push', () => {
 
     const result = await pushToKarakeep([article({ isArchived: true })], SETTINGS)
 
-    expect(bodyOf(callsTo(fetchMock, 'PATCH', '/api/v1/bookmarks/bm-1')[0]))
-      .toEqual({ archived: true, favourited: true })
+    expect(bodyOf(callsTo(fetchMock, 'PATCH', '/api/v1/bookmarks/bm-1')[0])).toEqual({
+      archived: true,
+      favourited: true,
+    })
     expect(result).toEqual({ pushed: 1, skipped: 0 })
   })
 
@@ -583,9 +604,13 @@ describe('push', () => {
     const fetchMock = mockApi({ 'PATCH /api/v1/bookmarks/bm-1': jsonResponse({}) })
     vi.stubGlobal('fetch', fetchMock)
 
-    await pushToKarakeep([article({ isArchived: true })], { ...SETTINGS, favouritesOnly: false }, {
-      remoteIndex: indexOf(indexed({ archived: false, favourited: false })),
-    })
+    await pushToKarakeep(
+      [article({ isArchived: true })],
+      { ...SETTINGS, favouritesOnly: false },
+      {
+        remoteIndex: indexOf(indexed({ archived: false, favourited: false })),
+      },
+    )
 
     expect(bodyOf(callsTo(fetchMock, 'PATCH', '/api/v1/bookmarks/bm-1')[0])).toEqual({ archived: true })
   })
@@ -593,33 +618,44 @@ describe('push', () => {
 
 describe('pull', () => {
   it('maps a bookmark into the store article shape', async () => {
-    vi.stubGlobal('fetch', mockApi({
-      'GET /api/v1/bookmarks': jsonResponse({ bookmarks: [bookmark()], nextCursor: null }),
-    }))
+    vi.stubGlobal(
+      'fetch',
+      mockApi({
+        'GET /api/v1/bookmarks': jsonResponse({ bookmarks: [bookmark()], nextCursor: null }),
+      }),
+    )
 
     const { articles } = await pullFromKarakeep(SETTINGS, { newId })
 
-    expect(articles).toEqual([{
-      id: 'id-1',
-      feedId: null,
-      source: 'example.com',
-      url: 'https://example.com/artikel',
-      title: 'Der Titel',
-      description: 'Die Beschreibung',
-      image: 'https://example.com/bild.jpg',
-      isRead: false,
-      isSaved: true,
-      isArchived: false,
-      publishedAt: '2026-06-01T10:00:00.000Z',
-      cachedHtml: null,
-      updatedAt: '2026-06-01T10:00:00.000Z',
-    }])
+    expect(articles).toEqual([
+      {
+        id: 'id-1',
+        feedId: null,
+        source: 'example.com',
+        url: 'https://example.com/artikel',
+        title: 'Der Titel',
+        description: 'Die Beschreibung',
+        image: 'https://example.com/bild.jpg',
+        isRead: false,
+        isSaved: true,
+        isArchived: false,
+        publishedAt: '2026-06-01T10:00:00.000Z',
+        cachedHtml: null,
+        updatedAt: '2026-06-01T10:00:00.000Z',
+      },
+    ])
   })
 
   it('reads `archived` as the archive — and NOT as the read state', async () => {
-    vi.stubGlobal('fetch', mockApi({
-      'GET /api/v1/bookmarks': jsonResponse({ bookmarks: [bookmark({ archived: true })], nextCursor: null }),
-    }))
+    vi.stubGlobal(
+      'fetch',
+      mockApi({
+        'GET /api/v1/bookmarks': jsonResponse({
+          bookmarks: [bookmark({ archived: true })],
+          nextCursor: null,
+        }),
+      }),
+    )
 
     const { articles } = await pullFromKarakeep(SETTINGS, { newId })
 
@@ -653,9 +689,12 @@ describe('pull', () => {
   })
 
   it('prefers the user-owned top-level fields over the crawler-owned content.*', async () => {
-    vi.stubGlobal('fetch', mockApi({
-      'GET /api/v1/bookmarks': jsonResponse({ bookmarks: [bookmark()], nextCursor: null }),
-    }))
+    vi.stubGlobal(
+      'fetch',
+      mockApi({
+        'GET /api/v1/bookmarks': jsonResponse({ bookmarks: [bookmark()], nextCursor: null }),
+      }),
+    )
 
     const { articles } = await pullFromKarakeep(SETTINGS, { newId })
 
@@ -664,12 +703,15 @@ describe('pull', () => {
   })
 
   it('falls back on content.* for a bookmark created in KaraKeep itself', async () => {
-    vi.stubGlobal('fetch', mockApi({
-      'GET /api/v1/bookmarks': jsonResponse({
-        bookmarks: [bookmark({ title: null, note: null })],
-        nextCursor: null,
+    vi.stubGlobal(
+      'fetch',
+      mockApi({
+        'GET /api/v1/bookmarks': jsonResponse({
+          bookmarks: [bookmark({ title: null, note: null })],
+          nextCursor: null,
+        }),
       }),
-    }))
+    )
 
     const { articles } = await pullFromKarakeep(SETTINGS, { newId })
 
@@ -678,15 +720,18 @@ describe('pull', () => {
   })
 
   it('drops bookmarks that have no url — a text note is nothing a reader can open', async () => {
-    vi.stubGlobal('fetch', mockApi({
-      'GET /api/v1/bookmarks': jsonResponse({
-        bookmarks: [
-          bookmark(),
-          { id: 'bm-2', createdAt: '2026-06-02T10:00:00.000Z', content: { type: 'text', text: 'Notiz' } },
-        ],
-        nextCursor: null,
+    vi.stubGlobal(
+      'fetch',
+      mockApi({
+        'GET /api/v1/bookmarks': jsonResponse({
+          bookmarks: [
+            bookmark(),
+            { id: 'bm-2', createdAt: '2026-06-02T10:00:00.000Z', content: { type: 'text', text: 'Notiz' } },
+          ],
+          nextCursor: null,
+        }),
       }),
-    }))
+    )
 
     const { articles } = await pullFromKarakeep(SETTINGS, { newId })
 
@@ -717,19 +762,24 @@ describe('round-trip of the field mapping', () => {
     expect(sent.createdAt).toBe('2026-05-04T08:30:00.000Z')
 
     // …and back in. The server echoes what we wrote, nested the way it stores it.
-    vi.stubGlobal('fetch', mockApi({
-      'GET /api/v1/bookmarks': jsonResponse({
-        bookmarks: [bookmark({
-          title: sent.title,
-          note: sent.note,
-          archived: sent.archived,
-          favourited: sent.favourited,
-          createdAt: sent.createdAt,
-          content: { url: sent.url, imageUrl: null },
-        })],
-        nextCursor: null,
+    vi.stubGlobal(
+      'fetch',
+      mockApi({
+        'GET /api/v1/bookmarks': jsonResponse({
+          bookmarks: [
+            bookmark({
+              title: sent.title,
+              note: sent.note,
+              archived: sent.archived,
+              favourited: sent.favourited,
+              createdAt: sent.createdAt,
+              content: { url: sent.url, imageUrl: null },
+            }),
+          ],
+          nextCursor: null,
+        }),
       }),
-    }))
+    )
 
     const { articles } = await pullFromKarakeep(SETTINGS, { newId })
 
@@ -761,9 +811,18 @@ describe('round-trip of the field mapping', () => {
 describe('pagination', () => {
   it('collects every page of the cursor loop', async () => {
     const pages = {
-      '': { bookmarks: [bookmark({ id: 'bm-1', content: { url: 'https://example.com/1' } })], nextCursor: 'c1' },
-      c1: { bookmarks: [bookmark({ id: 'bm-2', content: { url: 'https://example.com/2' } })], nextCursor: 'c2' },
-      c2: { bookmarks: [bookmark({ id: 'bm-3', content: { url: 'https://example.com/3' } })], nextCursor: null },
+      '': {
+        bookmarks: [bookmark({ id: 'bm-1', content: { url: 'https://example.com/1' } })],
+        nextCursor: 'c1',
+      },
+      c1: {
+        bookmarks: [bookmark({ id: 'bm-2', content: { url: 'https://example.com/2' } })],
+        nextCursor: 'c2',
+      },
+      c2: {
+        bookmarks: [bookmark({ id: 'bm-3', content: { url: 'https://example.com/3' } })],
+        nextCursor: null,
+      },
     }
 
     const fetchMock = mockApi({
@@ -808,15 +867,18 @@ describe('pagination', () => {
   })
 
   it('deduplicates by url — the same link twice is one article', async () => {
-    vi.stubGlobal('fetch', mockApi({
-      'GET /api/v1/bookmarks': jsonResponse({
-        bookmarks: [
-          bookmark({ id: 'bm-1' }),
-          bookmark({ id: 'bm-2', content: { url: 'https://www.example.com/artikel/' } }),
-        ],
-        nextCursor: null,
+    vi.stubGlobal(
+      'fetch',
+      mockApi({
+        'GET /api/v1/bookmarks': jsonResponse({
+          bookmarks: [
+            bookmark({ id: 'bm-1' }),
+            bookmark({ id: 'bm-2', content: { url: 'https://www.example.com/artikel/' } }),
+          ],
+          nextCursor: null,
+        }),
       }),
-    }))
+    )
 
     const { articles } = await pullFromKarakeep(SETTINGS, { newId })
     expect(articles).toHaveLength(1)
@@ -835,9 +897,12 @@ describe('pagination', () => {
   })
 
   it('survives a page without a nextCursor field at all', async () => {
-    vi.stubGlobal('fetch', mockApi({
-      'GET /api/v1/bookmarks': jsonResponse({ bookmarks: [bookmark()] }),
-    }))
+    vi.stubGlobal(
+      'fetch',
+      mockApi({
+        'GET /api/v1/bookmarks': jsonResponse({ bookmarks: [bookmark()] }),
+      }),
+    )
 
     const { articles } = await pullFromKarakeep(SETTINGS, { newId })
     expect(articles).toHaveLength(1)
@@ -845,17 +910,16 @@ describe('pagination', () => {
 })
 
 describe('syncWithKarakeep', () => {
-  const listOnce = bookmarks => mockApi({
-    'GET /api/v1/bookmarks': jsonResponse({ bookmarks, nextCursor: null }),
-    'GET /api/v1/bookmarks/check-url': jsonResponse({ bookmarkId: null }),
-    'POST /api/v1/bookmarks': CREATED,
-    'PATCH /api/v1/bookmarks/bm-1': jsonResponse({}),
-  })
+  const listOnce = bookmarks =>
+    mockApi({
+      'GET /api/v1/bookmarks': jsonResponse({ bookmarks, nextCursor: null }),
+      'GET /api/v1/bookmarks/check-url': jsonResponse({ bookmarkId: null }),
+      'POST /api/v1/bookmarks': CREATED,
+      'PATCH /api/v1/bookmarks/bm-1': jsonResponse({}),
+    })
 
   it('pulls what is new, pushes what is missing, and returns the full list', async () => {
-    const fetchMock = listOnce([
-      bookmark({ id: 'bm-9', content: { url: 'https://example.com/nur-remote' } }),
-    ])
+    const fetchMock = listOnce([bookmark({ id: 'bm-9', content: { url: 'https://example.com/nur-remote' } })])
     vi.stubGlobal('fetch', fetchMock)
 
     const local = [article({ id: 'local-1', url: 'https://example.com/nur-lokal' })]
@@ -870,8 +934,9 @@ describe('syncWithKarakeep', () => {
     ])
 
     // The one push is the local-only article, and it is a creation.
-    expect(bodyOf(callsTo(fetchMock, 'POST', '/api/v1/bookmarks')[0]).url)
-      .toBe('https://example.com/nur-lokal')
+    expect(bodyOf(callsTo(fetchMock, 'POST', '/api/v1/bookmarks')[0]).url).toBe(
+      'https://example.com/nur-lokal',
+    )
   })
 
   it('creates no duplicate for an article that is on both sides', async () => {
@@ -909,8 +974,10 @@ describe('syncWithKarakeep', () => {
     const { pushed } = await syncWithKarakeep([article()], SETTINGS, { newId })
 
     expect(callsTo(fetchMock, 'POST', '/api/v1/bookmarks')).toHaveLength(0)
-    expect(bodyOf(callsTo(fetchMock, 'PATCH', '/api/v1/bookmarks/bm-1')[0]))
-      .toEqual({ archived: false, favourited: true })
+    expect(bodyOf(callsTo(fetchMock, 'PATCH', '/api/v1/bookmarks/bm-1')[0])).toEqual({
+      archived: false,
+      favourited: true,
+    })
     expect(pushed).toBe(1)
   })
 
@@ -939,7 +1006,7 @@ describe('syncWithKarakeep', () => {
     expect(articles[0].summary).toBe('Die teuer bezahlte Zusammenfassung.')
   })
 
-  it('keeps the local id — nobody else\'s uuid ever enters this device', async () => {
+  it("keeps the local id — nobody else's uuid ever enters this device", async () => {
     vi.stubGlobal('fetch', listOnce([bookmark()]))
 
     const { articles } = await syncWithKarakeep([article({ id: 'local-1' })], SETTINGS, { newId })
@@ -1034,8 +1101,9 @@ describe('deleteFromKarakeep', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    await expect(deleteFromKarakeep('https://example.com/artikel', SETTINGS))
-      .resolves.toEqual({ deleted: true })
+    await expect(deleteFromKarakeep('https://example.com/artikel', SETTINGS)).resolves.toEqual({
+      deleted: true,
+    })
     expect(callsTo(fetchMock, 'DELETE', '/api/v1/bookmarks/bm-1')).toHaveLength(1)
   })
 
@@ -1045,8 +1113,9 @@ describe('deleteFromKarakeep', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    await expect(deleteFromKarakeep('https://example.com/artikel', SETTINGS))
-      .resolves.toEqual({ deleted: false })
+    await expect(deleteFromKarakeep('https://example.com/artikel', SETTINGS)).resolves.toEqual({
+      deleted: false,
+    })
   })
 })
 
@@ -1055,12 +1124,19 @@ describe('the api key never leaves the device in a log or an error', () => {
 
   it('keeps it out of every error message, even from a server that echoes the request', async () => {
     for (const status of [401, 403, 404, 429, 500, 502]) {
-      vi.stubGlobal('fetch', mockApi({
-        'GET /api/v1/bookmarks': jsonResponse(
-          { code: 'nope', message: `Invalid key: ${API_KEY}`, request: { headers: { Authorization: `Bearer ${API_KEY}` } } },
-          status,
-        ),
-      }))
+      vi.stubGlobal(
+        'fetch',
+        mockApi({
+          'GET /api/v1/bookmarks': jsonResponse(
+            {
+              code: 'nope',
+              message: `Invalid key: ${API_KEY}`,
+              request: { headers: { Authorization: `Bearer ${API_KEY}` } },
+            },
+            status,
+          ),
+        }),
+      )
 
       const error = await pullFromKarakeep(SETTINGS).catch(e => e)
 
@@ -1072,9 +1148,12 @@ describe('the api key never leaves the device in a log or an error', () => {
   })
 
   it('keeps it out of a network error, even when the transport echoes the request', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => {
-      throw new Error(`connect failed, Authorization: Bearer ${API_KEY}`)
-    }))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new Error(`connect failed, Authorization: Bearer ${API_KEY}`)
+      }),
+    )
 
     const error = await pullFromKarakeep(SETTINGS).catch(e => e)
 
@@ -1083,23 +1162,27 @@ describe('the api key never leaves the device in a log or an error', () => {
   })
 
   it('keeps it out of every log line', async () => {
-    vi.stubGlobal('fetch', mockApi({
-      'GET /api/v1/bookmarks': jsonResponse({ bookmarks: [bookmark()], nextCursor: null }),
-      'GET /api/v1/bookmarks/check-url': jsonResponse({ bookmarkId: null }),
-      'POST /api/v1/bookmarks': jsonResponse({}, 201),
-    }))
+    vi.stubGlobal(
+      'fetch',
+      mockApi({
+        'GET /api/v1/bookmarks': jsonResponse({ bookmarks: [bookmark()], nextCursor: null }),
+        'GET /api/v1/bookmarks/check-url': jsonResponse({ bookmarkId: null }),
+        'POST /api/v1/bookmarks': jsonResponse({}, 201),
+      }),
+    )
 
     await pullFromKarakeep(SETTINGS, { newId })
     await pushToKarakeep([article({ url: 'https://example.com/neu' })], SETTINGS)
 
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error(`boom ${API_KEY}`) }))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new Error(`boom ${API_KEY}`)
+      }),
+    )
     await pullFromKarakeep(SETTINGS).catch(() => {})
 
-    const logged = [
-      ...console.info.mock.calls,
-      ...console.warn.mock.calls,
-      ...console.error.mock.calls,
-    ]
+    const logged = [...console.info.mock.calls, ...console.warn.mock.calls, ...console.error.mock.calls]
     expect(logged.length).toBeGreaterThan(0)
     for (const call of logged) {
       expect(leaks(call)).toBe(false)

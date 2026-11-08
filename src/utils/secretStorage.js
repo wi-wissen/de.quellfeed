@@ -58,29 +58,33 @@ const known = new Map()
 
 export async function loadSecrets() {
   const secrets = {}
-  await Promise.all(SECRET_FIELDS.map(async ([section, field]) => {
-    const name = `${section}.${field}`
-    try {
-      const value = await SecureStorage.getItem(keyOf(section, field))
-      secrets[name] = value || ''
-    } catch (err) {
-      // Unreadable (e.g. a Keystore reset): the user has to enter it again, the app runs on.
-      console.warn(`[secrets] could not read ${name}:`, err?.code || err?.name || 'error')
-      secrets[name] = ''
-    }
-    known.set(name, secrets[name])
-  }))
+  await Promise.all(
+    SECRET_FIELDS.map(async ([section, field]) => {
+      const name = `${section}.${field}`
+      try {
+        const value = await SecureStorage.getItem(keyOf(section, field))
+        secrets[name] = value || ''
+      } catch (err) {
+        // Unreadable (e.g. a Keystore reset): the user has to enter it again, the app runs on.
+        console.warn(`[secrets] could not read ${name}:`, err?.code || err?.name || 'error')
+        secrets[name] = ''
+      }
+      known.set(name, secrets[name])
+    }),
+  )
   return secrets
 }
 
 export async function saveSecrets(secrets) {
-  await Promise.all(Object.entries(secrets).map(async ([name, value]) => {
-    if (known.get(name) === value) return
-    const [section, field] = name.split('.')
-    if (value) await SecureStorage.setItem(keyOf(section, field), value)
-    else await SecureStorage.removeItem(keyOf(section, field))
-    known.set(name, value)
-  }))
+  await Promise.all(
+    Object.entries(secrets).map(async ([name, value]) => {
+      if (known.get(name) === value) return
+      const [section, field] = name.split('.')
+      if (value) await SecureStorage.setItem(keyOf(section, field), value)
+      else await SecureStorage.removeItem(keyOf(section, field))
+      known.set(name, value)
+    }),
+  )
 }
 
 /** Test hook. */

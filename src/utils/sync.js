@@ -95,7 +95,9 @@ function toText(value) {
 function canonical(value) {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`
   if (isPlainObject(value)) {
-    const keys = Object.keys(value).filter(k => value[k] !== undefined).sort()
+    const keys = Object.keys(value)
+      .filter(k => value[k] !== undefined)
+      .sort()
     return `{${keys.map(k => `${JSON.stringify(k)}:${canonical(value[k])}`).join(',')}}`
   }
   return JSON.stringify(value === undefined ? null : value)
@@ -330,35 +332,39 @@ export function buildSyncPayload(state, options = {}) {
 
   const payloadFeeds = feeds
     .filter(feed => isHttpUrl(feed?.url))
-    .map(feed => stripUndefined({
-      url: feed.url,
-      title: toText(feed.title),
-      favicon: feed.favicon || null,
-      lastFetched: toIso(feed.lastFetched),
-      // Always written, '' included: an empty prompt means "known to be cleared", and
-      // only writing it lets a cleared prompt propagate (see pickUserText).
-      filterPrompt: toText(feed.filterPrompt),
-      updatedAt: toIso(feed.updatedAt),
-    }))
+    .map(feed =>
+      stripUndefined({
+        url: feed.url,
+        title: toText(feed.title),
+        favicon: feed.favicon || null,
+        lastFetched: toIso(feed.lastFetched),
+        // Always written, '' included: an empty prompt means "known to be cleared", and
+        // only writing it lets a cleared prompt propagate (see pickUserText).
+        filterPrompt: toText(feed.filterPrompt),
+        updatedAt: toIso(feed.updatedAt),
+      }),
+    )
 
   const payloadArticles = articles
     .filter(article => isHttpUrl(article?.url))
-    .map(article => stripUndefined({
-      url: article.url,
-      // An article's feed is named by URL, because the feed's id differs per device.
-      feedUrl: (article.feedId && feedUrlById.get(article.feedId)) || null,
-      source: toText(article.source) || null,
-      title: toText(article.title),
-      description: toText(article.description),
-      image: article.image || null,
-      isRead: Boolean(article.isRead),
-      isSaved: Boolean(article.isSaved),
-      isArchived: Boolean(article.isArchived),
-      isQuelled: Boolean(article.isQuelled),
-      publishedAt: toIso(article.publishedAt),
-      summary: toText(article.summary) || undefined,
-      updatedAt: toIso(article.updatedAt),
-    }))
+    .map(article =>
+      stripUndefined({
+        url: article.url,
+        // An article's feed is named by URL, because the feed's id differs per device.
+        feedUrl: (article.feedId && feedUrlById.get(article.feedId)) || null,
+        source: toText(article.source) || null,
+        title: toText(article.title),
+        description: toText(article.description),
+        image: article.image || null,
+        isRead: Boolean(article.isRead),
+        isSaved: Boolean(article.isSaved),
+        isArchived: Boolean(article.isArchived),
+        isQuelled: Boolean(article.isQuelled),
+        publishedAt: toIso(article.publishedAt),
+        summary: toText(article.summary) || undefined,
+        updatedAt: toIso(article.updatedAt),
+      }),
+    )
 
   return {
     version: SYNC_VERSION,
@@ -651,9 +657,8 @@ export function mergeSyncState(local, remote, options = {}) {
     if (deletedAt) delete tombstones.articles[url]
 
     // Which feed the article belongs to, named the only way both devices agree on.
-    let feedUrl = (localArticle && urlByLocalFeedId.get(localArticle.feedId))
-      || remoteArticle?.feedUrl
-      || null
+    let feedUrl =
+      (localArticle && urlByLocalFeedId.get(localArticle.feedId)) || remoteArticle?.feedUrl || null
     let detached = false
 
     // Deleting a feed takes its articles with it (store.removeFeed does exactly that), and
@@ -667,8 +672,9 @@ export function mergeSyncState(local, remote, options = {}) {
     if (feedUrl && !mergedFeedByUrl.has(feedUrl)) {
       const localAt = articleTime(localArticle)
       const remoteAt = articleTime(remoteArticle)
-      const bookmarked = pickFlag(localArticle?.isSaved, remoteArticle?.isSaved, localAt, remoteAt)
-        || pickFlag(localArticle?.isArchived, remoteArticle?.isArchived, localAt, remoteAt)
+      const bookmarked =
+        pickFlag(localArticle?.isSaved, remoteArticle?.isSaved, localAt, remoteAt) ||
+        pickFlag(localArticle?.isArchived, remoteArticle?.isArchived, localAt, remoteAt)
 
       if (!bookmarked) {
         if (tombstones.feeds[feedUrl]) continue
@@ -684,9 +690,8 @@ export function mergeSyncState(local, remote, options = {}) {
       }
     }
 
-    const feedId = (feedUrl && mergedFeedByUrl.get(feedUrl)?.id)
-      || (detached ? null : localArticle?.feedId)
-      || null
+    const feedId =
+      (feedUrl && mergedFeedByUrl.get(feedUrl)?.id) || (detached ? null : localArticle?.feedId) || null
     const merged = mergeArticle(localArticle, remoteArticle, feedId, newId)
     // Retention (see retention.js): an expired, unsaved feed article is dropped from BOTH
     // sides here, without a tombstone — otherwise the shared file would hand every
@@ -698,8 +703,7 @@ export function mergeSyncState(local, remote, options = {}) {
   // Newest first, like the store. The url is a tie-break, not decoration: feed items very
   // often share a publish date, and without a total order two devices would settle on two
   // different orderings of the same set — and the merge would keep reporting "changed".
-  mergedArticles.sort((a, b) =>
-    toMs(b.publishedAt) - toMs(a.publishedAt) || a.url.localeCompare(b.url))
+  mergedArticles.sort((a, b) => toMs(b.publishedAt) - toMs(a.publishedAt) || a.url.localeCompare(b.url))
 
   // 4 ── Expire old graves. Last, so a tombstone still gets its say in this merge.
   const prunedTombstones = pruneTombstones(tombstones, {
@@ -722,10 +726,14 @@ export function mergeSyncState(local, remote, options = {}) {
   const changed = canonical(localBefore) !== canonical(merged)
 
   const remoteBefore = { ...remotePayload, version: SYNC_VERSION, updatedAt: null }
-  const remoteAfter = { ...buildSyncPayload(merged, { now, maxTombstoneAgeMs: options.maxTombstoneAgeMs }), updatedAt: null }
+  const remoteAfter = {
+    ...buildSyncPayload(merged, { now, maxTombstoneAgeMs: options.maxTombstoneAgeMs }),
+    updatedAt: null,
+  }
   // The remote's own items are re-normalized through parse → build, so a formatting-only
   // difference (a missing default, a key in another order) never counts as a change.
-  const remoteChanged = canonical(normalizeForCompare(remoteBefore)) !== canonical(normalizeForCompare(remoteAfter))
+  const remoteChanged =
+    canonical(normalizeForCompare(remoteBefore)) !== canonical(normalizeForCompare(remoteAfter))
 
   return {
     ...merged,
@@ -749,7 +757,14 @@ function normalizeForCompare(payload) {
     feeds: [...payload.feeds]
       // filterPrompt: absent and '' compare equal on purpose — a read-only device must
       // not rewrite the whole file just because an old writer did not know the field.
-      .map(f => ({ url: f.url, title: toText(f.title), favicon: f.favicon || null, lastFetched: f.lastFetched || null, filterPrompt: toText(f.filterPrompt), updatedAt: f.updatedAt || null }))
+      .map(f => ({
+        url: f.url,
+        title: toText(f.title),
+        favicon: f.favicon || null,
+        lastFetched: f.lastFetched || null,
+        filterPrompt: toText(f.filterPrompt),
+        updatedAt: f.updatedAt || null,
+      }))
       .sort((a, b) => a.url.localeCompare(b.url)),
     articles: [...payload.articles]
       .map(a => ({
@@ -796,12 +811,14 @@ function countDifferences(feedsByUrl, articlesByUrl, merged, isRemoteSide = fals
       count++
       continue
     }
-    if (Boolean(other.isRead) !== Boolean(article.isRead)
-      || Boolean(other.isSaved) !== Boolean(article.isSaved)
-      || Boolean(other.isArchived) !== Boolean(article.isArchived)
-      || Boolean(other.isQuelled) !== Boolean(article.isQuelled)
-      || toText(other.summary) !== toText(article.summary || '')
-      || (isRemoteSide && toText(other.title) !== toText(article.title))) {
+    if (
+      Boolean(other.isRead) !== Boolean(article.isRead) ||
+      Boolean(other.isSaved) !== Boolean(article.isSaved) ||
+      Boolean(other.isArchived) !== Boolean(article.isArchived) ||
+      Boolean(other.isQuelled) !== Boolean(article.isQuelled) ||
+      toText(other.summary) !== toText(article.summary || '') ||
+      (isRemoteSide && toText(other.title) !== toText(article.title))
+    ) {
       count++
     }
   }

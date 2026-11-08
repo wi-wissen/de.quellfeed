@@ -36,7 +36,10 @@ function deferSpeak() {
   TextToSpeech.speak.mockImplementation(options => {
     let resolve
     let reject
-    const promise = new Promise((res, rej) => { resolve = res; reject = rej })
+    const promise = new Promise((res, rej) => {
+      resolve = res
+      reject = rej
+    })
     calls.push({ options, resolve, reject })
     return promise
   })
@@ -46,7 +49,9 @@ function deferSpeak() {
 async function waitFor(predicate, label = 'condition') {
   for (let i = 0; i < 100; i += 1) {
     if (predicate()) return
-    await new Promise(resolve => { setTimeout(resolve, 0) })
+    await new Promise(resolve => {
+      setTimeout(resolve, 0)
+    })
   }
   throw new Error(`timed out waiting for ${label}`)
 }
@@ -54,7 +59,9 @@ async function waitFor(predicate, label = 'condition') {
 /** Lets every already-queued microtask/macrotask run. */
 async function settle() {
   for (let i = 0; i < 5; i += 1) {
-    await new Promise(resolve => { setTimeout(resolve, 0) })
+    await new Promise(resolve => {
+      setTimeout(resolve, 0)
+    })
   }
 }
 
@@ -274,7 +281,9 @@ describe('createSpeechController', () => {
       await expect(controller.speak('')).rejects.toThrow('no_content')
       await expect(controller.speak('   \n\n ')).rejects.toThrow('no_content')
       await expect(controller.speak({ html: '' })).rejects.toThrow('no_content')
-      await expect(controller.speak({ html: '<img src="a.jpg" alt="nur ein Bild">' })).rejects.toThrow('no_content')
+      await expect(controller.speak({ html: '<img src="a.jpg" alt="nur ein Bild">' })).rejects.toThrow(
+        'no_content',
+      )
       await expect(controller.speak(null)).rejects.toThrow('no_content')
 
       expect(TextToSpeech.speak).not.toHaveBeenCalled()
@@ -320,12 +329,14 @@ describe('createSpeechController', () => {
 
     await controller.speak(DE_PARAGRAPH, { rate: 1.4, pitch: 0.9, volume: 0.8 })
 
-    expect(TextToSpeech.speak).toHaveBeenCalledWith(expect.objectContaining({
-      rate: 1.4,
-      pitch: 0.9,
-      volume: 0.8,
-      category: 'playback',
-    }))
+    expect(TextToSpeech.speak).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rate: 1.4,
+        pitch: 0.9,
+        volume: 0.8,
+        category: 'playback',
+      }),
+    )
   })
 
   it('exposes progress for the UI', async () => {
@@ -378,7 +389,10 @@ describe('createSpeechController', () => {
       // More engine calls than paragraphs …
       expect(TextToSpeech.speak.mock.calls.length).toBeGreaterThan(2)
       // … but the reader is still told about two paragraphs, and each one only once.
-      expect(handlers.onProgress.mock.calls.map(([index, total]) => [index, total])).toEqual([[0, 2], [1, 2]])
+      expect(handlers.onProgress.mock.calls.map(([index, total]) => [index, total])).toEqual([
+        [0, 2],
+        [1, 2],
+      ])
     })
 
     it('starts at the paragraph it is asked to', async () => {
@@ -426,7 +440,10 @@ describe('createSpeechController', () => {
       const controller = createSpeechController()
       const offset = PARAGRAPH.indexOf('Der zweite')
 
-      const playback = controller.speak({ units: [PARAGRAPH, 'Der nächste Absatz ist auch da.'] }, { lookahead: 0 })
+      const playback = controller.speak(
+        { units: [PARAGRAPH, 'Der nächste Absatz ist auch da.'] },
+        { lookahead: 0 },
+      )
       await waitFor(() => calls.length === 1, 'the first paragraph')
 
       // The engine reports it has reached the second sentence.
@@ -539,7 +556,10 @@ describe('createSpeechController', () => {
       const calls = deferSpeak()
       const controller = createSpeechController()
 
-      const playback = controller.speak({ units: [PARAGRAPH, 'Der nächste Absatz ist auch da.'] }, { lookahead: 0 })
+      const playback = controller.speak(
+        { units: [PARAGRAPH, 'Der nächste Absatz ist auch da.'] },
+        { lookahead: 0 },
+      )
       await waitFor(() => calls.length === 1, 'the paragraph')
       const listener = emitRange
 

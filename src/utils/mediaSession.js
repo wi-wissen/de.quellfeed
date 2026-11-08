@@ -90,8 +90,12 @@ function createNativeSession(handlers) {
       subscribing = MediaControl.addListener('mediaAction', event => {
         actionMap[event?.action]?.()
       })
-        .then(handle => { listener = handle })
-        .catch(() => { subscribing = null })
+        .then(handle => {
+          listener = handle
+        })
+        .catch(() => {
+          subscribing = null
+        })
     }
     return subscribing
   }

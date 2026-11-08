@@ -22,11 +22,18 @@ import {
 import { DEFAULT_PAYWALL_SETTINGS } from '../utils/paywall.js'
 import { DEFAULT_KARAKEEP_SETTINGS, syncWithKarakeep, deleteFromKarakeep } from '../utils/karakeep.js'
 import { DEFAULT_LINKWARDEN_SETTINGS, syncWithLinkwarden, deleteFromLinkwarden } from '../utils/linkwarden.js'
-import { clearDomainConfigCache, getDefaultConfigBaseUrl, normalizeConfigBaseUrl } from '../utils/domainConfig.js'
+import {
+  clearDomainConfigCache,
+  getDefaultConfigBaseUrl,
+  normalizeConfigBaseUrl,
+} from '../utils/domainConfig.js'
 import { getFaviconUrl } from '../utils/favicon.js'
 import { applyTheme, resolveThemeChoice } from '../utils/theme.js'
 import { mapSettledWithLimit } from '../utils/concurrency.js'
-import { loadArticles as loadArticleFiles, saveArticles as saveArticleFiles } from '../utils/articleStorage.js'
+import {
+  loadArticles as loadArticleFiles,
+  saveArticles as saveArticleFiles,
+} from '../utils/articleStorage.js'
 import { splitSecrets, hasPlainSecrets, loadSecrets, saveSecrets } from '../utils/secretStorage.js'
 import { retentionCutoff, isKeptArticle, pruneArticles } from '../utils/retention.js'
 
@@ -504,7 +511,11 @@ export const useQuellStore = defineStore('quell', {
      * many went. Saved, archived and link articles are never touched.
      */
     pruneOldArticles(now = Date.now()) {
-      const { articles, removed } = pruneArticles(this.articles, retentionCutoff(now), this._currentUrlsByFeed())
+      const { articles, removed } = pruneArticles(
+        this.articles,
+        retentionCutoff(now),
+        this._currentUrlsByFeed(),
+      )
       if (removed > 0) this.articles = articles
       return removed
     },

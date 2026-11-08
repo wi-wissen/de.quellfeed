@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { isKeptArticle, pruneArticles, retentionCutoff, ARTICLE_RETENTION_DAYS } from '../src/utils/retention.js'
+import {
+  isKeptArticle,
+  pruneArticles,
+  retentionCutoff,
+  ARTICLE_RETENTION_DAYS,
+} from '../src/utils/retention.js'
 import { mergeSyncState } from '../src/utils/sync.js'
 
 const NOW = Date.parse('2026-11-08T12:00:00Z')
@@ -9,7 +14,13 @@ const cutoff = retentionCutoff(NOW)
 const refreshed = new Map([['f1', new Set()]])
 
 const feedArticle = (url, age, extra = {}) => ({
-  id: url, feedId: 'f1', url, title: url, publishedAt: daysAgo(age), updatedAt: daysAgo(age), ...extra,
+  id: url,
+  feedId: 'f1',
+  url,
+  title: url,
+  publishedAt: daysAgo(age),
+  updatedAt: daysAgo(age),
+  ...extra,
 })
 
 describe('retention', () => {
@@ -45,10 +56,11 @@ describe('retention', () => {
   })
 
   it('reports how many went', () => {
-    const { articles, removed } = pruneArticles([
-      feedArticle('https://x.example/1', 100),
-      feedArticle('https://x.example/2', 1),
-    ], cutoff, refreshed)
+    const { articles, removed } = pruneArticles(
+      [feedArticle('https://x.example/1', 100), feedArticle('https://x.example/2', 1)],
+      cutoff,
+      refreshed,
+    )
     expect(removed).toBe(1)
     expect(articles.map(a => a.url)).toEqual(['https://x.example/2'])
   })
@@ -58,7 +70,15 @@ describe('retention', () => {
     const remote = {
       version: 1,
       feeds: [{ url: 'https://x.example/feed', title: 'X', updatedAt: daysAgo(500) }],
-      articles: [{ url: 'https://x.example/old', feedUrl: 'https://x.example/feed', title: 'old', publishedAt: daysAgo(200), updatedAt: daysAgo(200) }],
+      articles: [
+        {
+          url: 'https://x.example/old',
+          feedUrl: 'https://x.example/feed',
+          title: 'old',
+          publishedAt: daysAgo(200),
+          updatedAt: daysAgo(200),
+        },
+      ],
       tombstones: { feeds: {}, articles: {} },
     }
 

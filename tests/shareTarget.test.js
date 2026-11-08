@@ -12,8 +12,9 @@ describe('extractSharedUrl', () => {
   })
 
   it('mines the URL out of what Chrome actually sends', () => {
-    expect(extractSharedUrl('Massenaussterben: Wer überlebte https://www.spektrum.de/news/123'))
-      .toBe('https://www.spektrum.de/news/123')
+    expect(extractSharedUrl('Massenaussterben: Wer überlebte https://www.spektrum.de/news/123')).toBe(
+      'https://www.spektrum.de/news/123',
+    )
   })
 
   it('mines it out of a sentence with a trailing full stop', () => {
@@ -21,8 +22,9 @@ describe('extractSharedUrl', () => {
   })
 
   it('keeps a query string and fragment intact', () => {
-    expect(extractSharedUrl('see https://example.com/a?b=1&c=2#top'))
-      .toBe('https://example.com/a?b=1&c=2#top')
+    expect(extractSharedUrl('see https://example.com/a?b=1&c=2#top')).toBe(
+      'https://example.com/a?b=1&c=2#top',
+    )
   })
 
   it('does not eat a trailing dot that belongs to the path', () => {
@@ -32,8 +34,7 @@ describe('extractSharedUrl', () => {
   })
 
   it('takes the first URL when several are shared', () => {
-    expect(extractSharedUrl('https://a.example/1 und https://b.example/2'))
-      .toBe('https://a.example/1')
+    expect(extractSharedUrl('https://a.example/1 und https://b.example/2')).toBe('https://a.example/1')
   })
 
   it('accepts http as well as https', () => {

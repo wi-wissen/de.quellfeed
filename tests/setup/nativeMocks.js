@@ -7,7 +7,8 @@ import { vi } from 'vitest'
  */
 vi.mock('@capacitor/filesystem', () => {
   const files = new Map()
-  const notFound = path => Object.assign(new Error(`File does not exist: ${path}`), { code: 'OS-PLUG-FILE-0008' })
+  const notFound = path =>
+    Object.assign(new Error(`File does not exist: ${path}`), { code: 'OS-PLUG-FILE-0008' })
   return {
     Directory: { Data: 'DATA' },
     Encoding: { UTF8: 'utf8' },
@@ -39,8 +40,12 @@ vi.mock('@aparajita/capacitor-secure-storage', () => {
     __secure: items,
     SecureStorage: {
       getItem: vi.fn(async key => (items.has(key) ? items.get(key) : null)),
-      setItem: vi.fn(async (key, value) => { items.set(key, value) }),
-      removeItem: vi.fn(async key => { items.delete(key) }),
+      setItem: vi.fn(async (key, value) => {
+        items.set(key, value)
+      }),
+      removeItem: vi.fn(async key => {
+        items.delete(key)
+      }),
     },
   }
 })

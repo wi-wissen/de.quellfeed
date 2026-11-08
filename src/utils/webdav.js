@@ -39,7 +39,9 @@ const READ_TIMEOUT_MS = 30000
 // ── Config ──────────────────────────────────────────────────────────────────
 
 function normalizeBaseUrl(raw) {
-  const value = String(raw || '').trim().replace(/\/+$/, '')
+  const value = String(raw || '')
+    .trim()
+    .replace(/\/+$/, '')
   if (!value) return ''
 
   try {
@@ -171,7 +173,9 @@ async function proxyRequest({ method, url, headers, data }) {
   }
 
   const responseHeaders = {}
-  res.headers.forEach((value, key) => { responseHeaders[key] = value })
+  res.headers.forEach((value, key) => {
+    responseHeaders[key] = value
+  })
 
   return {
     status: res.status,

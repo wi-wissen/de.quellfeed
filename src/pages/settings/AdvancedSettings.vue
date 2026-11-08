@@ -76,7 +76,9 @@ export default {
     showReset() {
       return (
         Boolean(this.defaultConfigBaseUrl) &&
-        String(this.domainConfigBaseUrl || '').trim().replace(/\/+$/, '') !== this.defaultConfigBaseUrl
+        String(this.domainConfigBaseUrl || '')
+          .trim()
+          .replace(/\/+$/, '') !== this.defaultConfigBaseUrl
       )
     },
   },
@@ -89,7 +91,9 @@ export default {
       this.saveDomainConfigBaseUrl()
     },
     async saveDomainConfigBaseUrl() {
-      const normalized = String(this.domainConfigBaseUrl || '').trim().replace(/\/+$/, '')
+      const normalized = String(this.domainConfigBaseUrl || '')
+        .trim()
+        .replace(/\/+$/, '')
       if (normalized === this.$store.settings.domainConfigBaseUrl) return
 
       this.domainConfigBaseUrl = normalized

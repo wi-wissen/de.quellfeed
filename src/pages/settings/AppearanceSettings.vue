@@ -75,12 +75,7 @@
 
 <script>
 import { hidesTabbar } from '../../utils/tabbar.js'
-import {
-  READING_FONTS,
-  READING_FONT_SCALES,
-  READING_WIDTHS,
-  injectReadingFonts,
-} from '../../utils/fonts.js'
+import { READING_FONTS, READING_FONT_SCALES, READING_WIDTHS, injectReadingFonts } from '../../utils/fonts.js'
 
 export default {
   name: 'AppearanceSettings',

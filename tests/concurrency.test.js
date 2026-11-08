@@ -17,7 +17,13 @@ describe('mapSettledWithLimit', () => {
 
     expect(peak).toBe(3)
     expect(results.map(r => r.status)).toEqual([
-      'fulfilled', 'fulfilled', 'fulfilled', 'rejected', 'fulfilled', 'fulfilled', 'fulfilled',
+      'fulfilled',
+      'fulfilled',
+      'fulfilled',
+      'rejected',
+      'fulfilled',
+      'fulfilled',
+      'fulfilled',
     ])
     expect(results[6].value).toBe(14)
   })

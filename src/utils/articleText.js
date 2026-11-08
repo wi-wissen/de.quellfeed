@@ -26,34 +26,73 @@ export const MAX_UTTERANCE_CHARS = 3500
 // the time sanitize.js is done, but extractArticleText() is a public helper and
 // may be handed raw HTML by a caller or a test — so it defends itself.
 const DROP_TAGS = [
-  'script', 'style', 'noscript', 'template', 'svg', 'canvas',
-  'iframe', 'object', 'embed', 'video', 'audio',
-  'form', 'input', 'select', 'textarea', 'button',
+  'script',
+  'style',
+  'noscript',
+  'template',
+  'svg',
+  'canvas',
+  'iframe',
+  'object',
+  'embed',
+  'video',
+  'audio',
+  'form',
+  'input',
+  'select',
+  'textarea',
+  'button',
 ]
 
 // Blocks get a blank line between them, which is what makes the engine pause
 // instead of slurring one paragraph into the next.
 const BLOCK_TAGS = new Set([
-  'ADDRESS', 'ARTICLE', 'ASIDE', 'BLOCKQUOTE', 'DD', 'DIV', 'DL', 'DT',
-  'FIELDSET', 'FIGCAPTION', 'FIGURE', 'FOOTER', 'H1', 'H2', 'H3', 'H4', 'H5',
-  'H6', 'HEADER', 'HR', 'LI', 'MAIN', 'NAV', 'OL', 'P', 'PRE', 'SECTION',
-  'TABLE', 'TR', 'UL',
+  'ADDRESS',
+  'ARTICLE',
+  'ASIDE',
+  'BLOCKQUOTE',
+  'DD',
+  'DIV',
+  'DL',
+  'DT',
+  'FIELDSET',
+  'FIGCAPTION',
+  'FIGURE',
+  'FOOTER',
+  'H1',
+  'H2',
+  'H3',
+  'H4',
+  'H5',
+  'H6',
+  'HEADER',
+  'HR',
+  'LI',
+  'MAIN',
+  'NAV',
+  'OL',
+  'P',
+  'PRE',
+  'SECTION',
+  'TABLE',
+  'TR',
+  'UL',
 ])
 
 // Class/itemprop hints for captions that are not wrapped in <figcaption>.
 // Deliberately narrow: a bare "credit" would also match a legitimate paragraph.
 const CAPTION_HINTS = [
-  'caption',           // covers .caption, .wp-caption-text, .image-caption, …
+  'caption', // covers .caption, .wp-caption-text, .image-caption, …
   'bildunterschrift',
-  'image-credit', 'imagecredit', 'photo-credit', 'media-credit',
+  'image-credit',
+  'imagecredit',
+  'photo-credit',
+  'media-credit',
 ]
 
 // The same list as DROP_TAGS, plus the media elements that prepareRoot() removes
 // separately — as a Set of tag names, for the non-destructive walker below.
-const DROP_ELEMENTS = new Set([
-  ...DROP_TAGS.map(tag => tag.toUpperCase()),
-  'IMG', 'PICTURE', 'SOURCE',
-])
+const DROP_ELEMENTS = new Set([...DROP_TAGS.map(tag => tag.toUpperCase()), 'IMG', 'PICTURE', 'SOURCE'])
 
 function parseBody(html) {
   const doc = new DOMParser().parseFromString(`<body>${html || ''}</body>`, 'text/html')
@@ -290,7 +329,11 @@ function inline(node) {
 }
 
 function inlineOf(node) {
-  return Array.from(node.childNodes).map(inline).join('').replace(/[ \t]+/g, ' ').trim()
+  return Array.from(node.childNodes)
+    .map(inline)
+    .join('')
+    .replace(/[ \t]+/g, ' ')
+    .trim()
 }
 
 function renderList(list, depth) {
@@ -376,7 +419,10 @@ function renderChildren(node) {
   let buffer = []
 
   const flushInline = () => {
-    const text = buffer.join('').replace(/[ \t]+/g, ' ').trim()
+    const text = buffer
+      .join('')
+      .replace(/[ \t]+/g, ' ')
+      .trim()
     if (text) blocks.push(text)
     buffer = []
   }
@@ -431,7 +477,9 @@ export function extractArticleMarkdown(html, options = {}) {
   const skipCaptions = options.skipCaptions !== false
   const skipImages = options.skipImages !== false
   const root = prepareRoot(html, { skipCaptions, skipImages })
-  return renderChildren(root).replace(/\n{3,}/g, '\n\n').trim()
+  return renderChildren(root)
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
 }
 
 // ── Utterances ──────────────────────────────────────────────────────────────
@@ -496,13 +544,18 @@ function splitLongSegment(segment, limit) {
  * @returns {string[]} [] for empty input; every entry is <= maxChars
  */
 export function splitIntoUtterances(text, maxChars = MAX_UTTERANCE_CHARS) {
-  const source = String(text || '').replace(/\r\n?/g, '\n').trim()
+  const source = String(text || '')
+    .replace(/\r\n?/g, '\n')
+    .trim()
   if (!source) return []
 
   const limit = Math.max(1, Math.floor(Number(maxChars) || MAX_UTTERANCE_CHARS))
 
   const segments = []
-  for (const paragraph of source.split(/\n{2,}/).map(p => p.trim()).filter(Boolean)) {
+  for (const paragraph of source
+    .split(/\n{2,}/)
+    .map(p => p.trim())
+    .filter(Boolean)) {
     if (paragraph.length <= limit) {
       segments.push(paragraph)
       continue

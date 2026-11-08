@@ -27,9 +27,16 @@ function stubMediaSession() {
 }
 
 function stubAudio() {
-  const element = { play: vi.fn().mockResolvedValue(undefined), pause: vi.fn(), removeAttribute: vi.fn(), load: vi.fn() }
+  const element = {
+    play: vi.fn().mockResolvedValue(undefined),
+    pause: vi.fn(),
+    removeAttribute: vi.fn(),
+    load: vi.fn(),
+  }
   // A `function`, not an arrow: since Vitest 4 a mock called with `new` must be constructible.
-  window.Audio = vi.fn(function () { return element })
+  window.Audio = vi.fn(function () {
+    return element
+  })
   return element
 }
 
@@ -61,10 +68,18 @@ describe('createMediaSession', () => {
   it('carries the article into the notification and wires its buttons back', async () => {
     const session = stubMediaSession()
     const audio = stubAudio()
-    const handlers = { onPlay: vi.fn(), onPause: vi.fn(), onStop: vi.fn(), onNext: vi.fn(), onPrevious: vi.fn() }
+    const handlers = {
+      onPlay: vi.fn(),
+      onPause: vi.fn(),
+      onStop: vi.fn(),
+      onNext: vi.fn(),
+      onPrevious: vi.fn(),
+    }
 
     const media = createMediaSession(handlers)
-    await expect(media.enable({ title: 'Der Artikel', artist: 'Die Quelle', artwork: 'https://x/y.jpg' })).resolves.toBe(true)
+    await expect(
+      media.enable({ title: 'Der Artikel', artist: 'Die Quelle', artwork: 'https://x/y.jpg' }),
+    ).resolves.toBe(true)
 
     expect(session.metadata).toMatchObject({
       title: 'Der Artikel',

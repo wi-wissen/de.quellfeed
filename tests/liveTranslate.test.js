@@ -41,11 +41,7 @@ describe.skipIf(!KEY)('live: OpenRouter streaming', () => {
   it('translates blocks with live paragraph previews in order', async () => {
     const previews = []
     const result = await translateArticleBlocks(
-      [
-        '<p>The sun rose over the quiet town.</p>',
-        '<p>Nobody was awake yet.</p>',
-        '<h2>A new day</h2>',
-      ],
+      ['<p>The sun rose over the quiet town.</p>', '<p>Nobody was awake yet.</p>', '<h2>A new day</h2>'],
       SETTINGS,
       {
         targetLanguage: 'de',

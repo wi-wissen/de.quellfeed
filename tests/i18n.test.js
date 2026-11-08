@@ -36,8 +36,14 @@ describe('i18n catalogues', () => {
     const deKeys = flatten(de).sort()
     const enKeys = flatten(en).sort()
 
-    expect(deKeys.filter(key => !enKeys.includes(key)), 'missing in en').toEqual([])
-    expect(enKeys.filter(key => !deKeys.includes(key)), 'missing in de').toEqual([])
+    expect(
+      deKeys.filter(key => !enKeys.includes(key)),
+      'missing in en',
+    ).toEqual([])
+    expect(
+      enKeys.filter(key => !deKeys.includes(key)),
+      'missing in de',
+    ).toEqual([])
   })
 
   it('has a translation for every key the app asks for', () => {
@@ -90,12 +96,29 @@ describe('the sync pages use their own i18n namespace', () => {
   // in their own words. A missing key here is a page that would render a raw key path.
   it('gives all three targets the same set of texts', () => {
     const shared = [
-      'title', 'hint', 'enabled', 'lastSync', 'never',
-      'test', 'testOk', 'syncNow', 'done', 'notConfigured',
+      'title',
+      'hint',
+      'enabled',
+      'lastSync',
+      'never',
+      'test',
+      'testOk',
+      'syncNow',
+      'done',
+      'notConfigured',
     ]
     const errors = [
-      'unauthorized', 'forbidden', 'notFound', 'conflict', 'rateLimited', 'aborted',
-      'serverError', 'networkError', 'invalidPayload', 'requestFailed', 'notConfigured',
+      'unauthorized',
+      'forbidden',
+      'notFound',
+      'conflict',
+      'rateLimited',
+      'aborted',
+      'serverError',
+      'networkError',
+      'invalidPayload',
+      'requestFailed',
+      'notConfigured',
     ]
 
     for (const locale of [de, en]) {
@@ -119,10 +142,7 @@ describe('the sync pages use their own i18n namespace', () => {
     for (const locale of [de, en]) {
       for (const namespace of ['sync', 'karakeep', 'linkwarden']) {
         for (const key of Object.values(SYNC_ERROR_KEYS)) {
-          expect(
-            locale.settings[namespace].errors[key],
-            `settings.${namespace}.errors.${key}`,
-          ).toBeTruthy()
+          expect(locale.settings[namespace].errors[key], `settings.${namespace}.errors.${key}`).toBeTruthy()
         }
       }
     }

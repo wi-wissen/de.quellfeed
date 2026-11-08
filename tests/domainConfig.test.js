@@ -13,8 +13,12 @@ const store = new Map()
 vi.mock('@capacitor/preferences', () => ({
   Preferences: {
     get: async ({ key }) => ({ value: store.has(key) ? store.get(key) : null }),
-    set: async ({ key, value }) => { store.set(key, value) },
-    remove: async ({ key }) => { store.delete(key) },
+    set: async ({ key, value }) => {
+      store.set(key, value)
+    },
+    remove: async ({ key }) => {
+      store.delete(key)
+    },
     keys: async () => ({ keys: [...store.keys()] }),
   },
 }))
@@ -123,13 +127,17 @@ describe('getDomainConfig', () => {
     await getDomainConfig('spektrum.de', BASE)
 
     vi.advanceTimersByTime(CONFIG_TTL_MS + 1)
-    fetchMock.mockImplementation(() => { throw new Error('offline') })
+    fetchMock.mockImplementation(() => {
+      throw new Error('offline')
+    })
 
     expect(await getDomainConfig('spektrum.de', BASE)).toEqual(CONFIG)
   })
 
   it('returns null when offline and nothing was ever cached', async () => {
-    mockFetch(() => { throw new Error('offline') })
+    mockFetch(() => {
+      throw new Error('offline')
+    })
 
     expect(await getDomainConfig('spektrum.de', BASE)).toBeNull()
   })

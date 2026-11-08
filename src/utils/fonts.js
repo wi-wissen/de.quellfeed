@@ -254,7 +254,9 @@ export function buildFontFaceCss(fontId) {
  * display one.
  */
 export function buildAllFontFaceCss() {
-  return READING_FONTS.map(font => font.faces).filter(Boolean).join('\n')
+  return READING_FONTS.map(font => font.faces)
+    .filter(Boolean)
+    .join('\n')
 }
 
 export const READING_FONTS_STYLE_ID = 'quell-reading-fonts'
@@ -271,8 +273,8 @@ export function injectReadingFonts(doc = typeof document === 'undefined' ? null 
   const head = doc?.head
   if (!head) return null
 
-  const existing = doc.getElementById?.(READING_FONTS_STYLE_ID)
-    || head.querySelector(`#${READING_FONTS_STYLE_ID}`)
+  const existing =
+    doc.getElementById?.(READING_FONTS_STYLE_ID) || head.querySelector(`#${READING_FONTS_STYLE_ID}`)
   if (existing) return existing
 
   const style = doc.createElement('style')
@@ -299,9 +301,10 @@ export function resolveFontScale(value) {
   const scale = numeric > LEGACY_PX_THRESHOLD ? numeric / LEGACY_PX_BASE : numeric
   const clamped = Math.min(Math.max(scale, MIN_READING_FONT_SCALE), MAX_READING_FONT_SCALE)
 
-  return READING_FONT_SCALE_VALUES.reduce((best, step) => (
-    Math.abs(step - clamped) < Math.abs(best - clamped) ? step : best
-  ), READING_FONT_SCALE_VALUES[0])
+  return READING_FONT_SCALE_VALUES.reduce(
+    (best, step) => (Math.abs(step - clamped) < Math.abs(best - clamped) ? step : best),
+    READING_FONT_SCALE_VALUES[0],
+  )
 }
 
 /**
@@ -329,8 +332,10 @@ export function resolveFontSizePx(fontId, value, basePx = 16) {
 
 /** Entry from READING_WIDTHS; unknown ids fall back to `normal`. */
 export function getReadingWidth(widthId) {
-  return READING_WIDTHS.find(width => width.id === widthId)
-    || READING_WIDTHS.find(width => width.id === DEFAULT_READING_WIDTH)
+  return (
+    READING_WIDTHS.find(width => width.id === widthId) ||
+    READING_WIDTHS.find(width => width.id === DEFAULT_READING_WIDTH)
+  )
 }
 
 /** Normalized width id (`narrow` | `normal` | `wide`). */

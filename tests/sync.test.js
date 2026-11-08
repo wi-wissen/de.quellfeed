@@ -68,10 +68,7 @@ function article(overrides = {}) {
 
 /** A remote payload, built from a store-shaped state — the way a second device writes it. */
 function remoteOf(state, options = {}) {
-  return buildSyncPayload(
-    { tombstones: createEmptyTombstones(), ...state },
-    { now: NOW, ...options },
-  )
+  return buildSyncPayload({ tombstones: createEmptyTombstones(), ...state }, { now: NOW, ...options })
 }
 
 const EMPTY = { feeds: [], articles: [], tombstones: createEmptyTombstones() }
@@ -113,10 +110,13 @@ describe('buildSyncPayload', () => {
   })
 
   it('skips items without a usable url', () => {
-    const payload = buildSyncPayload({
-      feeds: [feed(), feed({ id: 'x', url: 'not-a-url' })],
-      articles: [article(), article({ id: 'y', url: '' })],
-    }, { now: NOW })
+    const payload = buildSyncPayload(
+      {
+        feeds: [feed(), feed({ id: 'x', url: 'not-a-url' })],
+        articles: [article(), article({ id: 'y', url: '' })],
+      },
+      { now: NOW },
+    )
 
     expect(payload.feeds).toHaveLength(1)
     expect(payload.articles).toHaveLength(1)
@@ -124,14 +124,17 @@ describe('buildSyncPayload', () => {
 
   it('prunes expired tombstones on the way out', () => {
     const old = new Date(Date.parse(NOW) - TOMBSTONE_MAX_AGE_MS - 1000).toISOString()
-    const payload = buildSyncPayload({
-      feeds: [],
-      articles: [],
-      tombstones: {
-        articles: { 'https://example.com/old': old, 'https://example.com/fresh': NOW },
-        feeds: {},
+    const payload = buildSyncPayload(
+      {
+        feeds: [],
+        articles: [],
+        tombstones: {
+          articles: { 'https://example.com/old': old, 'https://example.com/fresh': NOW },
+          feeds: {},
+        },
       },
-    }, { now: NOW })
+      { now: NOW },
+    )
 
     expect(payload.tombstones.articles).toEqual({ 'https://example.com/fresh': NOW })
   })
@@ -372,12 +375,14 @@ describe('mergeSyncState — deletions stay deleted', () => {
     }
     const remote = remoteOf({
       feeds: [],
-      articles: [article({
-        feedId: null,
-        url: 'https://example.com/link',
-        isSaved: true,
-        publishedAt: '2026-07-09T00:00:00.000Z',
-      })],
+      articles: [
+        article({
+          feedId: null,
+          url: 'https://example.com/link',
+          isSaved: true,
+          publishedAt: '2026-07-09T00:00:00.000Z',
+        }),
+      ],
     })
 
     const merged = merge(local, remote)
@@ -403,7 +408,7 @@ describe('mergeSyncState — deletions stay deleted', () => {
     expect(merged.articles).toHaveLength(0)
   })
 
-  it('takes a deleted feed\'s articles with it, on both sides', () => {
+  it("takes a deleted feed's articles with it, on both sides", () => {
     const local = {
       feeds: [],
       articles: [],
@@ -420,7 +425,7 @@ describe('mergeSyncState — deletions stay deleted', () => {
     expect(merged.articles).toHaveLength(0)
   })
 
-  it('lets a saved or archived article SURVIVE its feed\'s tombstone, detached into a link', () => {
+  it("lets a saved or archived article SURVIVE its feed's tombstone, detached into a link", () => {
     // "Archived = keep forever", and a bookmark is a bookmark: unsubscribing the feed
     // (here: on the other device) must not take them to the grave with it.
     const local = {
@@ -465,7 +470,10 @@ describe('mergeSyncState — deletions stay deleted', () => {
       ...EMPTY,
       tombstones: { feeds: {}, articles: { 'https://example.com/story-1': '2026-07-02T00:00:00.000Z' } },
     }
-    const remote = { ...remoteOf({}), tombstones: { feeds: {}, articles: { 'https://example.com/story-1': DELETED_AT } } }
+    const remote = {
+      ...remoteOf({}),
+      tombstones: { feeds: {}, articles: { 'https://example.com/story-1': DELETED_AT } },
+    }
 
     const merged = merge(local, remote)
 
@@ -507,7 +515,11 @@ describe('mergeSyncState — the conflict rule for isRead / isSaved', () => {
   })
 
   it('keeps an article saved that was saved on the other device', () => {
-    const local = { feeds: [feed()], articles: [article({ isSaved: false })], tombstones: createEmptyTombstones() }
+    const local = {
+      feeds: [feed()],
+      articles: [article({ isSaved: false })],
+      tombstones: createEmptyTombstones(),
+    }
     const remote = remoteOf({ feeds: [feed()], articles: [article({ isSaved: true })] })
 
     expect(merge(local, remote).articles[0].isSaved).toBe(true)
@@ -551,7 +563,11 @@ describe('mergeSyncState — the conflict rule for isRead / isSaved', () => {
   })
 
   it('keeps an article archived that was archived on the other device', () => {
-    const local = { feeds: [feed()], articles: [article({ isArchived: false })], tombstones: createEmptyTombstones() }
+    const local = {
+      feeds: [feed()],
+      articles: [article({ isArchived: false })],
+      tombstones: createEmptyTombstones(),
+    }
     const remote = remoteOf({ feeds: [feed()], articles: [article({ isArchived: true, isSaved: true })] })
 
     const merged = merge(local, remote)
@@ -576,15 +592,26 @@ describe('mergeSyncState — the conflict rule for isRead / isSaved', () => {
   })
 
   it('syncs isQuelled under the same rule', () => {
-    const local = { feeds: [feed()], articles: [article({ isQuelled: false })], tombstones: createEmptyTombstones() }
+    const local = {
+      feeds: [feed()],
+      articles: [article({ isQuelled: false })],
+      tombstones: createEmptyTombstones(),
+    }
     const remote = remoteOf({ feeds: [feed()], articles: [article({ isQuelled: true })] })
 
     expect(merge(local, remote).articles[0].isQuelled).toBe(true)
   })
 
   it('is decided the same way whichever device merges', () => {
-    const localA = { feeds: [feed()], articles: [article({ isRead: true, isSaved: false })], tombstones: createEmptyTombstones() }
-    const stateB = { feeds: [feed({ id: 'other' })], articles: [article({ id: 'other-a', feedId: 'other', isRead: false, isSaved: true })] }
+    const localA = {
+      feeds: [feed()],
+      articles: [article({ isRead: true, isSaved: false })],
+      tombstones: createEmptyTombstones(),
+    }
+    const stateB = {
+      feeds: [feed({ id: 'other' })],
+      articles: [article({ id: 'other-a', feedId: 'other', isRead: false, isSaved: true })],
+    }
 
     const aMerges = merge(localA, remoteOf(stateB))
     const bMerges = merge({ ...stateB, tombstones: createEmptyTombstones() }, remoteOf(localA))
@@ -610,7 +637,12 @@ describe('mergeSyncState — algebraic properties', () => {
     feeds: [feed({ id: 'r1' }), feed({ id: 'r3', url: 'https://third.com/rss', title: 'Third' })],
     articles: [
       article({ id: 'r-a1', feedId: 'r1', isSaved: true }),
-      article({ id: 'r-a4', feedId: 'r3', url: 'https://third.com/story', publishedAt: '2026-07-03T10:00:00.000Z' }),
+      article({
+        id: 'r-a4',
+        feedId: 'r3',
+        url: 'https://third.com/story',
+        publishedAt: '2026-07-03T10:00:00.000Z',
+      }),
     ],
   }
 
@@ -627,10 +659,13 @@ describe('mergeSyncState — algebraic properties', () => {
 
   it('converges on the same state whichever device merges first', () => {
     const onA = merge(local, remoteOf(remoteState))
-    const onB = merge({ ...remoteState, tombstones: createEmptyTombstones() }, remoteOf(local, {
-      // The other device's tombstones travel in its payload.
-      now: NOW,
-    }))
+    const onB = merge(
+      { ...remoteState, tombstones: createEmptyTombstones() },
+      remoteOf(local, {
+        // The other device's tombstones travel in its payload.
+        now: NOW,
+      }),
+    )
 
     // Ids are per-device, so compare what the sync file actually carries.
     const fileA = buildSyncPayload(onA, { now: NOW })
@@ -676,10 +711,13 @@ describe('mergeSyncState — algebraic properties', () => {
 
 describe('the additive fields — isArchived, isQuelled, filterPrompt (still format v1)', () => {
   it('writes them into the payload', () => {
-    const payload = buildSyncPayload({
-      feeds: [feed({ filterPrompt: 'nur KI-Themen' })],
-      articles: [article({ isArchived: true, isQuelled: true })],
-    }, { now: NOW })
+    const payload = buildSyncPayload(
+      {
+        feeds: [feed({ filterPrompt: 'nur KI-Themen' })],
+        articles: [article({ isArchived: true, isQuelled: true })],
+      },
+      { now: NOW },
+    )
 
     expect(payload.version).toBe(SYNC_VERSION)
     expect(payload.feeds[0].filterPrompt).toBe('nur KI-Themen')
@@ -699,22 +737,26 @@ describe('the additive fields — isArchived, isQuelled, filterPrompt (still for
     // knowledge, not an explicit false, so the archive must survive.
     const local = {
       feeds: [],
-      articles: [article({
-        feedId: null,
-        isArchived: true,
-        isSaved: true,
-        updatedAt: '2026-07-08T00:00:00.000Z',
-      })],
+      articles: [
+        article({
+          feedId: null,
+          isArchived: true,
+          isSaved: true,
+          updatedAt: '2026-07-08T00:00:00.000Z',
+        }),
+      ],
       tombstones: createEmptyTombstones(),
     }
     const remote = {
       version: 1,
-      articles: [{
-        url: 'https://example.com/story-1',
-        isRead: true,
-        isSaved: true,
-        updatedAt: '2026-07-10T00:00:00.000Z',
-      }],
+      articles: [
+        {
+          url: 'https://example.com/story-1',
+          isRead: true,
+          isSaved: true,
+          updatedAt: '2026-07-10T00:00:00.000Z',
+        },
+      ],
     }
 
     const merged = merge(local, remote)
@@ -731,7 +773,9 @@ describe('the additive fields — isArchived, isQuelled, filterPrompt (still for
     }
     const remote = {
       version: 1,
-      feeds: [{ url: 'https://example.com/feed.xml', title: 'Example', updatedAt: '2026-07-10T00:00:00.000Z' }],
+      feeds: [
+        { url: 'https://example.com/feed.xml', title: 'Example', updatedAt: '2026-07-10T00:00:00.000Z' },
+      ],
     }
 
     expect(merge(local, remote).feeds[0].filterPrompt).toBe('nur KI-Themen')
@@ -857,10 +901,18 @@ describe('syncWithWebdav', () => {
 
   it('merges again and retries once when the server answers 412', async () => {
     const first = serializeSyncPayload(remoteOf({ feeds: [feed()], articles: [] }))
-    const second = serializeSyncPayload(remoteOf({
-      feeds: [feed()],
-      articles: [article({ id: 'theirs', url: 'https://example.com/story-9', publishedAt: '2026-07-04T00:00:00.000Z' })],
-    }))
+    const second = serializeSyncPayload(
+      remoteOf({
+        feeds: [feed()],
+        articles: [
+          article({
+            id: 'theirs',
+            url: 'https://example.com/story-9',
+            publishedAt: '2026-07-04T00:00:00.000Z',
+          }),
+        ],
+      }),
+    )
 
     getFile
       .mockResolvedValueOnce({ status: 200, data: first, etag: '"v1"' })
@@ -911,10 +963,12 @@ describe('syncWithWebdav', () => {
   it('reports what moved, for the toast', async () => {
     getFile.mockResolvedValue({
       status: 200,
-      data: serializeSyncPayload(remoteOf({
-        feeds: [feed()],
-        articles: [article({ isRead: true }), article({ id: 'r2', url: 'https://example.com/story-3' })],
-      })),
+      data: serializeSyncPayload(
+        remoteOf({
+          feeds: [feed()],
+          articles: [article({ isRead: true }), article({ id: 'r2', url: 'https://example.com/story-3' })],
+        }),
+      ),
       etag: '"v1"',
     })
     putFile.mockResolvedValue({ status: 204, etag: '"v2"' })
@@ -935,14 +989,18 @@ describe('testWebdavConnection', () => {
   it('treats a missing sync file as a working connection', async () => {
     testConnection.mockResolvedValue({ ok: true, status: 404, exists: false })
 
-    await expect(testWebdavConnection({ baseUrl: 'x', username: 'u', password: 'p' }))
-      .resolves.toEqual({ ok: true, status: 404, exists: false })
+    await expect(testWebdavConnection({ baseUrl: 'x', username: 'u', password: 'p' })).resolves.toEqual({
+      ok: true,
+      status: 404,
+      exists: false,
+    })
   })
 
   it('reports bad credentials', async () => {
     testConnection.mockRejectedValue(new Error('unauthorized'))
 
-    await expect(testWebdavConnection({ baseUrl: 'x', username: 'u', password: 'p' }))
-      .rejects.toThrow('unauthorized')
+    await expect(testWebdavConnection({ baseUrl: 'x', username: 'u', password: 'p' })).rejects.toThrow(
+      'unauthorized',
+    )
   })
 })

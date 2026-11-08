@@ -5,8 +5,12 @@ vi.mock('../src/utils/storage.js', () => {
   return {
     __prefs: prefs,
     storageGet: vi.fn(async key => (prefs.has(key) ? JSON.parse(JSON.stringify(prefs.get(key))) : null)),
-    storageSet: vi.fn(async (key, value) => { prefs.set(key, JSON.parse(JSON.stringify(value))) }),
-    storageRemove: vi.fn(async key => { prefs.delete(key) }),
+    storageSet: vi.fn(async (key, value) => {
+      prefs.set(key, JSON.parse(JSON.stringify(value)))
+    }),
+    storageRemove: vi.fn(async key => {
+      prefs.delete(key)
+    }),
     storageRemoveByPrefix: vi.fn(async () => 0),
   }
 })
@@ -35,7 +39,12 @@ describe('secrets', () => {
     expect(settings.ai).toEqual({ apiKey: '', model: 'm' })
     expect(settings.webdav).toEqual({ password: '', url: 'https://dav.example' })
     expect(JSON.stringify(settings)).not.toMatch(/sk-1|pw"|kk|lw/)
-    expect(secrets).toEqual({ 'ai.apiKey': 'sk-1', 'webdav.password': 'pw', 'karakeep.apiKey': 'kk', 'linkwarden.apiKey': 'lw' })
+    expect(secrets).toEqual({
+      'ai.apiKey': 'sk-1',
+      'webdav.password': 'pw',
+      'karakeep.apiKey': 'kk',
+      'linkwarden.apiKey': 'lw',
+    })
   })
 
   it('the settings blob never holds a key; the secure store does', async () => {
@@ -46,7 +55,10 @@ describe('secrets', () => {
   })
 
   it('moves keys out of a blob written by an older version', async () => {
-    __prefs.set('quell:settings', { theme: 'dark', webdav: { url: 'https://dav.example', password: 'old-pw' } })
+    __prefs.set('quell:settings', {
+      theme: 'dark',
+      webdav: { url: 'https://dav.example', password: 'old-pw' },
+    })
     store.settings.webdav.password = ''
 
     await store.loadSettings()

@@ -168,7 +168,10 @@ describe('saving from the feed', () => {
   it('discards a download that finishes after the user unsaved again', async () => {
     let release
     fetchArticleContent.mockImplementationOnce(
-      () => new Promise(resolve => { release = resolve }),
+      () =>
+        new Promise(resolve => {
+          release = resolve
+        }),
     )
     store.articles = [feedArticle()]
 
@@ -190,7 +193,13 @@ describe('unsubscribing a feed', () => {
     store.articles = [
       feedArticle({ id: 'a-plain', url: 'https://example.com/plain' }),
       feedArticle({ id: 'a-saved', url: 'https://example.com/saved', isSaved: true }),
-      feedArticle({ id: 'a-arch', url: 'https://example.com/arch', isSaved: true, isArchived: true, cachedHtml: '<p>offline</p>' }),
+      feedArticle({
+        id: 'a-arch',
+        url: 'https://example.com/arch',
+        isSaved: true,
+        isArchived: true,
+        cachedHtml: '<p>offline</p>',
+      }),
     ]
 
     await store.removeFeed('feed-1')

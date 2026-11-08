@@ -82,13 +82,9 @@ export function buildIframeDoc(html, headerImageUrl = null, themeChoice = 'syste
     (headerImageUrl && html.includes(headerImageUrl)) || articleLeadsWithImage(html)
   const showFeedImage = options.showFeedImage
   const showArticleTitle = options.showArticleTitle === true && articleTitle
-  const shouldShowHeaderImage = headerImageUrl && (
-    showFeedImage === true ||
-    (showFeedImage !== false && !articleAlreadyShowsImage)
-  )
-  const title = showArticleTitle
-    ? `<h1 class="article-title">${escapeHtml(articleTitle)}</h1>`
-    : ''
+  const shouldShowHeaderImage =
+    headerImageUrl && (showFeedImage === true || (showFeedImage !== false && !articleAlreadyShowsImage))
+  const title = showArticleTitle ? `<h1 class="article-title">${escapeHtml(articleTitle)}</h1>` : ''
   // The cover URL comes straight out of the feed XML and is NOT run through DOMPurify
   // like the article body. Unescaped, a `"` in it would let the feed write its own
   // markup into the reading view. Only http(s) URLs get in, and always escaped.
@@ -204,7 +200,9 @@ export async function fetchArticleContent(url, configBaseUrl = '', options = {})
   })
 
   let html = null
-  let fallbackImages = collectFallbackImages(doc.querySelector('article') || doc.querySelector('main') || doc.body)
+  let fallbackImages = collectFallbackImages(
+    doc.querySelector('article') || doc.querySelector('main') || doc.body,
+  )
 
   if (config) {
     const extracted = extractWithConfig(doc, config)
@@ -233,8 +231,8 @@ export async function fetchArticleContent(url, configBaseUrl = '', options = {})
     // What the page itself claims to be written in (<html lang>, or the old-school
     // meta header). '' means "the page didn't say" — never guessed here.
     language: normalizeLanguageTag(
-      doc.documentElement.getAttribute('lang')
-      || doc.querySelector('meta[http-equiv="content-language" i]')?.getAttribute('content')
+      doc.documentElement.getAttribute('lang') ||
+        doc.querySelector('meta[http-equiv="content-language" i]')?.getAttribute('content'),
     ),
   }
 }
@@ -286,7 +284,7 @@ function hasFeedFallbackContent(feedFallback) {
   return Boolean(
     String(feedFallback.title || '').trim() ||
     String(feedFallback.description || '').trim() ||
-    String(feedFallback.url || '').trim()
+    String(feedFallback.url || '').trim(),
   )
 }
 

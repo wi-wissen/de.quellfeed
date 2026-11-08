@@ -41,10 +41,7 @@ describe('getFaviconUrl', () => {
 
 describe('rememberDeclaredIcon', () => {
   it('prefers what the page declares over the guessed /favicon.ico', () => {
-    rememberDeclaredIcon(
-      'https://example.com/article',
-      docFrom('<link rel="icon" href="/assets/icon.png">')
-    )
+    rememberDeclaredIcon('https://example.com/article', docFrom('<link rel="icon" href="/assets/icon.png">'))
 
     expect(getFaviconUrl('https://example.com/other')).toBe('https://example.com/assets/icon.png')
   })
@@ -52,7 +49,7 @@ describe('rememberDeclaredIcon', () => {
   it('resolves a relative href against the page it came from', () => {
     rememberDeclaredIcon(
       'https://example.com/blog/post',
-      docFrom('<link rel="shortcut icon" href="../icon.ico">')
+      docFrom('<link rel="shortcut icon" href="../icon.ico">'),
     )
 
     expect(getFaviconUrl('https://example.com/x')).toBe('https://example.com/icon.ico')
@@ -65,7 +62,7 @@ describe('rememberDeclaredIcon', () => {
         <link rel="icon" href="/small.png" sizes="16x16">
         <link rel="icon" href="/big.png" sizes="180x180">
         <link rel="icon" href="/mid.png" sizes="32x32">
-      `)
+      `),
     )
 
     expect(getFaviconUrl('https://example.com/a')).toBe('https://example.com/big.png')
@@ -96,7 +93,7 @@ describe('getFaviconFallbackUrl', () => {
   // handing back a generic globe that looks like a real icon.
   it('is the last resort, reached only after the site itself failed', () => {
     expect(getFaviconFallbackUrl('https://example.com/a')).toBe(
-      'https://icons.duckduckgo.com/ip3/example.com.ico'
+      'https://icons.duckduckgo.com/ip3/example.com.ico',
     )
   })
 

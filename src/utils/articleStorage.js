@@ -98,15 +98,17 @@ export async function loadArticles() {
   const withHtml = new Set(Array.isArray(meta?.html) ? meta.html : [])
 
   onDisk.clear()
-  await Promise.all(articles.map(async article => {
-    if (!withHtml.has(article.id)) {
-      article.cachedHtml = article.cachedHtml ?? null
-      return
-    }
-    const html = await readText(htmlPath(article.id))
-    article.cachedHtml = html
-    if (html != null) onDisk.set(article.id, fingerprint(html))
-  }))
+  await Promise.all(
+    articles.map(async article => {
+      if (!withHtml.has(article.id)) {
+        article.cachedHtml = article.cachedHtml ?? null
+        return
+      }
+      const html = await readText(htmlPath(article.id))
+      article.cachedHtml = html
+      if (html != null) onDisk.set(article.id, fingerprint(html))
+    }),
+  )
 
   return articles
 }

@@ -42,7 +42,12 @@ export default {
     return {
       appVersion: __APP_VERSION__,
       sections: [
-        { id: 'appearance', route: '/settings/appearance/', icon: 'color-palette-outline', color: 'color-accent' },
+        {
+          id: 'appearance',
+          route: '/settings/appearance/',
+          icon: 'color-palette-outline',
+          color: 'color-accent',
+        },
         { id: 'feeds', route: '/settings/feeds/', icon: 'logo-rss', color: 'color-warning' },
         { id: 'sync', route: '/settings/sync/', icon: 'cloud-outline', color: 'color-success' },
         { id: 'paywall', route: '/settings/paywall/', icon: 'lock-open-outline', color: 'color-warning' },

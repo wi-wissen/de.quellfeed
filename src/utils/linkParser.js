@@ -14,8 +14,14 @@ export async function fetchLinkMetadata(inputUrl) {
 
   return {
     url: canonical,
-    title: meta(doc, 'og:title') || meta(doc, 'twitter:title') || textOf(doc, 'title') || hostnameOf(canonical),
-    description: (meta(doc, 'og:description') || meta(doc, 'twitter:description') || meta(doc, 'description') || '').slice(0, 280),
+    title:
+      meta(doc, 'og:title') || meta(doc, 'twitter:title') || textOf(doc, 'title') || hostnameOf(canonical),
+    description: (
+      meta(doc, 'og:description') ||
+      meta(doc, 'twitter:description') ||
+      meta(doc, 'description') ||
+      ''
+    ).slice(0, 280),
     image: absoluteUrl(meta(doc, 'og:image') || meta(doc, 'twitter:image'), canonical),
     publishedAt: parseDate(meta(doc, 'article:published_time') || meta(doc, 'og:article:published_time')),
     source: meta(doc, 'og:site_name') || hostnameOf(canonical),
@@ -32,9 +38,7 @@ export function normalizeUrl(inputUrl) {
 }
 
 function meta(doc, name) {
-  const el =
-    doc.querySelector(`meta[property="${name}"]`) ||
-    doc.querySelector(`meta[name="${name}"]`)
+  const el = doc.querySelector(`meta[property="${name}"]`) || doc.querySelector(`meta[name="${name}"]`)
   return (el?.getAttribute('content') || '').trim()
 }
 

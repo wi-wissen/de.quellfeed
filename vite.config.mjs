@@ -145,11 +145,7 @@ function devConfigs() {
 }
 
 export default defineConfig({
-  plugins: [
-    vue(),
-    devProxy(),
-    devConfigs(),
-  ],
+  plugins: [vue(), devProxy(), devConfigs()],
   define: {
     __APP_VERSION__: JSON.stringify(version),
   },

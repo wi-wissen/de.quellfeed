@@ -157,9 +157,7 @@ export default {
     },
 
     async markSignedIn(site) {
-      const sites = this.sites.map(s =>
-        s.domain === site.domain ? { ...s, lastLoginAt: Date.now() } : s,
-      )
+      const sites = this.sites.map(s => (s.domain === site.domain ? { ...s, lastLoginAt: Date.now() } : s))
       await this.$store.setPaywallSites(sites)
     },
 

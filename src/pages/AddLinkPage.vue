@@ -1,9 +1,5 @@
 <template>
-  <f7-page
-    name="add-link"
-    @page:beforein="onPageIn"
-    @page:beforeout="onPageOut"
-  >
+  <f7-page name="add-link" @page:beforein="onPageIn" @page:beforeout="onPageOut">
     <f7-navbar>
       <f7-nav-left>
         <f7-link back class="nav-icon-link">
@@ -32,12 +28,7 @@
     </f7-list>
 
     <f7-block>
-      <f7-button
-        fill
-        large
-        :disabled="!url.trim() || loading"
-        @click="addLink"
-      >
+      <f7-button fill large :disabled="!url.trim() || loading" @click="addLink">
         <f7-preloader v-if="loading" color="white"></f7-preloader>
         <span v-else>{{ $t('addLink.add') }}</span>
       </f7-button>

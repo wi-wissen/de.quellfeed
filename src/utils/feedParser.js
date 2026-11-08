@@ -64,7 +64,10 @@ function parseAtomEntry(entry) {
   let link = ''
   for (const l of links) {
     const rel = l.getAttribute('rel') || 'alternate'
-    if (rel === 'alternate') { link = l.getAttribute('href') || ''; break }
+    if (rel === 'alternate') {
+      link = l.getAttribute('href') || ''
+      break
+    }
   }
   if (!link && links.length > 0) link = links[0].getAttribute('href') || ''
 
@@ -94,7 +97,10 @@ function xmlText(parent, ...tags) {
 }
 
 function stripHtml(html) {
-  return html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+  return html
+    .replace(/<[^>]+>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function normalizeFeedText(text) {
@@ -128,14 +134,21 @@ export function normalizeArticle(item, feedId) {
     image: extractImage(item),
     isRead: false,
     isSaved: false,
-    publishedAt: item.pubDate
-      ? new Date(item.pubDate).toISOString()
-      : new Date().toISOString(),
+    publishedAt: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
     cachedHtml: null,
   }
 }
 
-const COMMON_FEED_PATHS = ['/feed', '/feed/', '/rss', '/rss/', '/atom.xml', '/feed.xml', '/rss.xml', '/index.xml']
+const COMMON_FEED_PATHS = [
+  '/feed',
+  '/feed/',
+  '/rss',
+  '/rss/',
+  '/atom.xml',
+  '/feed.xml',
+  '/rss.xml',
+  '/index.xml',
+]
 
 /**
  * Finds every feed a URL leads to. Returns [{ url, title }], newest-first is not

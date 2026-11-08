@@ -13,11 +13,7 @@
          this page is still open — everything after that renders against nothing. -->
     <template v-if="feed">
       <f7-list strong inset dividers>
-        <f7-list-item
-          class="feed-detail-url"
-          :header="$t('settings.feedDetail.url')"
-          :title="feed.url"
-        >
+        <f7-list-item class="feed-detail-url" :header="$t('settings.feedDetail.url')" :title="feed.url">
           <template #media>
             <AppIcon name="logo-rss" class="color-warning" />
           </template>

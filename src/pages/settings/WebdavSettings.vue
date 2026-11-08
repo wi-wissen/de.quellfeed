@@ -69,10 +69,7 @@
     <f7-list strong inset dividers>
       <f7-list-item>
         <span>{{ $t('settings.sync.enabled') }}</span>
-        <f7-toggle
-          :checked="webdav.enabled"
-          @change="onChange('enabled', $event.target.checked)"
-        ></f7-toggle>
+        <f7-toggle :checked="webdav.enabled" @change="onChange('enabled', $event.target.checked)"></f7-toggle>
       </f7-list-item>
       <f7-list-item
         class="settings-action-item"

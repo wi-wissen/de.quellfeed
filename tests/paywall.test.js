@@ -61,9 +61,13 @@ beforeEach(() => {
   vi.clearAllMocks()
 
   InAppBrowser.addListener.mockImplementation((eventName, listenerFunc) => {
-    const handle = { eventName, listenerFunc, remove: vi.fn(async () => {
-      listeners = listeners.filter(l => l !== handle)
-    }) }
+    const handle = {
+      eventName,
+      listenerFunc,
+      remove: vi.fn(async () => {
+        listeners = listeners.filter(l => l !== handle)
+      }),
+    }
     listeners.push(handle)
     return Promise.resolve(handle)
   })

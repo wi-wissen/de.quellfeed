@@ -9,7 +9,8 @@ import { translateArticleBlocks, translateText, TRANSLATION_CHUNK_CHARS } from '
  * broken with. Needs the network and QUELL_LIVE_KEY; skipped everywhere else.
  */
 const KEY = process.env.QUELL_LIVE_KEY || ''
-const ARTICLE_URL = 'https://www.irishtimes.com/world/europe/2026/07/08/ai-software-that-generates-rage-bait-developed-by-germanys-far-right-afd/'
+const ARTICLE_URL =
+  'https://www.irishtimes.com/world/europe/2026/07/08/ai-software-that-generates-rage-bait-developed-by-germanys-far-right-afd/'
 
 const SETTINGS = {
   provider: 'openrouter',

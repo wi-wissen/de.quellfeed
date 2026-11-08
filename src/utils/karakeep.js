@@ -145,10 +145,13 @@ function normalizeBaseUrl(raw) {
     // from a URL. The key belongs in the Authorization header and nowhere else.
     url.username = ''
     url.password = ''
-    return url.toString()
-      .replace(/\/+$/, '')
-      // Users paste the endpoint they found in the docs, not the server root.
-      .replace(new RegExp(`${API_PATH}/*$`), '')
+    return (
+      url
+        .toString()
+        .replace(/\/+$/, '')
+        // Users paste the endpoint they found in the docs, not the server root.
+        .replace(new RegExp(`${API_PATH}/*$`), '')
+    )
   } catch {
     return value.replace(new RegExp(`${API_PATH}/*$`), '')
   }
@@ -454,8 +457,9 @@ export async function testKarakeepConnection(settings) {
 
 /** The articles this sync is about: saved ones, with a usable URL. */
 function pushable(articles) {
-  return (Array.isArray(articles) ? articles : [])
-    .filter(article => article?.isSaved && isHttpUrl(article.url))
+  return (Array.isArray(articles) ? articles : []).filter(
+    article => article?.isSaved && isHttpUrl(article.url),
+  )
 }
 
 /**
@@ -503,7 +507,10 @@ async function upsertBookmark(config, article, existing, options) {
   // `existing` is either an indexed bookmark (id + flags) or a bare id from check-url,
   // whose flags we have not paid a request to learn.
   let id = typeof existing === 'string' ? existing : existing?.id || null
-  let have = typeof existing === 'object' && existing ? { archived: Boolean(existing.archived), favourited: Boolean(existing.favourited) } : null
+  let have =
+    typeof existing === 'object' && existing
+      ? { archived: Boolean(existing.archived), favourited: Boolean(existing.favourited) }
+      : null
 
   if (!id) {
     const { data } = await request(config, {
@@ -567,7 +574,7 @@ export async function pushToKarakeep(articles, settings, options = {}) {
 
   for (const article of pushable(articles)) {
     const indexed = index ? index.get(urlKey(article.url)) || null : null
-    const existing = indexed || await findBookmarkIdByUrl(config, article.url, options)
+    const existing = indexed || (await findBookmarkIdByUrl(config, article.url, options))
 
     const result = await upsertBookmark(config, article, existing, options)
     if (result === 'skipped') skipped++
@@ -663,10 +670,12 @@ function pickArchived(local, remote, remoteModifiedAt) {
 }
 
 function changed(before, after) {
-  return before.isSaved !== after.isSaved
-    || Boolean(before.isArchived) !== Boolean(after.isArchived)
-    || before.title !== after.title
-    || before.description !== after.description
+  return (
+    before.isSaved !== after.isSaved ||
+    Boolean(before.isArchived) !== Boolean(after.isArchived) ||
+    before.title !== after.title ||
+    before.description !== after.description
+  )
 }
 
 /**

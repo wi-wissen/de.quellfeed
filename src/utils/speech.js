@@ -164,9 +164,10 @@ function toText(input, options) {
   if (!input || typeof input !== 'object') return ''
 
   const title = String(input.title || '').trim()
-  const body = typeof input.text === 'string' && input.text.trim()
-    ? input.text.trim()
-    : extractArticleText(input.html || '', options)
+  const body =
+    typeof input.text === 'string' && input.text.trim()
+      ? input.text.trim()
+      : extractArticleText(input.html || '', options)
 
   // The title is its own paragraph, so the engine pauses after it.
   return [title, body].filter(Boolean).join('\n\n')
@@ -184,12 +185,15 @@ function toText(input, options) {
  * layers are the same list.
  */
 function prepare(input, options) {
-  const limit = Math.max(1, Math.floor(Number(options.maxChars ?? MAX_UTTERANCE_CHARS) || MAX_UTTERANCE_CHARS))
+  const limit = Math.max(
+    1,
+    Math.floor(Number(options.maxChars ?? MAX_UTTERANCE_CHARS) || MAX_UTTERANCE_CHARS),
+  )
 
   const units = Array.isArray(input?.units)
     ? input.units
-      .map(unit => String(typeof unit === 'string' ? unit : unit?.text || '').trim())
-      .filter(Boolean)
+        .map(unit => String(typeof unit === 'string' ? unit : unit?.text || '').trim())
+        .filter(Boolean)
     : splitIntoUtterances(toText(input, options), limit)
 
   if (units.length === 0) throw new Error('no_content')
@@ -252,7 +256,9 @@ export function createSpeechController(handlers = {}) {
 
   function openStopGate() {
     let release
-    const promise = new Promise(resolve => { release = resolve })
+    const promise = new Promise(resolve => {
+      release = resolve
+    })
     stopGate = { promise, release }
     return stopGate
   }

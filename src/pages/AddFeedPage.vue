@@ -1,9 +1,5 @@
 <template>
-  <f7-page
-    name="add-feed"
-    @page:beforein="onPageIn"
-    @page:beforeout="onPageOut"
-  >
+  <f7-page name="add-feed" @page:beforein="onPageIn" @page:beforeout="onPageOut">
     <f7-navbar>
       <f7-nav-left>
         <f7-link back class="nav-icon-link">
@@ -32,12 +28,7 @@
     </f7-list>
 
     <f7-block>
-      <f7-button
-        fill
-        large
-        :disabled="!url.trim() || loading"
-        @click="searchFeeds"
-      >
+      <f7-button fill large :disabled="!url.trim() || loading" @click="searchFeeds">
         <f7-preloader v-if="loading" color="white"></f7-preloader>
         <span v-else>{{ $t('addFeed.add') }}</span>
       </f7-button>

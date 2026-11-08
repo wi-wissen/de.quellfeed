@@ -142,7 +142,9 @@ describe('collectSpeechBlocks', () => {
   })
 
   it('does not mutate the document it is shown', () => {
-    const root = body('<p>Text.</p><figure><img src="a.jpg"><figcaption>Bildunterschrift</figcaption></figure>')
+    const root = body(
+      '<p>Text.</p><figure><img src="a.jpg"><figcaption>Bildunterschrift</figcaption></figure>',
+    )
 
     collectSpeechBlocks(root)
 
@@ -197,7 +199,9 @@ describe('collectSpeechBlocks', () => {
   it('reads the same words as extractArticleText', () => {
     const html = '<h1>Titel</h1><p>Ein <strong>fetter</strong> Absatz.</p><ul><li>Eins</li></ul>'
 
-    const blocks = collectSpeechBlocks(body(html)).map(block => block.text).join('\n\n')
+    const blocks = collectSpeechBlocks(body(html))
+      .map(block => block.text)
+      .join('\n\n')
     expect(blocks).toBe(extractArticleText(html))
   })
 })
@@ -228,14 +232,16 @@ describe('extractArticleMarkdown', () => {
   })
 
   it('copies images and captions in the "everything" mode', () => {
-    const html = '<figure><img src="a.jpg" alt="Ein Hund"><figcaption>Foto: Wer auch immer</figcaption></figure>'
+    const html =
+      '<figure><img src="a.jpg" alt="Ein Hund"><figcaption>Foto: Wer auch immer</figcaption></figure>'
     const md = extractArticleMarkdown(html, { skipCaptions: false, skipImages: false })
     expect(md).toContain('![Ein Hund](a.jpg)')
     expect(md).toContain('*Foto: Wer auch immer*')
   })
 
   it('drops images and captions by default', () => {
-    const html = '<figure><img src="a.jpg" alt="Ein Hund"><figcaption>Foto: Wer auch immer</figcaption></figure><p>Text.</p>'
+    const html =
+      '<figure><img src="a.jpg" alt="Ein Hund"><figcaption>Foto: Wer auch immer</figcaption></figure><p>Text.</p>'
     const md = extractArticleMarkdown(html)
     expect(md).toBe('Text.')
     expect(md).not.toContain('Ein Hund')

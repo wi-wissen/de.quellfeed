@@ -1,9 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import {
-  QUELL_DESCRIPTION_CHARS,
-  parseQuellIndices,
-  quellFilterArticles,
-} from '../src/utils/ai.js'
+import { QUELL_DESCRIPTION_CHARS, parseQuellIndices, quellFilterArticles } from '../src/utils/ai.js'
 
 const API_KEY = 'sk-super-secret-key-1234567890'
 
@@ -146,13 +142,17 @@ describe('quellFilterArticles', () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
 
-    await expect(quellFilterArticles('no sports', items, { ...settings, apiKey: '' }))
-      .rejects.toThrow('not_configured')
+    await expect(quellFilterArticles('no sports', items, { ...settings, apiKey: '' })).rejects.toThrow(
+      'not_configured',
+    )
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('throws server_error on a 500 (the store fails open on it)', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => mockJsonResponse({ error: { message: 'boom' } }, 500)))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => mockJsonResponse({ error: { message: 'boom' } }, 500)),
+    )
 
     await expect(quellFilterArticles('no sports', items, settings)).rejects.toThrow('server_error')
   })
@@ -160,26 +160,33 @@ describe('quellFilterArticles', () => {
   it('aborts a hanging provider after the timeout', async () => {
     // A fetch that only ever resolves through its abort signal — the timeout is
     // the single thing standing between this and a refresh that hangs forever.
-    vi.stubGlobal('fetch', vi.fn((url, init) => new Promise((resolve, reject) => {
-      init.signal.addEventListener('abort', () => {
-        const err = new Error('The operation was aborted.')
-        err.name = 'AbortError'
-        reject(err)
-      })
-    })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        (url, init) =>
+          new Promise((resolve, reject) => {
+            init.signal.addEventListener('abort', () => {
+              const err = new Error('The operation was aborted.')
+              err.name = 'AbortError'
+              reject(err)
+            })
+          }),
+      ),
+    )
 
-    await expect(quellFilterArticles('no sports', items, settings, { timeoutMs: 20 }))
-      .rejects.toThrow('aborted')
+    await expect(quellFilterArticles('no sports', items, settings, { timeoutMs: 20 })).rejects.toThrow(
+      'aborted',
+    )
   })
 
   it('never leaks the api key into logs or errors', async () => {
     const infoSpy = console.info
     const errorSpy = console.error
 
-    vi.stubGlobal('fetch', vi.fn(async () => mockJsonResponse(
-      { error: { message: `Invalid key: ${API_KEY}` } },
-      401,
-    )))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => mockJsonResponse({ error: { message: `Invalid key: ${API_KEY}` } }, 401)),
+    )
 
     let caught
     try {

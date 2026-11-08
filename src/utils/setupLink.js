@@ -53,7 +53,7 @@ function decodeFragment(fragment) {
  */
 export function parseSetupLink(url) {
   const match = String(url || '').match(
-    /^(?:de\.quellfeed:\/\/setup|https:\/\/quellfeed\.de\/setup(?:-ai)?(?:\.html)?\/?)#(.+)$/i
+    /^(?:de\.quellfeed:\/\/setup|https:\/\/quellfeed\.de\/setup(?:-ai)?(?:\.html)?\/?)#(.+)$/i,
   )
   if (!match) return null
 

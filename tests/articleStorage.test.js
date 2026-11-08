@@ -5,8 +5,12 @@ vi.mock('../src/utils/storage.js', () => {
   return {
     __prefs: prefs,
     storageGet: vi.fn(async key => (prefs.has(key) ? prefs.get(key) : null)),
-    storageSet: vi.fn(async (key, value) => { prefs.set(key, value) }),
-    storageRemove: vi.fn(async key => { prefs.delete(key) }),
+    storageSet: vi.fn(async (key, value) => {
+      prefs.set(key, value)
+    }),
+    storageRemove: vi.fn(async key => {
+      prefs.delete(key)
+    }),
   }
 })
 
@@ -14,7 +18,13 @@ const { __fs, Filesystem } = await import('@capacitor/filesystem')
 const { __prefs } = await import('../src/utils/storage.js')
 const { loadArticles, saveArticles, _resetArticleStorage } = await import('../src/utils/articleStorage.js')
 
-const article = (id, extra = {}) => ({ id, url: `https://example.com/${id}`, title: id, cachedHtml: null, ...extra })
+const article = (id, extra = {}) => ({
+  id,
+  url: `https://example.com/${id}`,
+  title: id,
+  cachedHtml: null,
+  ...extra,
+})
 
 beforeEach(() => {
   __fs.clear()
@@ -40,10 +50,7 @@ describe('articleStorage', () => {
     _resetArticleStorage()
 
     const loaded = await loadArticles()
-    expect(loaded).toEqual([
-      article('a', { cachedHtml: '<p>A</p>', isSaved: true }),
-      article('b'),
-    ])
+    expect(loaded).toEqual([article('a', { cachedHtml: '<p>A</p>', isSaved: true }), article('b')])
   })
 
   it('rewrites an HTML file only when it changed, and deletes it when it is gone', async () => {

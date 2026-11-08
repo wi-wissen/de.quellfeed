@@ -20,14 +20,14 @@ function cspOf(html) {
  * font switch works, and it does not.
  */
 describe('the reading view CSP lets our own fonts through', () => {
-  it('names the origin instead of relying on \'self\'', () => {
+  it("names the origin instead of relying on 'self'", () => {
     const csp = cspOf(docFor('inter'))
 
     expect(csp).toContain(window.location.origin)
     expect(csp).not.toContain("'self'")
   })
 
-  it('still blocks the article\'s own remote fonts', () => {
+  it("still blocks the article's own remote fonts", () => {
     const csp = cspOf(docFor('inter'))
 
     // Only our origin and data: — a font from the publisher's CDN has no way in.
@@ -104,7 +104,7 @@ describe('the reading view is locked down', () => {
     expect(csp).not.toMatch(/-src none/)
   })
 
-  it('cannot be broken out of through the feed\'s cover URL', () => {
+  it("cannot be broken out of through the feed's cover URL", () => {
     const evil = 'https://cdn.example/a.jpg"><iframe src="https://evil.example"></iframe><img x="'
     const html = buildIframeDoc('<p>Text</p>', evil, 'light')
     const doc = new DOMParser().parseFromString(html, 'text/html')
