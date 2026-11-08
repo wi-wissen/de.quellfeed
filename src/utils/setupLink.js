@@ -79,7 +79,7 @@ export function parseSetupLink(url) {
   // These strings end up inside a Framework7 dialog, and F7 dialogs render HTML — so the
   // charsets are restricted to what the values legitimately need, and the dialog escapes
   // them again on top (defence in depth, not either-or).
-  if (!/^[\w.\/:@-]*$/.test(model) || model.length > 120) throw new Error('invalid_setup_link')
+  if (!/^[\w./:@-]*$/.test(model) || model.length > 120) throw new Error('invalid_setup_link')
   // A preset provider carries its own base URL; only `custom` needs one, and it must be
   // something a fetch can actually talk to.
   if (provider === 'custom' && !/^https?:\/\/[^\s"'<>\\]+$/i.test(baseUrl)) {

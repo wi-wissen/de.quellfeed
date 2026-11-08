@@ -8,7 +8,6 @@ import AppIcon from './components/AppIcon.vue'
 import SecretInput from './components/SecretInput.vue'
 import { i18n } from './i18n/index.js'
 import { pinia, store } from './store/index.js'
-import routes from './routes.js'
 import './css/app.css'
 
 Framework7.use(Framework7Vue)

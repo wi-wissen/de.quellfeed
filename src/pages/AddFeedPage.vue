@@ -22,12 +22,12 @@
         :placeholder="$t('addFeed.placeholder')"
         :value="url"
         clear-button
-        @input="onUrlInput"
-        @keyup.enter="searchFeeds"
         inputmode="url"
         autocomplete="off"
         autocorrect="off"
         autocapitalize="off"
+        @input="onUrlInput"
+        @keyup.enter="searchFeeds"
       ></f7-list-input>
     </f7-list>
 

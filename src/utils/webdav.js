@@ -159,7 +159,7 @@ export function getWebdavTransport() {
  * The dev-build path. Deliberately fetch() and not CapacitorHttp: in the browser the
  * latter is a shim that would hit the same CORS wall we are routing around.
  */
-async function proxyRequest({ method, url, headers, data, responseType }) {
+async function proxyRequest({ method, url, headers, data }) {
   const proxyUrl = `${DEV_DAV_PROXY_PATH}?url=${encodeURIComponent(url)}`
 
   let res

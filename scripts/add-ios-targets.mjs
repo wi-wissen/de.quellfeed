@@ -104,7 +104,7 @@ function addAppEntitlements(project, appGroupKey, appTargetUuid) {
   return changed
 }
 
-function addExtensionTarget(project, appTargetUuid) {
+function addExtensionTarget(project) {
   const targets = project.hash.project.objects.PBXNativeTarget
   const exists = Object.keys(targets).some(
     key => !key.endsWith('_comment') && targets[key].name?.replace(/"/g, '') === EXTENSION_NAME
@@ -235,7 +235,7 @@ const before = readFileSync(projectPath, 'utf8')
 const changed = [
   addAppTargetSources(project, appGroupKey, appTargetUuid),
   addAppEntitlements(project, appGroupKey, appTargetUuid),
-  addExtensionTarget(project, appTargetUuid),
+  addExtensionTarget(project),
 ].some(Boolean)
 
 if (!changed) {

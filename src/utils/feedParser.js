@@ -192,7 +192,7 @@ export async function discoverFeedUrl(inputUrl) {
 
 function isFeedContent(text) {
   // Strip BOM (U+FEFF) before trimming
-  const t = text.replace(/^﻿/, '').trimStart()
+  const t = text.replace(/^\uFEFF/, '').trimStart()
   return t.startsWith('<?xml') || t.startsWith('<rss') || t.startsWith('<feed') || t.startsWith('<atom')
 }
 

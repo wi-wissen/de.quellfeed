@@ -30,10 +30,10 @@
         :placeholder="$t('settings.karakeep.baseUrlPlaceholder')"
         :value="settings.baseUrl"
         clear-button
-        @input="onChange('baseUrl', $event.target.value)"
         inputmode="url"
         autocapitalize="off"
         autocorrect="off"
+        @input="onChange('baseUrl', $event.target.value)"
       ></f7-list-input>
 
       <SecretInput

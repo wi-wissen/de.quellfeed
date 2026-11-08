@@ -146,13 +146,7 @@ function devConfigs() {
 
 export default defineConfig({
   plugins: [
-    vue({
-      template: {
-        compilerOptions: {
-          isCustomElement: tag => tag === 'ion-icon',
-        },
-      },
-    }),
+    vue(),
     devProxy(),
     devConfigs(),
   ],

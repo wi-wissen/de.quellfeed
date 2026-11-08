@@ -25,8 +25,8 @@ code says so instead of pretending.
 
 | Layer | Technology |
 |---|---|
-| UI | Framework7 v8 + Vue 3 (**Options API**, no TypeScript) |
-| Native shell | Capacitor v6 (Android; minSdk 26, target 35) |
+| UI | Framework7 v9 + Vue 3 (**Options API**, no TypeScript) + Pinia |
+| Native shell | Capacitor v8 (Android; minSdk 26, target 36 · iOS 15) |
 | Icons | Ionicons — inlined as SVG, see below |
 | i18n | vue-i18n (de/en, picked from `navigator.language`) |
 | HTTP (native) | `CapacitorHttp` — no CORS to fight |
@@ -41,7 +41,9 @@ code says so instead of pretending.
 ```bash
 npm install
 npm run dev      # Vite, dev proxy included — one single process
-npm test         # Vitest
+npm test         # Vitest (watch); npm run test:run for a single run
+npm run lint     # ESLint
+npm run format   # Prettier
 npm run build    # production build into dist/
 
 npx cap sync android

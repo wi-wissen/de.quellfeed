@@ -102,12 +102,6 @@ export default {
     }
   },
 
-  mounted() {
-    // Puts every reading font's @font-face into the app document so the list can
-    // render each name in its own typeface. Idempotent, local, no network.
-    injectReadingFonts()
-  },
-
   computed: {
     theme() {
       return this.$store.settings.theme
@@ -124,6 +118,12 @@ export default {
     readingWidth() {
       return this.$store.readingPrefs.width
     },
+  },
+
+  mounted() {
+    // Puts every reading font's @font-face into the app document so the list can
+    // render each name in its own typeface. Idempotent, local, no network.
+    injectReadingFonts()
   },
 
   methods: {

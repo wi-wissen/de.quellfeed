@@ -22,12 +22,12 @@
         :placeholder="$t('addLink.placeholder')"
         :value="url"
         clear-button
-        @input="url = $event.target.value"
-        @keyup.enter="addLink"
         inputmode="url"
         autocomplete="off"
         autocorrect="off"
         autocapitalize="off"
+        @input="url = $event.target.value"
+        @keyup.enter="addLink"
       ></f7-list-input>
     </f7-list>
 

@@ -25,11 +25,11 @@
           :placeholder="$t('settings.paywall.loginUrlPlaceholder')"
           :value="loginUrl"
           clear-button
-          @input="loginUrl = $event.target.value"
-          @keyup.enter="addSite"
           inputmode="url"
           autocapitalize="off"
           autocorrect="off"
+          @input="loginUrl = $event.target.value"
+          @keyup.enter="addSite"
         ></f7-list-input>
       </f7-list>
 

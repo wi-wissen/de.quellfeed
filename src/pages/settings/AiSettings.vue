@@ -35,9 +35,9 @@
         :placeholder="$t('settings.ai.modelPlaceholder')"
         :value="ai.model"
         clear-button
-        @input="onChange('model', $event.target.value)"
         autocapitalize="off"
         autocorrect="off"
+        @input="onChange('model', $event.target.value)"
       ></f7-list-input>
 
       <f7-list-input
@@ -49,10 +49,10 @@
         :placeholder="$t('settings.ai.baseUrlPlaceholder')"
         :value="ai.baseUrl"
         clear-button
-        @input="onChange('baseUrl', $event.target.value)"
         inputmode="url"
         autocapitalize="off"
         autocorrect="off"
+        @input="onChange('baseUrl', $event.target.value)"
       ></f7-list-input>
 
       <SecretInput

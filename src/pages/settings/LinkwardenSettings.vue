@@ -32,10 +32,10 @@
         :placeholder="$t('settings.linkwarden.baseUrlPlaceholder')"
         :value="settings.baseUrl"
         clear-button
-        @input="onChange('baseUrl', $event.target.value)"
         inputmode="url"
         autocapitalize="off"
         autocorrect="off"
+        @input="onChange('baseUrl', $event.target.value)"
       ></f7-list-input>
 
       <SecretInput
@@ -51,9 +51,9 @@
         :label="$t('settings.linkwarden.collection')"
         :value="settings.collectionName"
         clear-button
-        @input="onChange('collectionName', $event.target.value)"
         autocapitalize="off"
         autocorrect="off"
+        @input="onChange('collectionName', $event.target.value)"
       ></f7-list-input>
     </f7-list>
 

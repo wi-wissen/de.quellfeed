@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { normalizeArticle, extractImage, parseFeedString } from '../src/utils/feedParser.js'
 
 // Mock http so feedParser tests don't make real network calls

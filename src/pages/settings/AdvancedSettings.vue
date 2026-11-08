@@ -19,12 +19,12 @@
         :placeholder="$t('settings.domainConfigPlaceholder')"
         :value="domainConfigBaseUrl"
         clear-button
-        @input="domainConfigBaseUrl = $event.target.value"
-        @keyup.enter="saveDomainConfigBaseUrl"
-        @blur="saveDomainConfigBaseUrl"
         inputmode="url"
         autocapitalize="off"
         autocorrect="off"
+        @input="domainConfigBaseUrl = $event.target.value"
+        @keyup.enter="saveDomainConfigBaseUrl"
+        @blur="saveDomainConfigBaseUrl"
       ></f7-list-input>
       <!-- Clearing the URL turns remote configs off entirely (a feature) — which makes
            the way BACK essential: nobody remembers the default address by heart. -->

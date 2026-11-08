@@ -213,7 +213,7 @@ export async function fetchArticleContent(url, configBaseUrl = '', options = {})
   }
 
   if (!html) {
-    html = extractWithReadability(doc, url)
+    html = extractWithReadability(doc)
   }
 
   if (!html) {
@@ -260,7 +260,7 @@ function extractWithConfig(doc, config) {
   return null
 }
 
-function extractWithReadability(doc, url) {
+function extractWithReadability(doc) {
   try {
     const clone = doc.cloneNode(true)
     const reader = new Readability(clone)

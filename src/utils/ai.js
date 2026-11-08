@@ -825,7 +825,7 @@ export function parseQuellIndices(text, count) {
   const size = Number.isInteger(count) && count > 0 ? count : 0
   if (size === 0) return []
 
-  for (const match of String(text || '').matchAll(/\[[^\[\]]*\]/g)) {
+  for (const match of String(text || '').matchAll(/\[[^[\]]*\]/g)) {
     let parsed
     try {
       parsed = JSON.parse(match[0])

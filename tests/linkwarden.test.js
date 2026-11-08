@@ -9,7 +9,6 @@ import {
   resolveLinkwardenConfig,
   syncWithLinkwarden,
   testLinkwardenConnection,
-  urlKey,
 } from '../src/utils/linkwarden.js'
 import { Capacitor, CapacitorHttp } from '@capacitor/core'
 
